@@ -1,0 +1,68 @@
+﻿@* _Navbar.cshtml *@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var user = HttpContextAccessor.HttpContext?.User;
+    var nombre = user?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "";
+    var apellido = user?.FindFirst("Apellido")?.Value ?? "";
+    var empresa = user?.FindFirst("RazonSocial")?.Value ?? "";
+}
+
+<div class="main-header">
+    <div class="main-header-logo">
+        <div class="logo-header bg-dark">
+            <a href="/Dashboard" class="logo">
+                <img src="/assets/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand" height="20" />
+            </a>
+            <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar text-white">
+                    <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler text-white">
+                    <i class="gg-menu-left"></i>
+                </button>
+            </div>
+            <button class="topbar-toggler more text-white">
+                <i class="gg-more-vertical-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-header navbar-expand-lg border-bottom bg-white">
+        <div class="container-fluid">
+
+            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form p-0 d-none d-lg-flex">
+                <div class="d-flex align-items-center px-3">
+                    <span class="nav-link fs-5 fw-semibold text-dark m-0">
+                        <i class="bi bi-person-circle me-2"></i> ¡Bienvenido! <span class="text-primary">@nombre @apellido</span>
+                    </span>
+                </div>
+            </nav>
+
+            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-dark fw-semibold" href="#" id="empresaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-building me-2"></i> @empresa
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="empresaDropdown">
+                        <li>
+                            <a class="dropdown-item" href="/CompanySelect">
+                                <i class="bi bi-arrow-repeat me-2"></i> Cambiar empresa
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item ms-3">
+                    <a href="javascript:void(0);" class="nav-link text-dark fw-semibold" title="Cerrar sesión" onclick="document.getElementById('logout-form').submit();">
+                        <i class="bi bi-box-arrow-right text-danger me-2"></i> Cerrar sesión
+                    </a>
+                    <form id="logout-form" method="post" asp-page="/Logout" style="display: none;"></form>
+                </li>
+
+            </ul>
+        </div>
+    </nav>
+</div>

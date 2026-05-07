@@ -1,0 +1,162 @@
+﻿@page
+@model eCertify.Pages.Certificacion.RepresentacionModel
+@{
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">Repesentación Impresa</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2">
+                <a href="/Home"><i class="bi bi-house-door"></i></a>
+            </li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>Repesentación Impresa</span></li>
+        </ul>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        <i class="bi bi-question-circle me-1"></i> Ayuda
+    </button>
+</div>
+
+<!-- Modal de ayuda-->
+<div class="modal fade modal-lg" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Guía (Repesentación Impresa)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Para completar correctamente el proceso de <strong>Representación Impresa</strong> en SogeFacturas, siga cuidadosamente los siguientes pasos:</p>
+
+                <p>Una vez dentro de la página de Representación Impresa (RI) de SogeFacturas, encontrará un botón denominado <strong>Descargar .ZIP</strong>. Al hacer clic en dicho botón, se descargará un archivo comprimido que contiene todas las representaciones impresas de las facturas simuladas en el paso anterior. Estos archivos deben ser entregado manualmente a la DGII.</p>
+
+                <p>Además, se muestra una tabla que contiene cada una de las representaciones impresas generadas. Para cada factura, se disponen los siguientes botones:</p>
+                <ul>
+                    <li><strong>Consultar:</strong> permite verificar la validez del comprobante ante la DGII a través del enlace QR proporcionado.</li>
+                    <li><strong>Descargar:</strong> permite obtener individualmente cada representación impresa, en caso de que no desee descargar el archivo completo en formato ZIP.</li>
+                </ul>
+
+                <p>Una vez descargadas las representaciones impresas de tus facturas de simulación, dirígete al portal de la DGII para subirlas manualmente. Finalmente, haz clic en el botón <strong>Enviar Archivos</strong> para continuar con el proceso.</p>
+
+                <div class="text-center my-4">
+                    <p>Ejemplo de como seleccionar los archivos en el portal de la DGII</p>
+                    <img src="/Images/RI.png" alt="Ejemplo del formulario rellenado con datos" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-4 shadow-sm">
+    @await Html.PartialAsync("_ProgressBars")
+    
+    <h5 class="col-md-4 mt-4">Repesentación Impresa</h5>
+    <div class="d-flex justify-content-start align-items-center mb-3">
+        <button type="button" onclick="window.location.href='?handler=DescargarZip'" class="btn btn-sm btn-primary">
+            <i class="bi bi-download"></i> Descargar .Zip
+        </button>
+    </div>
+    <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+        <table class="table table-bordered table-striped">
+            <thead class="table-primary">
+                <tr>
+                    <th>Fila</th>
+                    <th>Factura</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaBody">
+                @if (Model.RepresentacionPdf != null && Model.RepresentacionPdf.Any())
+                {
+                    int fila = 1;
+                    foreach (var factura in Model.RepresentacionPdf)
+                    {
+                        <tr>
+                            <td>@fila</td>
+                            <td>@factura.NombreArchivo</td>
+                            <td>
+                                <a href="@factura.QrUrl" target="_blank" class="btn btn-sm btn-info me-1" title="Consultar QR">
+                                    <i class="bi bi-qr-code"></i> Consultar
+                                </a>
+                                <a href="?handler=DescargarPdf&nombreArchivo=@(factura.NombreArchivo.Replace(".xml", ".pdf"))" class="btn btn-sm btn-danger" title="Descargar PDF">
+                                    <i class="bi bi-file-earmark-pdf"></i> Descargar
+                                </a>
+
+                            </td>
+                        </tr>
+                        fila++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3">No hay representaciones generadas.</td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Botón flotante mejorado -->
+<div id="pasoData" data-completado="@Model.PasoCompletado"></div>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1000">
+    <form method="post" asp-page-handler="MarcarCompletado"
+          id="formCompletado" class="form-completado"
+          data-completado="@Model.PasoCompletado.ToString().ToLower()">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn @(Model.PasoCompletado ? "btn-success" : "btn-outline-success") btn-completado">
+            <i class="@(Model.PasoCompletado ? "fas" : "far") fa-check-circle me-2"></i>
+            @(Model.PasoCompletado ? "¡Completado!" : "Marcar como completado")
+        </button>
+    </form>
+</div>
+
+<!-- Mensajes de estado -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["ErrorMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+    // Pasar el estado a JavaScript globalmente
+    window.pasoCompletado = @Json.Serialize(Model.PasoCompletado);
+    </script>
+    <script src="~/js/PasosCompletados.js"></script>
+}

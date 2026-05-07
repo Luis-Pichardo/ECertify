@@ -1,0 +1,451 @@
+﻿@page
+@model eCertify.Pages.Certificacion.PruebasModel
+
+@inject IConfiguration Configuration
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">Pruebas de Datos e-CF</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2">
+                <a href="/Home"><i class="bi bi-house-door"></i></a>
+            </li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>Pruebas</span></li>
+        </ul>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        <i class="bi bi-question-circle me-1"></i> Ayuda
+    </button>
+</div>
+
+<!-- Modal de ayuda-->
+<div class="modal fade modal-lg" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Guía (Pruebas de Datos e-CF)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Para completar el proceso de pruebas de Datos e-CF, siga los pasos a continuación:</p>
+
+                <ol>
+                    <li>Cargue su archivo Excel en el formulario correspondiente.</li>
+                    <li>Haga clic en el botón <strong>"Subir y Procesar"</strong>.</li>
+                    <li>Una vez procesado, se mostrarán los archivos XML generados en la tabla.</li>
+                    <li>Cada archivo tendrá un botón <strong>"Enviar"</strong> que permite remitirlo a la DGII para su validación.</li>
+                    <li>Después del envío, el resultado se imprimirá en el <strong>log de envío</strong> (ubicado en la parte inferior), donde podrá ver si fue <strong>aceptado</strong> o <strong>rechazado</strong>.</li>
+                    <li>Algunos archivos mostrarán un botón <strong>"Descargar"</strong>. Estos archivos corresponden a los <strong>Comprobantes de Resumen (RFCE)</strong> generados a partir de facturas tipo <strong>E32</strong> cuyo <strong>Monto Total</strong> es menor a RD$250,000.00.</li>
+                    <li>Estos archivos <strong>también deben ser enviados</strong> a la DGII como cualquier otro. La diferencia es que, una vez aceptados, deben ser <strong>descargados y subidos manualmente</strong> al portal de la DGII.</li>
+                </ol>
+
+                <div class="alert alert-warning mt-4" role="alert">
+                    <strong>Importante:</strong> Si algún archivo es rechazado, el detalle del error aparecerá en el log de envío. Luego de corregir el error, debe <strong>refrescar la página</strong> y volver a subir <u>todos los archivos</u> desde cero. Esto es necesario porque al recibir un rechazo, la DGII reinicia el conteo de archivos subidos a <strong>0</strong>.
+                </div>
+
+                <p class="mb-3">
+                    Luego de completar los pasos descritos en este diálogo de ayuda, habrá finalizado correctamente el proceso correspondiente a este primer paso de la postulación como emisor electrónico.
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 mb-4 shadow-sm">
+    @await Html.PartialAsync("_ProgressBars")
+    <h4 class="mb-3">Subir archivo Excel</h4>
+
+    <!-- Subir archivo -->
+    <div class="mb-4">
+        <label class="form-label fw-semibold">Archivo Excel:</label>
+        <div class="border border-2 rounded p-4 text-center position-relative bg-light"
+             id="uploadBox" style="cursor:pointer;">
+            <i class="bi bi-cloud-arrow-up fs-1 text-secondary"></i>
+            <p class="mb-0">Haga clic o arrastre un archivo aquí</p>
+            <p class="mb-0">Tipos de archivos: .xls/.xlsx</p>
+            <input type="file" id="fileInput" accept=".xlsx, .xls"
+                   class="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
+            <div id="fileName" class="mt-2 text-primary fw-bold"></div>
+        </div>
+
+        <button class="btn btn-primary mt-3" id="uploadBtn" onclick="mostrarLoading()">
+            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            <i class="bi bi-upload me-2"></i>
+            <span class="btn-text">Subir y Procesar</span>
+        </button>
+        <div id="mensajeExito" class="alert alert-success mt-3 d-none" role="alert">
+            Archivo procesado exitosamente.
+        </div>
+    </div>
+
+    <div class="table-responsive" >
+        <table id="facturasTable_ECF" class="table table-bordered table-striped">
+            <thead class="table-primary">
+                <tr>
+                    <th>Fila</th>
+                    <th>Factura</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var factura in Model.Facturas)
+                {
+                    <tr>
+                        <td>@factura.Numero</td>
+                        <td>@factura.Factura</td>
+                        <td><span class="badge bg-secondary">@factura.Estado</span></td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-success btn-sm btn-enviar me-2" data-id="@factura.Numero" data-tab="ECF" @(factura.Estado == "Aceptado" ? "disabled" : "")>
+                                    Enviar
+                                </button>
+
+                                @* <button class="btn btn-info btn-sm" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </button> *@
+                                @if (factura.PuedeDescargarse)
+                                {
+                                    <button class="btn btn-primary btn-sm"
+                                            onclick="descargarXml('@User.FindFirst("RNC")?.Value', '@factura.FileNameCompleto')"
+                                            title="Descargar XML">
+                                        <i class="bi bi-download"></i> Descargar
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <h5 class="mt-4">Log de envío</h5>
+    <div id="logConsole_ECF" class="bg-light text-dark p-3 rounded"
+         style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.9rem;">
+    </div>
+</div>
+
+<!-- Botón flotante mejorado -->
+<div id="pasoData" data-completado="@Model.PasoCompletado"></div>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1000">
+    <form method="post" asp-page-handler="MarcarCompletado"
+          id="formCompletado" class="form-completado"
+          data-completado="@Model.PasoCompletado.ToString().ToLower()">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn @(Model.PasoCompletado ? "btn-success" : "btn-outline-success") btn-completado">
+            <i class="@(Model.PasoCompletado ? "fas" : "far") fa-check-circle me-2"></i>
+            @(Model.PasoCompletado ? "¡Completado!" : "Marcar como completado")
+        </button>
+    </form>
+</div>
+
+<!-- Mensajes de estado -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["ErrorMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+
+    @section Scripts {
+    <script src="~/js/PasosCompletados.js"></script>
+    <script>
+        const apiBaseUrl = '@Configuration["ApiUrl"]';
+        console.log("apiBaseUrl:", apiBaseUrl);
+
+        // Tomamos el token directamente desde los claims
+        const token = '@User.FindFirst("Token")?.Value';
+
+        function mostrarLoading() {
+            const btn = document.getElementById("uploadBtn");
+            const spinner = btn.querySelector(".spinner-border");
+            const btnText = btn.querySelector(".btn-text");
+
+            btn.disabled = true;
+            spinner.classList.remove("d-none");
+            btnText.textContent = "Procesando...";
+
+            procesarArchivoExcel().finally(() => {
+                restaurarBoton();
+                sessionStorage.setItem("mensajeExito", "Archivo procesado exitosamente.");
+                window.location.reload();
+            });
+        }
+
+        function restaurarBoton() {
+            const btn = document.getElementById("uploadBtn");
+            const spinner = btn.querySelector(".spinner-border");
+            const btnText = btn.querySelector(".btn-text");
+
+            btn.disabled = false;
+            spinner.classList.add("d-none");
+            btnText.textContent = "Subir y Procesar";
+        }
+
+        async function procesarArchivoExcel() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Debe seleccionar un archivo");
+                throw new Error("Archivo no seleccionado");
+            }
+
+            const formData = new FormData();
+            formData.append("RNC", '@User.FindFirst("RNC")?.Value');
+            formData.append("ExcelFile", file);
+
+
+            const response = await fetch(`${apiBaseUrl}api/PruebasExcel/GenerarXmlsExcel`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            // const response = await fetch(`${apiBaseUrl}api/PruebasExcel/GenerarXmlsExcel`, {
+            //     method: "POST",
+            //     body: formData
+            // });
+            
+            if (!response.ok) {
+                const error = await response.text();
+                console.error("Error al subir:", error);
+                mostrarMensaje('Ha ocurrido un error al procesar el archivo', 'error');
+                throw new Error(error);
+            }
+
+        }
+
+        function logMensaje(mensaje, esError = false) {
+            const log = document.getElementById("logConsole_ECF");
+            const timestamp = new Date().toLocaleTimeString();
+            const mensajeElement = document.createElement('div');
+            mensajeElement.innerHTML = `[${timestamp}] ${mensaje}`;
+            if (esError) {
+                mensajeElement.classList.add('text-danger');
+                mensajeElement.innerHTML = `[${timestamp}] <strong>ERROR:</strong> ${mensaje}`;
+            }
+            log.appendChild(mensajeElement);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function actualizarEstadoFila(numero, nuevoEstado, esError = false) {
+            const fila = $(`#facturasTable_ECF tbody tr:eq(${numero - 1})`);
+            if (fila.length) {
+                const badge = fila.find('.badge');
+                badge.text(nuevoEstado);
+                badge.removeClass('bg-secondary bg-success bg-danger bg-warning');
+
+                const estadoLower = nuevoEstado;
+
+                if (estadoLower.includes('Aceptado')) {
+                    badge.addClass('bg-success');
+                } else if (estadoLower.includes('Rechazado')) {
+                    badge.addClass('bg-danger');
+                } else if (estadoLower.includes('enviando')) {
+                    badge.addClass('bg-warning');
+                } else {
+                    badge.addClass('bg-secondary');
+                }
+            }
+        }
+
+
+        async function enviarArchivo(numero, nombreArchivo) {
+            const button = $(`.btn-enviar[data-id="${numero}"]`);
+
+            // Limpiar log antes de iniciar el envío
+            const log = document.getElementById("logConsole_ECF");
+            log.innerHTML = "";
+
+            button.prop('disabled', true);
+            button.html('<span class="spinner-border spinner-border-sm"></span> Enviando...');
+
+            logMensaje(`Iniciando envío de ${nombreArchivo} a la DGII...`);
+            logMensaje(`Archivo recibido correctamente.`);
+            logMensaje(`Consultando archivo...`);
+            actualizarEstadoFila(numero, 'Enviando...');
+            let estado = null;
+            try {
+                const formData = new FormData();
+                formData.append('rnc', '@User.FindFirst("RNC")?.Value');
+                formData.append('fileName', nombreArchivo);
+
+                const response = await fetch(`${apiBaseUrl}api/PruebasExcel/EnviarXmlSegunTipo`, {
+                    method: 'POST',
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+                estado = result?.datosFactura?.estado ?? result?.estado ?? null;
+
+                // Si la respuesta está anidada en `message` como string JSON, lo parseamos
+                if (!estado && typeof result.message === 'string') {
+                    try {
+                        const inner = JSON.parse(result.message);
+                        estado = inner?.estado ?? "No Enviado";
+                        result.datosFactura = inner; 
+                    } catch (e) {
+                        console.warn("No se pudo parsear 'message':", result.message);
+                    }
+                }
+
+                logMensaje(`Respuesta DGII: ${JSON.stringify(result, null, 2)}`);
+                actualizarEstadoFila(numero, estado);
+
+                // Registrar historial
+                await fetch(`${apiBaseUrl}api/HistorialPruebasExcel/Registrar`, {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        rnc: result.datosFactura?.rnc ?? '@User.FindFirst("RNC")?.Value',
+                        encf: result.datosFactura?.encf ?? nombreArchivo,
+                        tipo: nombreArchivo.startsWith("E32") ? "RFCE" : "ECF",
+                        estadoEnvio: estado,
+                        codigoRespuesta: result.datosFactura?.codigo ?? "",
+                        trackId: result.datosFactura?.trackId ?? "",
+                        mensajes: JSON.stringify(result.datosFactura?.mensajes ?? []),
+                        archivoXml: nombreArchivo,
+                        secuenciaUtilizada: result.datosFactura?.secuenciaUtilizada ?? false,
+                        fechaEnvio: new Date().toISOString()
+                    })
+                });
+
+            } catch (error) {
+                logMensaje(`Error en el proceso de envío: ${error.message}`, true);
+                actualizarEstadoFila(numero, 'Error al Enviar', true);
+            } finally {
+                if (estado && estado.includes("Aceptado")) {
+                    button.prop('disabled', true);
+                    button.text('Enviado');
+                } else {
+                    button.prop('disabled', false);
+                    button.text('Enviar');
+                }
+            }
+        }
+
+        $(document).ready(function () {
+            $('#facturasTable_ECF').DataTable({
+                scrollY: '300px',
+                scrollCollapse: true,
+                paging: false,
+                ordering: false,
+                info: false,
+                searching: false
+            });
+
+            $(document).on('click', '.btn-enviar', function () {
+                const id = $(this).data('id');
+                const nombreArchivo = $(this).closest('tr').find('td:nth-child(2)').text().trim();
+                enviarArchivo(id, nombreArchivo);
+            });
+
+            const uploadBox = document.getElementById('uploadBox');
+            const inputFile = document.getElementById('fileInput');
+            const fileNameDiv = document.getElementById('fileName');
+
+            inputFile.addEventListener('change', function () {
+                if (this.files.length > 0) {
+                    const file = this.files[0];
+                    if (!file.name.toLowerCase().endsWith('.xlsx') && !file.name.toLowerCase().endsWith('.xls')) {
+                        fileNameDiv.textContent = 'Archivo no válido. Solo se permite .xlsx o .xls';
+                        fileNameDiv.classList.add('text-danger');
+                        return;
+                    }
+                    fileNameDiv.textContent = file.name;
+                    fileNameDiv.classList.remove('text-danger');
+                } else {
+                    fileNameDiv.textContent = '';
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const mensaje = sessionStorage.getItem("mensajeExito");
+            if (mensaje) {
+                mostrarMensaje('Archivo procesado exitosamente', 'success');
+                sessionStorage.removeItem("mensajeExito");
+            }
+        });
+
+        //Funcion para descargar los archivos de tipo 32 con un MontoTotal menor a 250,000
+        async function descargarXml(rnc, fileName) {
+            console.log("RNC:", rnc);
+            console.log("Archivo:", fileName);
+
+            const url = `${apiBaseUrl}api/PruebasExcel/DescargarXml?rnc=${encodeURIComponent(rnc)}&fileName=${encodeURIComponent(fileName)}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Archivo no encontrado o error en el servidor.');
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl); // liberar memoria
+
+            } catch (error) {
+                console.error("Error al descargar:", error);
+                alert("No se pudo descargar el archivo.");
+            }
+        }
+
+        // Pasar el estado a JavaScript globalmente
+        window.pasoCompletado = @Json.Serialize(Model.PasoCompletado);
+    </script>
+
+}

@@ -1,0 +1,19 @@
+﻿
+#xmlUpload {
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    border: 2px dashed #ccc;
+    background-color: #f8f9fa;
+}
+
+#xmlUpload:hover {
+    border-color: #0d6efd;
+    background-color: #e9f2ff;
+    box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+    transform: scale(1.01);
+}
+
+#xmlUpload:hover i,
+#xmlUpload:hover p {
+    color: #0d6efd;
+}

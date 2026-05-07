@@ -1,0 +1,115 @@
+﻿body {
+}
+.file-drop-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 30px;
+    border: 2px dashed #d1d5db;
+    border-radius: 6px;
+    background-color: #f9fafb;
+    cursor: pointer;
+}
+
+    .file-drop-area:hover {
+        background-color: #f1f5f9;
+    }
+
+#logConsole_ECF, #logConsole_RFCE {
+    background-color: #f1f1f1;
+    color: #333;
+    padding: 10px;
+    border-radius: 5px;
+    height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+    /* Estilos para los mensajes en el log */
+    #logConsole_ECF pre, #logConsole_RFCE pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background-color: #fff;
+        padding: 5px;
+        border-radius: 3px;
+        border-left: 3px solid #0d6efd;
+    }
+
+    #logConsole_ECF .text-danger, #logConsole_RFCE .text-danger {
+        color: #dc3545 !important;
+        font-weight: bold;
+    }
+
+#facturasTable_ECF {
+    border-collapse: collapse !important;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+    #facturasTable_ECF thead {
+        background-color: #f8f9fa;
+    }
+
+        #facturasTable_ECF thead th {
+            color: #343a40;
+            font-weight: 600;
+            border-bottom: none;
+            padding: 0.75rem;
+            vertical-align: middle;
+        }
+
+    #facturasTable_ECF tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+        #facturasTable_ECF tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+    #facturasTable_ECF tbody td {
+        border-top: 1px solid #dee2e6;
+        vertical-align: middle;
+        padding: 0.6rem;
+    }
+
+    #facturasTable_ECF .badge {
+        font-size: 0.75rem;
+        padding: 0.4em 0.6em;
+    }
+
+    #facturasTable_ECF .btn-group .btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        #facturasTable_ECF .btn-group .btn:hover {
+            transform: scale(1.02);
+        }
+
+    #facturasTable_ECF .btn i {
+        margin-right: 4px;
+        vertical-align: text-bottom;
+    }
+
+#uploadBox {
+    transition: all 0.3s ease-in-out;
+    border: 2px dashed #ccc;
+    background-color: #f8f9fa;
+}
+
+    #uploadBox:hover {
+        border-color: #0d6efd;
+        background-color: #e9f2ff;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+        transform: scale(1.01);
+    }
+
+        #uploadBox:hover i,
+        #uploadBox:hover p {
+            color: #0d6efd;
+        }

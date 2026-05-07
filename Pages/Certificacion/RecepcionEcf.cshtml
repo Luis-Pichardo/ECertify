@@ -1,0 +1,46 @@
+﻿@page
+@model eCertify.Pages.Certificacion.RecepcionEcfModel
+@{
+}
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">Prueba Recepción e-CF</h3>
+    <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+            <a href="#">
+                <i class="icon-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="Dashboard.aspx">Inicio</a>
+        </li>
+        <li class="separator">
+            <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Prueba Recepción e-CF</a>
+        </li>
+    </ul>
+</div>
+
+<div class="card p-3 mb-4">
+    @await Html.PartialAsync("_ProgressBars")
+
+    <h5>URL Servicios Prueba</h5>
+
+    <p class="text-muted mb-3">
+        Para cumplir con este paso solo debes dirigirte al portal de la DGII y en el paso <strong>7: URL Servicios Prueba</strong>, confirmar que los datos en los campos estén exactamente como se muestran en la imagen más abajo. En caso de que estén vacíos, solo debes rellenarlos tal como aparecen en dicha imagen.
+        Es importante tomar en cuenta que el campo <strong>Servicio de Autenticación</strong> debe dejarse vacío.
+    </p>
+
+    <div>
+        <img src="~/Images/Urlserviciofe.png" alt="Portal DGII" class="img-fluid rounded border mx-auto d-block w-50" />
+    </div>
+
+    <p class="text-muted mt-4">
+        Si has seguido todos los pasos como se requiere, ya has completado este paso correctamente, por lo que puedes avanzar al siguiente.
+    </p>
+</div>

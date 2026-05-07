@@ -1,0 +1,91 @@
+﻿/* Reset completo para todas las notificaciones */
+.notifyjs-bootstrap-base,
+.notifyjs-bootstrap-base *,
+.notifyjs-bootstrap-base span,
+.notifyjs-bootstrap-base div {
+    color: #000000 !important; /* Fuerza texto negro */
+    text-shadow: none !important;
+    font-family: "Public Sans", sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    padding: 12px 15px !important;
+    border-radius: 6px !important;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25) !important;
+    opacity: 1 !important;
+    border: 1px solid transparent !important;
+    z-index: 9999 !important;
+}
+
+/* Estilos específicos para cada tipo (solo fondos) */
+.notifyjs-bootstrap-success {
+    background-color: #28a745 !important;
+    border-color: #218838 !important;
+}
+
+.notifyjs-bootstrap-error {
+    background-color: #dc3545 !important;
+    border-color: #c82333 !important;
+}
+
+.notifyjs-bootstrap-info {
+    background-color: #17a2b8 !important;
+    border-color: #138496 !important;
+}
+
+.notifyjs-bootstrap-warning {
+    background-color: #ffc107 !important;
+    border-color: #e0a800 !important;
+}
+
+/* Contenedores - asegurar herencia */
+.notifyjs-container,
+.notifyjs-wrapper,
+.notifyjs-hidable {
+    opacity: 1 !important;
+}
+
+    /* Forzar color de texto en todos los elementos */
+    .notifyjs-container * {
+        color: #000000 !important;
+    }
+
+/* Posicionamiento */
+.notifyjs-corner {
+    position: fixed;
+    margin: 5px;
+    right: 20px;
+    top: 20px;
+}
+
+/* Animaciones */
+@keyframes notify-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes notify-fade-out {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.notifyjs-fadein {
+    animation: notify-fade-in 0.4s ease forwards;
+}
+
+.notifyjs-fadeout {
+    animation: notify-fade-out 0.4s ease forwards;
+}

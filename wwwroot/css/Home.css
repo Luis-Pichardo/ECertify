@@ -1,0 +1,20 @@
+﻿/* Card grande de atrás (tabla) más oscuro y plano */
+.card-back {
+    background-color: #e0e0e0; /* gris tenue */
+    position: relative;
+    z-index: 1; /* base */
+    padding: 1rem;
+}
+
+/* Cards de arriba más “flotantes” */
+.card-front {
+    background-color: #ffffff;
+    box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 2;
+    transition: transform 0.2s;
+}
+
+    .card-front:hover {
+        transform: translateY(-5px);
+    }

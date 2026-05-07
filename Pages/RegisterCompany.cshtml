@@ -1,0 +1,854 @@
+@page
+@using System.Text.Json
+@model eCertify.Pages.RegisterCompanyModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Registrar Empresa — eCertify</title>
+    <link rel="icon" href="~/assets/favicon.PNG" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link href="/css/_LoadingOverlay.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --green:       #006B3C;
+            --green-dark:  #004d2b;
+            --green-light: #e6f4ed;
+            --green-mid:   #c3e6d3;
+            --radius:      14px;
+            --radius-sm:   8px;
+            --transition:  .22s cubic-bezier(.4,0,.2,1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #004d2b 0%, #006B3C 55%, #008f50 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding-bottom: 4rem;
+            overflow-x: hidden;
+        }
+
+        /* ── Blobs ── */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            animation: float ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .blob-1 { width: 520px; height: 520px; top: -200px; left: -180px; animation-duration: 10s; }
+        .blob-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; animation-duration: 12s; animation-delay: 2s; }
+        .blob-3 { width: 200px; height: 200px; top: 40%; left: 4%; animation-duration: 8s; animation-delay: 4s; background: rgba(255,255,255,0.05); }
+        .blob-4 { width: 140px; height: 140px; top: 12%; right: 6%; animation-duration: 14s; animation-delay: 1s; background: rgba(255,255,255,0.04); }
+
+        @@keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-20px); }
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Top nav ── */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 2rem;
+            background: rgba(0,0,0,0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+        .nav-brand i { font-size: 1.25rem; }
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: rgba(255,255,255,0.85);
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 2rem;
+            padding: 0.38rem 1rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .btn-back:hover {
+            background: rgba(255,255,255,0.18);
+            color: white;
+            border-color: rgba(255,255,255,0.6);
+        }
+
+        /* ── Main content ── */
+        .main-content {
+            max-width: 1020px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ── Page header ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .page-header-icon {
+            width: 62px;
+            height: 62px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.9rem;
+            color: white;
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .page-header-title {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 0.2rem;
+        }
+        .page-header-sub {
+            font-size: 0.83rem;
+            color: rgba(255,255,255,0.68);
+            font-weight: 400;
+        }
+
+        /* ── Main card ── */
+        .register-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.2rem 2.4rem;
+            box-shadow: 0 28px 65px rgba(0,0,0,0.24);
+        }
+        .card-section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1.4rem;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 1.8rem;
+        }
+        .card-section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #005c33, #00a854);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,107,60,0.35);
+        }
+        .card-section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.15rem;
+        }
+        .card-section-sub {
+            font-size: 0.82rem;
+            color: #6b7280;
+        }
+
+        /* ── Form sections ── */
+        .form-section {
+            background: #fff;
+            border: 1.5px solid #e5e7eb;
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 1.1rem;
+        }
+        .form-section__header {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.85rem 1.2rem;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #374151;
+        }
+        .form-section__header i { color: var(--green); font-size: 1rem; }
+        .form-section__body { padding: 1.3rem 1.2rem; }
+
+        /* ── Inputs ── */
+        .form-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.3rem;
+        }
+        .form-control, .form-select {
+            border-radius: 0.55rem;
+            border: 1.5px solid #d1d5db;
+            padding: 0.62rem 0.9rem;
+            font-size: 0.91rem;
+            color: #111827;
+            background: #f9fafb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control::placeholder { color: #9ca3af; }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(0,107,60,0.13);
+            background: #fff;
+        }
+
+        /* ── Dropzone ── */
+        .emp-dropzone {
+            position: relative;
+            border: 2px dashed #d1d5db;
+            border-radius: var(--radius-sm);
+            background: #f9fafb;
+            min-height: 118px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+            overflow: hidden;
+        }
+        .emp-dropzone:hover,
+        .emp-dropzone.emp-dz--hover {
+            border-color: var(--green);
+            background: var(--green-light);
+            box-shadow: 0 0 0 3px var(--green-mid);
+        }
+        .emp-dropzone.emp-dz--selected {
+            border-style: solid;
+            border-color: var(--green);
+            background: var(--green-light);
+            cursor: default;
+        }
+        .emp-dropzone.emp-dz--error { border-color: #dc3545; background: #fff5f5; }
+        .emp-dropzone__input {
+            position: absolute; inset: 0;
+            opacity: 0; cursor: pointer; z-index: 2;
+        }
+        .emp-dropzone.emp-dz--selected .emp-dropzone__input { pointer-events: none; }
+
+        .emp-dz-idle {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 0.3rem;
+            padding: 1.3rem; text-align: center;
+            pointer-events: none;
+        }
+        .emp-dz-idle__icon {
+            font-size: 1.9rem; color: #adb5bd;
+            transition: color var(--transition), transform var(--transition);
+        }
+        .emp-dropzone:hover .emp-dz-idle__icon,
+        .emp-dropzone.emp-dz--hover .emp-dz-idle__icon { color: var(--green); transform: translateY(-3px); }
+        .emp-dz-idle__title { font-size: 0.88rem; font-weight: 600; color: #374151; margin: 0; }
+        .emp-dz-idle__sub   { font-size: 0.78rem; color: #6b7280; margin: 0; }
+        .emp-dz-idle__badge {
+            display: inline-block; background: #e9ecef; color: #6c757d;
+            border-radius: 20px; padding: 0.15rem 0.6rem;
+            font-size: 0.7rem; font-weight: 500;
+        }
+
+        .emp-dz-selected {
+            display: none; flex-direction: row;
+            align-items: center; gap: 0.7rem;
+            padding: 0.85rem 1rem; width: 100%;
+            pointer-events: none;
+        }
+        .emp-dz-selected.d-flex { display: flex !important; }
+        .emp-dz-file-icon { font-size: 1.7rem; color: var(--green); flex-shrink: 0; }
+        .emp-dz-file-info { flex: 1; min-width: 0; }
+        .emp-dz-file-name {
+            display: block; font-weight: 600; font-size: 0.86rem; color: #111827;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .emp-dz-file-meta { display: block; font-size: 0.74rem; color: #6b7280; }
+        .emp-dz-remove {
+            background: none; border: none; color: #adb5bd;
+            cursor: pointer; padding: 0.2rem 0.3rem; border-radius: 4px;
+            pointer-events: all; z-index: 3; position: relative;
+            transition: color var(--transition);
+        }
+        .emp-dz-remove:hover { color: #dc3545; }
+        .emp-dz-change {
+            font-size: 0.73rem; color: var(--green); font-weight: 500;
+            pointer-events: all; cursor: pointer;
+            z-index: 3; position: relative;
+            display: block; text-align: center; padding: 0.25rem 0;
+        }
+        .emp-dz-change:hover { text-decoration: underline; }
+
+        /* ── Password toggle ── */
+        .emp-pass-wrap { position: relative; }
+        .emp-pass-toggle {
+            position: absolute; right: 10px; top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer; color: #6b7280; z-index: 4;
+            background: none; border: none; padding: 0;
+            transition: color var(--transition);
+        }
+        .emp-pass-toggle:hover { color: var(--green); }
+
+        /* ── Field label ── */
+        .emp-field-label {
+            font-size: 0.77rem; font-weight: 700;
+            letter-spacing: 0.06em; text-transform: uppercase;
+            color: #6b7280; margin-bottom: 0.45rem;
+        }
+
+        /* ── Submit button ── */
+        .btn-submit {
+            width: 100%;
+            padding: 0.82rem 1.5rem;
+            border-radius: 0.55rem;
+            font-size: 0.97rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--green), #00a854);
+            border: none;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+            box-shadow: 0 4px 16px rgba(0,107,60,0.32);
+            margin-top: 1.2rem;
+        }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(0,107,60,0.42);
+            color: #fff;
+        }
+        .btn-submit:disabled { opacity: 0.65; cursor: not-allowed; color: #fff; }
+
+        /* ── Info panel ── */
+        .info-panel {
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: sticky;
+            top: 80px;
+        }
+        .info-panel__header {
+            background: linear-gradient(135deg, var(--green), #008f50);
+            color: white;
+            padding: 0.9rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+        .info-panel__body { padding: 1.1rem; }
+        .tip-list { list-style: none; padding: 0; margin: 0; }
+        .tip-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            font-size: 0.83rem;
+            color: #374151;
+            margin-bottom: 0.75rem;
+        }
+        .tip-list li:last-child { margin-bottom: 0; }
+        .tip-list__icon { color: var(--green); flex-shrink: 0; margin-top: 0.1rem; }
+        .cert-tip {
+            margin-top: 1rem;
+            background: var(--green-light);
+            border: 1px solid var(--green-mid);
+            border-left: 4px solid var(--green);
+            border-radius: var(--radius-sm);
+            padding: 0.8rem 0.9rem;
+            font-size: 0.8rem;
+            color: #1f4d32;
+        }
+
+        /* ── Footer ── */
+        .page-footer {
+            position: fixed;
+            bottom: 1.2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.38);
+            font-size: 0.74rem;
+            z-index: 5;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        @@media (max-width: 992px) {
+            .info-panel { position: static; margin-top: 1rem; }
+        }
+        @@media (max-width: 600px) {
+            .top-nav { padding: 0.8rem 1.2rem; }
+            .main-content { padding: 1.8rem 1rem; }
+            .register-card { padding: 1.5rem 1.2rem; border-radius: 1.1rem; }
+            .page-header-title { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    <!-- Server messages → SweetAlert2 -->
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <input type="hidden" id="swal-error" value="@Model.ErrorMessage" />
+    }
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <input type="hidden" id="swal-success" value="@Model.SuccessMessage" />
+    }
+
+    <!-- Top navigation -->
+    <nav class="top-nav">
+        <a href="/Home" class="nav-brand">
+            <i class="bi bi-shield-lock-fill"></i>
+            eCertify
+        </a>
+        <a href="/CompanySelect" class="btn-back">
+            <i class="bi bi-arrow-left"></i>Volver
+        </a>
+    </nav>
+
+    <main class="main-content">
+
+        <!-- Page header -->
+        <div class="page-header">
+            <div class="page-header-icon">
+                <i class="bi bi-building-fill-add"></i>
+            </div>
+            <div>
+                <h1 class="page-header-title">Registrar Empresa</h1>
+                <p class="page-header-sub">Complete los datos para registrar su empresa en eCertify</p>
+            </div>
+        </div>
+
+        <!-- Main card -->
+        <div class="register-card">
+
+            <div class="card-section-header">
+                <div class="card-section-icon">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+                <div>
+                    <p class="card-section-title">Nueva Empresa</p>
+                    <p class="card-section-sub">Todos los campos marcados con <span class="text-danger">*</span> son obligatorios</p>
+                </div>
+            </div>
+
+            <div class="row g-4 align-items-start">
+
+                <!-- ── Formulario ── -->
+                <div class="col-lg-7">
+                    <form method="post" enctype="multipart/form-data" id="empForm">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Datos de la empresa -->
+                        <div class="form-section">
+                            <div class="form-section__header">
+                                <i class="bi bi-building"></i>
+                                Datos de la Empresa
+                            </div>
+                            <div class="form-section__body">
+                                <div class="mb-3">
+                                    <label asp-for="Empresa.RazonSocial" class="form-label">
+                                        Razón Social <span class="text-danger">*</span>
+                                    </label>
+                                    <input asp-for="Empresa.RazonSocial" class="form-control"
+                                           placeholder="Nombre legal de la empresa" autofocus required />
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="Empresa.RNC" class="form-label">
+                                            RNC <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="Empresa.RNC" class="form-control"
+                                               placeholder="Ej. 130000000" required />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="Empresa.Direccion" class="form-label">
+                                            Dirección <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="Empresa.Direccion" class="form-control"
+                                               placeholder="Dirección fiscal" required />
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="provinciaSelect" class="form-label">
+                                            Provincia <span class="text-danger">*</span>
+                                        </label>
+                                        <select id="provinciaSelect" name="Empresa.ProvinciaId"
+                                                class="form-select" required>
+                                            <option value="">— Seleccione una provincia —</option>
+                                            @foreach (var prov in Model.ProvinciasConMunicipios)
+                                            {
+                                                <option value="@prov.Id">@prov.Descripcion</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="municipioSelect" class="form-label">
+                                            Municipio <span class="text-danger">*</span>
+                                        </label>
+                                        <select id="municipioSelect" name="Empresa.MunicipioId"
+                                                class="form-select" disabled required>
+                                            <option value="">Seleccione primero una provincia</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Certificado digital -->
+                        <div class="form-section">
+                            <div class="form-section__header">
+                                <i class="bi bi-shield-lock-fill"></i>
+                                Certificado Digital
+                            </div>
+                            <div class="form-section__body">
+                                <p class="emp-field-label">Archivo del Certificado (.p12) <span class="text-danger">*</span></p>
+                                <div class="emp-dropzone" id="dzCert">
+                                    <div class="emp-dz-idle" id="dzCertIdle">
+                                        <i class="bi bi-file-earmark-lock emp-dz-idle__icon"></i>
+                                        <p class="emp-dz-idle__title">Arrastra el archivo .p12 aquí</p>
+                                        <p class="emp-dz-idle__sub">o haz clic para buscarlo</p>
+                                        <span class="emp-dz-idle__badge">.p12</span>
+                                    </div>
+                                    <div class="emp-dz-selected" id="dzCertSel">
+                                        <i class="bi bi-file-earmark-check-fill emp-dz-file-icon"></i>
+                                        <div class="emp-dz-file-info">
+                                            <span class="emp-dz-file-name" id="certName">—</span>
+                                            <span class="emp-dz-file-meta" id="certMeta">—</span>
+                                        </div>
+                                        <button type="button" class="emp-dz-remove" id="certRemove" title="Quitar">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    <span class="emp-dz-change d-none" id="certChange">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Cambiar archivo
+                                    </span>
+                                    <input asp-for="Empresa.Certificado" type="file" id="certInput"
+                                           accept=".p12" class="emp-dropzone__input" required />
+                                </div>
+
+                                <div class="mt-3">
+                                    <label asp-for="Empresa.CertificadoPass" class="form-label">
+                                        Contraseña del Certificado <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="emp-pass-wrap">
+                                        <input asp-for="Empresa.CertificadoPass" type="password"
+                                               class="form-control pe-5" id="certPass"
+                                               placeholder="Contraseña del archivo .p12" required />
+                                        <button type="button" class="emp-pass-toggle" id="togglePass">
+                                            <i class="bi bi-eye" id="togglePassIcon"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Logo (opcional) -->
+                        <div class="form-section">
+                            <div class="form-section__header">
+                                <i class="bi bi-image"></i>
+                                Logo de la Empresa
+                                <span class="badge bg-secondary ms-2 fw-normal" style="font-size:.68rem">Opcional</span>
+                            </div>
+                            <div class="form-section__body">
+                                <p class="emp-field-label">Imagen del Logo</p>
+                                <div class="emp-dropzone" id="dzLogo">
+                                    <div class="emp-dz-idle" id="dzLogoIdle">
+                                        <i class="bi bi-image emp-dz-idle__icon"></i>
+                                        <p class="emp-dz-idle__title">Arrastra el logo aquí</p>
+                                        <p class="emp-dz-idle__sub">o haz clic para buscarlo</p>
+                                        <span class="emp-dz-idle__badge">.png · .jpg · .jpeg</span>
+                                    </div>
+                                    <div class="emp-dz-selected" id="dzLogoSel">
+                                        <i class="bi bi-file-earmark-image-fill emp-dz-file-icon"></i>
+                                        <div class="emp-dz-file-info">
+                                            <span class="emp-dz-file-name" id="logoName">—</span>
+                                            <span class="emp-dz-file-meta" id="logoMeta">—</span>
+                                        </div>
+                                        <button type="button" class="emp-dz-remove" id="logoRemove" title="Quitar">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    <span class="emp-dz-change d-none" id="logoChange">
+                                        <i class="bi bi-arrow-repeat me-1"></i>Cambiar imagen
+                                    </span>
+                                    <input asp-for="Empresa.LogoArchivo" type="file" id="logoInput"
+                                           accept=".png,.jpg,.jpeg" class="emp-dropzone__input" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="empSubmit">
+                            <i class="bi bi-building-fill-check"></i>
+                            <span id="empBtnLabel">Registrar Empresa</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- ── Panel informativo ── -->
+                <div class="col-lg-5">
+                    <div class="info-panel">
+                        <div class="info-panel__header">
+                            <i class="bi bi-lightbulb-fill"></i>
+                            ¿Para qué sirve cada campo?
+                        </div>
+                        <div class="info-panel__body">
+                            <ul class="tip-list">
+                                <li>
+                                    <i class="bi bi-building tip-list__icon"></i>
+                                    <span><strong>Razón Social y RNC</strong>: identifican legalmente su empresa ante la DGII.</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-geo-alt tip-list__icon"></i>
+                                    <span><strong>Dirección, Provincia y Municipio</strong>: datos de ubicación requeridos por la DGII.</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-shield-lock tip-list__icon"></i>
+                                    <span><strong>Certificado .p12</strong>: su firma digital. Se usa para firmar todos los XML que envía a la DGII.</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-key tip-list__icon"></i>
+                                    <span><strong>Contraseña</strong>: protege su certificado. Guárdela en un lugar seguro.</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-image tip-list__icon"></i>
+                                    <span><strong>Logo</strong>: se muestra en la representación gráfica (RI) de sus facturas electrónicas.</span>
+                                </li>
+                            </ul>
+                            <div class="cert-tip mt-3">
+                                <i class="bi bi-shield-check me-1"></i>
+                                <strong>Certificado X.509:</strong> el archivo <em>.p12</em> contiene su clave privada RSA.
+                                eCertify lo usa exclusivamente para firmar documentos con el estándar
+                                <strong>XMLDSIG</strong> exigido por la DGII.
+                            </div>
+                            <div class="alert alert-warning py-2 px-3 mt-3 mb-0 small">
+                                <i class="bi bi-shield-exclamation me-1"></i>
+                                Guarde su contraseña del certificado en un lugar seguro; no podrá recuperarla si la olvida.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <p class="page-footer">© 2025 eCertify — Todos los derechos reservados</p>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+    (function () {
+        // ── SweetAlert mensajes del servidor ──
+        window.addEventListener("DOMContentLoaded", () => {
+            const errEl = document.getElementById('swal-error');
+            if (errEl) Swal.fire({ icon: 'error', title: 'Error', text: errEl.value, confirmButtonColor: '#006B3C' });
+
+            const sucEl = document.getElementById('swal-success');
+            if (sucEl) Swal.fire({ icon: 'success', title: '¡Empresa registrada!', text: sucEl.value, confirmButtonColor: '#006B3C' });
+        });
+
+        // ── Provincia / Municipio ──
+        const provincias = @Html.Raw(JsonSerializer.Serialize(
+            Model.ProvinciasConMunicipios,
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+
+        const provSel = document.getElementById('provinciaSelect');
+        const muniSel = document.getElementById('municipioSelect');
+
+        function cargarMunicipios(provId) {
+            muniSel.innerHTML = '';
+            if (!provId) {
+                muniSel.innerHTML = '<option value="">Seleccione primero una provincia</option>';
+                muniSel.disabled = true;
+                return;
+            }
+            const prov = provincias.find(p => p.id == provId);
+            if (prov && prov.municipios.length > 0) {
+                muniSel.disabled = false;
+                muniSel.innerHTML = '<option value="">— Seleccione un municipio —</option>';
+                prov.municipios.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.descripcion;
+                    muniSel.appendChild(opt);
+                });
+            } else {
+                muniSel.innerHTML = '<option value="">Sin municipios disponibles</option>';
+                muniSel.disabled = true;
+            }
+        }
+        provSel.addEventListener('change', () => cargarMunicipios(provSel.value));
+
+        // ── Dropzone genérico ──
+        function formatBytes(b) {
+            return b < 1024 ? b + ' B'
+                 : b < 1048576 ? (b / 1024).toFixed(1) + ' KB'
+                 : (b / 1048576).toFixed(2) + ' MB';
+        }
+
+        function initDropzone(cfg) {
+            const dz     = document.getElementById(cfg.dz);
+            const input  = document.getElementById(cfg.input);
+            const idle   = document.getElementById(cfg.idle);
+            const sel    = document.getElementById(cfg.sel);
+            const nameEl = document.getElementById(cfg.name);
+            const metaEl = document.getElementById(cfg.meta);
+            const remove = document.getElementById(cfg.remove);
+            const change = document.getElementById(cfg.change);
+
+            function showFile(file) {
+                if (!file) return;
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (cfg.accept && !cfg.accept.includes(ext)) {
+                    dz.classList.add('emp-dz--error'); return;
+                }
+                dz.classList.remove('emp-dz--error');
+                dz.classList.add('emp-dz--selected');
+                idle.style.display = 'none';
+                sel.classList.add('d-flex');
+                if (change) change.classList.remove('d-none');
+                nameEl.textContent = file.name;
+                metaEl.textContent = formatBytes(file.size) + ' · ' + ext.toUpperCase();
+            }
+
+            function clearFile() {
+                dz.classList.remove('emp-dz--selected', 'emp-dz--error', 'emp-dz--hover');
+                idle.style.display = '';
+                sel.classList.remove('d-flex');
+                if (change) change.classList.add('d-none');
+                nameEl.textContent = '—';
+                metaEl.textContent = '—';
+                input.value = '';
+            }
+
+            input.addEventListener('change', () => { if (input.files.length) showFile(input.files[0]); });
+            if (remove) remove.addEventListener('click', e => { e.stopPropagation(); clearFile(); });
+            if (change) change.addEventListener('click', e => { e.stopPropagation(); clearFile(); input.click(); });
+
+            dz.addEventListener('dragover', e => {
+                e.preventDefault();
+                if (!dz.classList.contains('emp-dz--selected')) dz.classList.add('emp-dz--hover');
+            });
+            dz.addEventListener('dragleave', () => dz.classList.remove('emp-dz--hover'));
+            dz.addEventListener('drop', e => {
+                e.preventDefault();
+                dz.classList.remove('emp-dz--hover');
+                const file = e.dataTransfer?.files[0];
+                if (file) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                    showFile(file);
+                }
+            });
+        }
+
+        initDropzone({
+            dz: 'dzCert', input: 'certInput', idle: 'dzCertIdle', sel: 'dzCertSel',
+            name: 'certName', meta: 'certMeta', remove: 'certRemove', change: 'certChange',
+            accept: ['p12']
+        });
+        initDropzone({
+            dz: 'dzLogo', input: 'logoInput', idle: 'dzLogoIdle', sel: 'dzLogoSel',
+            name: 'logoName', meta: 'logoMeta', remove: 'logoRemove', change: 'logoChange',
+            accept: ['png', 'jpg', 'jpeg']
+        });
+
+        // ── Toggle contraseña ──
+        document.getElementById('togglePass').addEventListener('click', function () {
+            const inp  = document.getElementById('certPass');
+            const icon = document.getElementById('togglePassIcon');
+            const isPass = inp.type === 'password';
+            inp.type = isPass ? 'text' : 'password';
+            icon.className = isPass ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+
+        // ── Submit ──
+        document.getElementById('empForm').addEventListener('submit', function (e) {
+            const certInput = document.getElementById('certInput');
+            if (!certInput.files.length) {
+                e.preventDefault();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Certificado requerido',
+                    text: 'Por favor, adjunta el archivo .p12 del certificado digital.',
+                    confirmButtonColor: '#006B3C'
+                });
+                return;
+            }
+            const btn   = document.getElementById('empSubmit');
+            const label = document.getElementById('empBtnLabel');
+            btn.disabled = true;
+            label.textContent = 'Registrando…';
+            showLoader('Registrando empresa…');
+        });
+    })();
+    </script>
+
+    <script src="/js/_LoadingOverlay.js"></script>
+
+    <div id="globalLoader">
+        <div class="gl-spinner">
+            <div class="gl-ring-outer"></div>
+            <div class="gl-ring-inner"></div>
+        </div>
+        <p class="gl-text">Procesando&hellip;</p>
+    </div>
+
+</body>
+</html>

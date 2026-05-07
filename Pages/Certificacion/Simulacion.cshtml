@@ -1,0 +1,422 @@
+﻿@page
+@model eCertify.Pages.Certificacion.SimulacionModel
+@{
+}
+@inject IConfiguration Configuration
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">Simulación e-CF</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2">
+                <a href="/Home"><i class="bi bi-house-door"></i></a>
+            </li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>Simulación e-CF</span></li>
+        </ul>
+    </div>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+        <i class="bi bi-question-circle me-1"></i> Ayuda
+    </button>
+</div>
+
+<!-- Modal de ayuda-->
+<div class="modal fade modal-lg" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Guía (Simulación e-CF)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Para completar correctamente el proceso de <strong>Simulación e-CF</strong> en SogeFacturas, siga cuidadosamente los siguientes pasos:</p>
+                <ol class="list-unstyled">
+                    <li class="mb-4">
+                        Diríjase a la página de <strong>Simulación e-CF</strong> y complete todos los campos del formulario. En la sección <strong>Datos de la Factura</strong>, deberá ingresar el <strong>Tipo de e-CF</strong> y la <strong>Secuencia</strong>.
+
+                        <div class="card border-danger bg-light mt-2 mb-3">
+                            <div class="card-body p-2">
+                                <strong class="text-danger">Importante:</strong> La secuencia debe continuar justo después de la última factura enviada en el paso de <strong>Pruebas e-CF</strong>. Por ejemplo, si la última secuencia utilizada fue <code>132828231E310000000014</code>, deberá iniciar desde <code>132828231E310000000015</code> para evitar errores como <em>“Esta secuencia ya ha sido utilizada.”</em>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="mb-4">
+                        Complete los <strong>Datos del Comprador</strong>: asegúrese de ingresar correctamente el <strong>RNC del Comprador</strong> y la <strong>Razón Social</strong>.
+                    </li>
+                    <li class="mb-4">
+                        Ingrese la información del <strong>Producto o Servicio</strong>. Todos los campos son obligatorios. Aunque algunos podrían variar según el tipo de e-CF.<br />
+                        Si el producto <strong>no lleva ITBIS</strong>, elimine el valor por defecto (18%) del campo correspondiente. Si aplica un <strong>ITBIS distinto</strong> (por ejemplo, 16%), modifique el valor por defecto según corresponda.
+                    </li>
+
+                    <li>
+                        <div class="text-center my-4">
+                            <p>Ejemplo del formulario lleno:</p>
+                            <img src="/Images/FormSimulacion.png" alt="Ejemplo del formulario rellenado con datos" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </li>
+
+                    <li class="mb-4">
+                        Una vez todos los campos estén correctamente completados, haga clic en el botón <strong>Generar</strong>. Esto mostrará un recuadro con el <strong>JSON generado</strong>. Desde aquí podrá:
+                        <ul>
+                            <li>Descargar el JSON.</li>
+                            <li>Editar su contenido.</li>
+                            <li>Enviar el JSON a la DGII.</li>
+                            <li>Descargar la Representación Impresa.</li>
+                        </ul>
+                        <em>Nota: también podrá descargar la representación impresa en el paso siguiente.</em>
+                    </li>
+                    <li class="mb-4">
+                        Para <strong>descargar el JSON</strong> o la <strong>Representación Impresa</strong>, simplemente haga clic en el botón correspondiente.<br />
+                        Para <strong>editar el JSON</strong>, haga clic en el botón <em>Editar</em>, realice los cambios necesarios y haga clic fuera del contenedor para que los cambios se guarden automáticamente.
+                    </li>
+                    <li class="mb-4">
+                        Al hacer clic en <strong>Enviar</strong>, el JSON será procesado y enviado a nuestra API, la cual:
+                        <ul>
+                            <li>Generará el archivo XML correspondiente.</li>
+                            <li>Lo enviará automáticamente a la <strong>DGII</strong>.</li>
+                            <li>Consultará el estado de respuesta y lo mostrará en pantalla.</li>
+                            <li>Generará automáticamente la <strong>Representación Impresa</strong> de la factura, disponible para su descarga.</li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <div class="text-center my-4">
+                            <p>Ejemplo del recuadro con el Json generado:</p>
+                            <img src="/Images/JsonGenerado.png" alt="Ejemplo del Json generado" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </li>
+
+                    <p class="mt-3">
+                        Cuando se llegue a una factura <strong>E32</strong> con monto menor a RD$250,000.00, se abrirá un <strong>modal</strong> en pantalla solicitando descargar manualmente el XML de dicha factura para subirlo directamente al portal de la <strong>DGII</strong>.
+                    </p>
+
+                    <li>
+                        <div class="text-center my-4">
+                            <img src="/Images/E32ResumenModal.png" alt="Modal de E32 menor a 250,000" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </li>
+
+                    <p>
+                        Es importante que, al momento de generar los JSON de tipo <strong>E32</strong>, generes únicamente aquellos que la <strong>DGII</strong> esté solicitando en su portal.
+                        Por ejemplo, en la siguiente imagen puedes ver que la DGII está solicitando <strong>4 facturas E32 RFCE menor a RD$250,000.00</strong> y <strong>2 facturas E32 mayor o igual a RD$250,000.00</strong>.
+                    </p>
+
+                    <li>
+                        <div class="text-center my-4">
+                            <img src="/Images/CantidadComprobantes.png" alt="Cantidad de comprobantes que requiere la DGII" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </li>
+
+                    <li class="mb-4">
+                        Preste atención al <strong>Log de Envío</strong>, ya que en él se mostrarán todos los mensajes y estados de los procesos realizados, lo que le permitirá verificar el comportamiento de cada paso.
+                    </li>
+
+                    <li>
+                        <div class="text-center my-4">
+                            <p>Ejemplo del Log de envio con un mensaje:</p>
+                            <img src="/Images/LogEnvio.png" alt="Ejemplo del Log de envio" style="max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 4px;" />
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card p-4 shadow-sm">
+
+    @await Html.PartialAsync("_ProgressBars")
+
+    <form method="post" asp-page-handler="GenerarJson">
+        <div class="row">
+            <div class="col-md-12">
+                <h5 class="mb-3">Datos de la factura</h5>
+                <div class="row">
+                    <div class=" col-md-6 mb-2">
+                        <label class="form-label small" for="TipoECF">Tipo ECF</label>
+                        <select id="TipoECF" name="simulacion.TipoECF" class="form-select form-select-sm" required>
+                            <option value="">Seleccione...</option>
+                            <option value="31">31</option>
+                            <option value="32">32</option>
+                            <option value="33">33</option>
+                            <option value="34">34</option>
+                            <option value="41">41</option>
+                            <option value="43">43</option>
+                            <option value="44">44</option>
+                            <option value="45">45</option>
+                            <option value="46">46</option>
+                            <option value="47">47</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label small" for="SecuenciaECF">Secuencia</label>
+                        <input id="SecuenciaECF" name="simulacion.SecuenciaECF" class="form-control form-control-sm" type="number" placeholder="solo el número de la secuencia sin los 00000" required />
+                    </div>
+                </div>
+
+                @* Solo si seleccionan los tipos E33 y E34 se mostraran estos campos *@
+                <div id="modificacionWrapper" class="row d-none mt-3">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label small" for="NCFModificado">NCF Modificado</label>
+                        <input id="NCFModificado" name="simulacion.NCFModificado" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label small" for="RazonModificacion">Razón de modificación</label>
+                        <input id="RazonModificacion" name="simulacion.RazonModificacion" class="form-control form-control-sm" readonly />
+                    </div>
+                </div>
+
+                <h5 class="mb-3">Datos del comprador</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label small" for="ClienteRNC">RNC comprador</label>
+                        <input id="ClienteRNC" name="simulacion.ClienteRNC" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label small" for="ClienteNombre">Razón Social</label>
+                        <input id="ClienteNombre" name="simulacion.ClienteNombre" class="form-control form-control-sm" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <h5 class="mb-3">Producto / servicio</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label small" for="ProductoNombre">Descripción</label>
+                        <textarea id="ProductoNombre" name="simulacion.ProductoNombre" class="form-control form-control-sm" rows="3" required></textarea>
+                    </div>
+                    <div class="col-md-1 mb-2">
+                        <label class="form-label small" for="ProductoCantidad">Cantidad</label>
+                        <input id="ProductoCantidad" name="simulacion.ProductoCantidad" type="number" step="0.01" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <label class="form-label small" for="ProductoPrecio">Precio</label>
+                        <input id="ProductoPrecio" name="simulacion.ProductoPrecio" type="number" step="0.01" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="col-md-1 mb-3">
+                        <label class="form-label small" for="ProductoItbis">ITBIS %</label>
+                        <input id="ProductoItbis" name="simulacion.ProductoItbis" value="18" type="number" class="form-control form-control-sm" placeholder="Ej: 18 o vacío si exento" />
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <label class="form-label small" for="ProductoTipo">Tipo</label>
+                        <select id="ProductoTipo" name="simulacion.ProductoTipo" class="form-select form-select-sm" required>
+                            <option value="B" selected>Producto</option>
+                            <option value="S">Servicio</option>
+                        </select>
+                        <input type="hidden" name="simulacion.ProductoTipo" id="ProductoTipoHidden" value="B">
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <label class="form-label small" for="UnidadeMedida">Unidad de Medida</label>
+                        <select id="UnidadeMedida" name="simulacion.UnidadeMedida" class="form-select form-select-sm" required>
+                            <option value="1">Barril</option>
+                            <option value="2">Bolsa</option>
+                            <option value="3">Bote</option>
+                            <option value="4">Bultos</option>
+                            <option value="5">Botella</option>
+                            <option value="6">Caja/Cajón</option>
+                            <option value="7">Cajetilla</option>
+                            <option value="8">Centímetro</option>
+                            <option value="9">Cilindro</option>
+                            <option value="10">Conjunto</option>
+                            <option value="11">Contenedor</option>
+                            <option value="12">Día</option>
+                            <option value="13">Docena</option>
+                            <option value="14">Fardo</option>
+                            <option value="15">Galones</option>
+                            <option value="16">Grado</option>
+                            <option value="17">Gramo</option>
+                            <option value="18">Granel</option>
+                            <option value="19">Hora</option>
+                            <option value="20">Huacal</option>
+                            <option value="21">Kilogramo</option>
+                            <option value="22">Kilovatio Hora</option>
+                            <option value="23">Libra</option>
+                            <option value="24">Litro</option>
+                            <option value="25">Lote</option>
+                            <option value="26">Metro</option>
+                            <option value="27">Metro Cuadrado</option>
+                            <option value="28">Metro Cúbico</option>
+                            <option value="29">Millones de Unidades Térmicas</option>
+                            <option value="30">Minuto</option>
+                            <option value="31">Paquete</option>
+                            <option value="32">Par</option>
+                            <option value="33">Pie</option>
+                            <option value="34">Pieza</option>
+                            <option value="35">Rollo</option>
+                            <option value="36">Sobre</option>
+                            <option value="37">Segundo</option>
+                            <option value="38">Tanque</option>
+                            <option value="39">Tonelada</option>
+                            <option value="40">Tubo</option>
+                            <option value="41">Yarda</option>
+                            <option value="42">Yarda Cuadrada</option>
+                            <option value="43" selected>Unidad</option>
+                            <option value="44">Elemento</option>
+                            <option value="45">Millar</option>
+                            <option value="46">Saco</option>
+                            <option value="47">Lata</option>
+                            <option value="48">Display</option>
+                            <option value="49">Bidón</option>
+                            <option value="50">Ración</option>
+                            <option value="51">Quintal</option>
+                            <option value="52">Toneladas de Registro Bruto</option>
+                            <option value="53">Pie Cuadrado</option>
+                            <option value="54">Pasajero</option>
+                            <option value="55">Pulgadas</option>
+                            <option value="56">Parqueo barcos en muelle</option>
+                            <option value="57">Bandeja</option>
+                            <option value="58">Hectárea</option>
+                            <option value="59">Mililitro</option>
+                            <option value="60">Miligramo</option>
+                            <option value="61">Onzas</option>
+                            <option value="62">Onzas Troy</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón generar -->
+            <div class="col-12 mt-3">
+                <button id="btnGenerar" type="submit" class="btn btn-success w-30">
+                    <span id="spinner" class="spinner-border spinner-border-sm d-none me-2"></span>
+                    Generar
+                </button>
+            </div>
+        </div>
+    </form>
+    <!-- Contenedor para JSON generado -->
+    @if (Model.JsonGenerado != null)
+    {
+        <div id="jsonContainer" class="mt-4 p-3 border rounded bg-light">
+            <div class="d-flex justify-content-between mb-3">
+                <h5>JSON Generado</h5>
+                <div>
+                    <button type="button" onclick="descargarJson()" class="btn btn-sm btn-primary me-2">
+                        <i class="bi bi-download"></i> Descargar Json
+                    </button>
+                    @* <button type="button" onclick="guardarEdicion()" class="btn btn-sm btn-success me-2">
+                        <i class="bi bi-save"></i> Guardar
+                    </button> *@
+                    <button type="button" onclick="editarJson()" class="btn btn-sm btn-warning me-2">
+                        <i class="bi bi-pencil"></i> Editar
+                    </button>
+                    <form method="post" asp-page-handler="EnviarFactura" class="d-inline-block m-0">
+                        <input type="hidden" id="JsonGeneradoHidden" name="JsonGenerado" value="@Model.JsonGenerado" />
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="bi bi-send"></i> Enviar
+                        </button>
+                    </form>
+                    <button type="button" onclick="DescargarPdf()" class="btn btn-sm btn-primary me-2">
+                        <i class="bi bi-download"></i> Descargar Pdf
+                    </button>
+                </div>
+            </div>
+            <pre id="jsonContent" class="p-3 bg-white border rounded" style="max-height: 300px; overflow-y: auto;">@Model.JsonGenerado</pre>
+            <textarea id="jsonEditor" class="form-control d-none" style="width: 100%; height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.9rem;">@Model.JsonGenerado</textarea>
+        </div>
+    }
+    <hr class="my-4" />
+    <h5 class="mb-3">Log de envío</h5>
+    <div id="logConsole_ECF" class="bg-light text-dark p-3 rounded"
+         style="height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.9rem;">
+        @if (Model.MensajesLog != null && Model.MensajesLog.Any())
+        {
+            foreach (var mensaje in Model.MensajesLog)
+            {
+                <div>@mensaje</div>
+            }
+        }
+    </div>
+
+    @if (Model.MostrarModalDescarga)
+    {
+        <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);" id="infoModal" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow">
+                    <div class="modal-header bg-primary text-dark">
+                        <h5 class="modal-title">Atención</h5>
+                        <form method="post" asp-page-handler="CerrarModal" class="m-0 p-0">
+                            <button type="submit" class="btn-close" aria-label="Cerrar"></button>
+                        </form>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            De esta factura solo se enviara un resumen electrónico a la DGII porque es de tipo <strong>E32</strong> y su monto es menor a <strong>RD$250,000</strong>.<br />
+                            Para enviar la factura como comprobante, debes descargarla y enviarla desde el portal de la DGII <strong>manualmente.</strong>.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <form method="post" asp-page-handler="DescargarXml">
+                            <input type="hidden" asp-for="ArchivoParaDescargar" />
+                            <input type="hidden" asp-for="RncEmpresa" />
+                            <button type="submit" class="btn btn-primary">Descargar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+<!-- Botón flotante mejorado -->
+<div id="pasoData" data-completado="@Model.PasoCompletado"></div>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1000">
+    <form method="post" asp-page-handler="MarcarCompletado"
+          id="formCompletado" class="form-completado"
+          data-completado="@Model.PasoCompletado.ToString().ToLower()">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn @(Model.PasoCompletado ? "btn-success" : "btn-outline-success") btn-completado">
+            <i class="@(Model.PasoCompletado ? "fas" : "far") fa-check-circle me-2"></i>
+            @(Model.PasoCompletado ? "¡Completado!" : "Marcar como completado")
+        </button>
+    </form>
+</div>
+
+
+<!-- Mensajes de estado -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["ErrorMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="~/js/simulacion.js"></script>
+    <script src="~/js/PasosCompletados.js"></script>
+    <script>
+        // Pasar el estado a JavaScript globalmente
+        window.pasoCompletado = @Json.Serialize(Model.PasoCompletado);
+    </script>
+}

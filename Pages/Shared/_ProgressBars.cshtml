@@ -1,0 +1,85 @@
+﻿@* Pages/Shared/_ProgressBars.cshtml *@
+@{
+}
+
+<ul class="nav nav-pills stepper" id="certificationSteps" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="step1-tab" data-bs-toggle="pill" data-bs-target="#step1-content"
+                type="button" role="tab" aria-controls="step1-content" aria-selected="true"
+                data-step-url="/Certificacion/Postulacion">
+            <span class="step-number">✓</span>
+            <span class="step-label">Postulación</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="step2-tab" data-bs-toggle="pill" data-bs-target="#step2-content"
+                type="button" role="tab" aria-controls="step2-content" aria-selected="false"
+                data-step-url="/certificacion/pruebas">
+            <span class="step-number">✓</span>
+            <span class="step-label">Pruebas de Datos e-CF</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="step3-tab" data-bs-toggle="pill" data-bs-target="#step3-content"
+                type="button" role="tab" aria-controls="step3-content" aria-selected="false"
+                data-step-url="/Certificacion/Aprobacion">
+            <span class="step-number">✓</span>
+            <span class="step-label">Aprobación Comercial</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="step4-tab" data-bs-toggle="pill" data-bs-target="#step4-content"
+                type="button" role="tab" aria-controls="step4-content" aria-selected="false"
+                data-step-url="/Certificacion/Simulacion">
+            <span class="step-number">✓</span>
+            <span class="step-label">Simulación e-CF</span>
+        </button>
+    </li>
+        <li class="nav-item" role="presentation">
+        <button class="nav-link" id="step5-tab" data-bs-toggle="pill" data-bs-target="#step5-content"
+                type="button" role="tab" aria-controls="step5-content" aria-selected="false"
+                data-step-url="/Certificacion/Representacion">
+            <span class="step-number">✓</span>
+            <span class="step-label">Representación Impresa</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="step6-tab" data-bs-toggle="pill" data-bs-target="#step6-content"
+                type="button" role="tab" aria-controls="step6-content" aria-selected="false"
+                data-step-url="/Certificacion/Urlservicios">
+            <span class="step-number">✓</span>
+            <span class="step-label">URL Servicios Prueba</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="step7-tab" data-bs-toggle="pill" data-bs-target="#step7-content"
+                type="button" role="tab" aria-controls="step7-content" aria-selected="false"
+                data-step-url="/Certificacion/DeclaracionJurada">
+            <span class="step-number">✓</span>
+            <span class="step-label">Declaración Jurada</span>
+        </button>
+    </li>
+
+</ul>
+
+<div class="tab-content p-3 border border-top-0 rounded-bottom" id="certificationStepsContent" style="display:none">
+    <div class="tab-pane fade show active" id="step1-content" role="tabpanel" aria-labelledby="step1-tab"></div>
+    <div class="tab-pane fade" id="step2-content" role="tabpanel" aria-labelledby="step2-tab"></div>
+    <div class="tab-pane fade" id="step3-content" role="tabpanel" aria-labelledby="step3-tab"></div>
+    <div class="tab-pane fade" id="step4-content" role="tabpanel" aria-labelledby="step4-tab"></div>
+</div>
+
+@* <div class="d-flex justify-content-between mt-4">
+    <button id="btnPrev" class="btn btn-outline-primary" disabled>
+        <i class="bi bi-chevron-left"></i> Anterior
+    </button>
+    <button id="btnNext" class="btn btn-primary">
+        Siguiente
+    </button>
+</div> *@
+@section Styles {
+    <link rel="stylesheet" href="~/css/progressbars.css" />
+}
+@section Script {
+    <script src="~/js/progressbars.js"></script>
+}

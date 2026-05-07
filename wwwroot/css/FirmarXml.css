@@ -1,0 +1,385 @@
+/* ===== FirmarXml.css — Página unificada de firma digital ===== */
+
+/* ── Variables ── */
+:root {
+    --fxml-green:        #006B3C;
+    --fxml-green-light:  #e6f4ed;
+    --fxml-green-mid:    #c3e6d3;
+    --fxml-blue:         #0d6efd;
+    --fxml-purple:       #6f42c1;
+    --fxml-border:       #dee2e6;
+    --fxml-radius:       14px;
+    --fxml-radius-sm:    8px;
+    --fxml-shadow:       0 2px 16px rgba(0,0,0,.08);
+    --fxml-shadow-hover: 0 6px 28px rgba(0,107,60,.18);
+    --fxml-transition:   .22s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Banner de encabezado contextual ── */
+.fxml-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, var(--fxml-green) 0%, #008f50 100%);
+    color: #fff;
+    border-radius: var(--fxml-radius);
+    padding: 1.4rem 1.8rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--fxml-shadow-hover);
+}
+.fxml-banner__icon {
+    width: 56px; height: 56px;
+    background: rgba(255,255,255,.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+.fxml-banner__title  { font-size: 1.25rem; font-weight: 700; margin-bottom: .15rem; }
+.fxml-banner__sub    { font-size: .875rem; opacity: .82; }
+
+/* Context badges in banner */
+.fxml-ctx-badge {
+    margin-left: auto;
+    padding: .35rem .85rem;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.35);
+}
+
+/* ── Zona de Arrastrar & Soltar ── */
+.fxml-dropzone {
+    position: relative;
+    border: 2px dashed var(--fxml-border);
+    border-radius: var(--fxml-radius);
+    background: #fafafa;
+    min-height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color var(--fxml-transition),
+                background  var(--fxml-transition),
+                box-shadow  var(--fxml-transition),
+                transform   var(--fxml-transition);
+    overflow: hidden;
+}
+.fxml-dropzone:hover,
+.fxml-dropzone.fxml-dz--hover {
+    border-color: var(--fxml-green);
+    background:   var(--fxml-green-light);
+    box-shadow:   0 0 0 4px var(--fxml-green-mid);
+    transform:    translateY(-2px);
+}
+.fxml-dropzone.fxml-dz--selected {
+    border-style:  solid;
+    border-color:  var(--fxml-green);
+    background:    var(--fxml-green-light);
+    cursor:        default;
+    transform:     none;
+    box-shadow:    none;
+}
+.fxml-dropzone.fxml-dz--error {
+    border-color: #dc3545;
+    background:   #fff5f5;
+}
+.fxml-dropzone__input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+/* hide native input when file is selected */
+.fxml-dropzone.fxml-dz--selected .fxml-dropzone__input {
+    pointer-events: none;
+}
+
+/* ── Estado idle ── */
+.fxml-dz-idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    padding: 2rem;
+    text-align: center;
+    pointer-events: none;
+}
+.fxml-dz-idle__icon {
+    font-size: 3rem;
+    color: #adb5bd;
+    transition: color var(--fxml-transition), transform var(--fxml-transition);
+}
+.fxml-dropzone:hover .fxml-dz-idle__icon,
+.fxml-dropzone.fxml-dz--hover .fxml-dz-idle__icon {
+    color:     var(--fxml-green);
+    transform: translateY(-4px) scale(1.08);
+}
+.fxml-dz-idle__title  { font-size: 1rem; font-weight: 600; color: #495057; margin: 0; }
+.fxml-dz-idle__sub    { font-size: .85rem; color: #6c757d; margin: 0; }
+.fxml-dz-idle__badge  {
+    display: inline-block;
+    background: #e9ecef;
+    color: #6c757d;
+    border-radius: 20px;
+    padding: .2rem .75rem;
+    font-size: .75rem;
+    font-weight: 500;
+    letter-spacing: .02em;
+}
+
+/* ── Estado archivo seleccionado ── */
+.fxml-dz-selected {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: .75rem;
+    padding: 1.75rem;
+    width: 100%;
+    pointer-events: none;
+}
+.fxml-dz-selected.d-flex { display: flex !important; }
+
+.fxml-file-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #fff;
+    border: 1.5px solid var(--fxml-green-mid);
+    border-radius: var(--fxml-radius-sm);
+    padding: .9rem 1.1rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 2px 8px rgba(0,107,60,.08);
+}
+.fxml-file-card__icon {
+    font-size: 2rem;
+    color: var(--fxml-green);
+    flex-shrink: 0;
+}
+.fxml-file-card__info {
+    flex: 1;
+    min-width: 0;
+}
+.fxml-file-card__name {
+    display: block;
+    font-weight: 600;
+    font-size: .9rem;
+    color: #212529;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.fxml-file-card__meta {
+    display: block;
+    font-size: .78rem;
+    color: #6c757d;
+    margin-top: .1rem;
+}
+.fxml-file-remove {
+    background: none;
+    border: none;
+    color: #adb5bd;
+    cursor: pointer;
+    padding: .25rem;
+    border-radius: 4px;
+    transition: color var(--fxml-transition), background var(--fxml-transition);
+    pointer-events: all;
+    z-index: 3;
+    position: relative;
+}
+.fxml-file-remove:hover { color: #dc3545; background: #fff0f0; }
+
+.fxml-change-hint {
+    font-size: .78rem;
+    color: var(--fxml-green);
+    font-weight: 500;
+    pointer-events: all;
+    cursor: pointer;
+    z-index: 3;
+    position: relative;
+}
+.fxml-change-hint:hover { text-decoration: underline; }
+
+/* ── Botón de firma ── */
+.fxml-btn-sign {
+    width: 100%;
+    padding: .85rem 1.5rem;
+    border-radius: var(--fxml-radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    background: linear-gradient(135deg, var(--fxml-green) 0%, #008f50 100%);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    transition: opacity var(--fxml-transition),
+                transform var(--fxml-transition),
+                box-shadow var(--fxml-transition);
+    box-shadow: 0 4px 14px rgba(0,107,60,.3);
+}
+.fxml-btn-sign:hover:not(:disabled) {
+    opacity: .92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,107,60,.4);
+    color: #fff;
+}
+.fxml-btn-sign:disabled {
+    background: linear-gradient(135deg, #adb5bd 0%, #ced4da 100%);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: .75;
+}
+.fxml-btn-sign__icon { font-size: 1.1rem; }
+
+/* ── Barra de progreso de firma ── */
+.fxml-progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 1.25rem;
+    border: 1px solid var(--fxml-border);
+    border-radius: var(--fxml-radius-sm);
+    overflow: hidden;
+    background: #fff;
+}
+.fxml-pstep {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .7rem 1rem;
+    border-bottom: 1px solid var(--fxml-border);
+    transition: background var(--fxml-transition);
+}
+.fxml-pstep:last-child { border-bottom: none; }
+.fxml-pstep__dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    color: #adb5bd;
+    flex-shrink: 0;
+    transition: background var(--fxml-transition), color var(--fxml-transition);
+}
+.fxml-pstep__label { font-size: .85rem; color: #6c757d; transition: color var(--fxml-transition); }
+.fxml-pstep.fxml-pstep--active .fxml-pstep__dot {
+    background: var(--fxml-green);
+    color: #fff;
+}
+.fxml-pstep.fxml-pstep--active .fxml-pstep__label {
+    color: var(--fxml-green);
+    font-weight: 600;
+}
+.fxml-pstep.fxml-pstep--done .fxml-pstep__dot {
+    background: #28a745;
+    color: #fff;
+}
+.fxml-pstep.fxml-pstep--done .fxml-pstep__label { color: #28a745; }
+.fxml-pstep.fxml-pstep--active { background: var(--fxml-green-light); }
+
+/* Spin animation */
+@keyframes fxmlSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+.fxml-spin { animation: fxmlSpin .7s linear infinite; display: inline-block; }
+
+/* ── Panel lateral de información ── */
+.fxml-info-panel {
+    background: #fff;
+    border: 1px solid var(--fxml-border);
+    border-radius: var(--fxml-radius);
+    overflow: hidden;
+    box-shadow: var(--fxml-shadow);
+    height: fit-content;
+}
+.fxml-info-panel__header {
+    background: linear-gradient(135deg, var(--fxml-green) 0%, #008f50 100%);
+    color: #fff;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    font-weight: 600;
+    font-size: .95rem;
+}
+.fxml-info-panel__body { padding: 1.25rem; }
+
+/* Steps list */
+.fxml-how-steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .75rem; }
+.fxml-how-step  {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    font-size: .86rem;
+    color: #495057;
+}
+.fxml-how-step__num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--fxml-green);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: .05rem;
+}
+
+/* ── Panel de estado del paso ── */
+.fxml-step-status {
+    margin-top: 1rem;
+    background: #fff;
+    border: 1px solid var(--fxml-border);
+    border-radius: var(--fxml-radius);
+    overflow: hidden;
+    box-shadow: var(--fxml-shadow);
+}
+.fxml-step-status__header {
+    padding: .8rem 1.25rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--fxml-border);
+    display: flex; align-items: center; gap: .5rem;
+    font-weight: 600; font-size: .85rem; color: #495057;
+}
+.fxml-step-status__body { padding: 1rem 1.25rem; }
+
+/* ── Alerta de error ── */
+.fxml-error-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    background: #fff5f5;
+    border: 1px solid #f5c6cb;
+    border-left: 4px solid #dc3545;
+    border-radius: var(--fxml-radius-sm);
+    padding: .9rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: .875rem;
+    color: #721c24;
+}
+.fxml-error-alert__icon { font-size: 1.1rem; color: #dc3545; flex-shrink: 0; margin-top: .05rem; }
+
+/* ── Formulario de carga: sección ── */
+.fxml-upload-section {
+    background: #fff;
+    border: 1px solid var(--fxml-border);
+    border-radius: var(--fxml-radius);
+    padding: 1.75rem;
+    box-shadow: var(--fxml-shadow);
+}
+.fxml-section-label {
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: #6c757d;
+    margin-bottom: .6rem;
+}

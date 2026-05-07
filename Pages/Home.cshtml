@@ -1,0 +1,74 @@
+﻿@page
+@model eCertify.Pages.HomeModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container py-4">
+    <!-- KPIs -->
+    <div class="row text-center mb-4 g-3">
+        <!-- Completados -->
+        <div class="col-12 col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="text-muted">Pasos Completados</h6>
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <i class="fas fa-list-check fa-lg text-success"></i>
+                    <h2 class="text-success fw-bold mb-0" id="kpiCompletados">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pendientes -->
+        <div class="col-12 col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="text-muted">Pasos Pendientes</h6>
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <i class="fas fa-hourglass-half fa-2x text-danger mb-2"></i>
+                    <h2 class="text-danger fw-bold mb-0" id="kpiPendientes">0</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Porcentaje -->
+        <div class="col-12 col-md-4">
+            <div class="card shadow-sm p-3">
+                <h6 class="text-muted">% Completado</h6>
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <h2 class="text-primary fw-bold mb-0" id="kpiPorcentaje">0</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Gráfico y Timeline -->
+    <div class="row g-3">
+        <!-- Donut Chart -->
+        <div class="col-12 col-md-6 d-flex">
+            <div class="card shadow-sm p-4 flex-fill">
+                <h5 class="mb-3 text-center">Progreso General</h5>
+                <div class="d-flex justify-content-center">
+                    <div class="w-100">
+                        <canvas id="donutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline -->
+        <div class="col-12 col-md-6">
+            <div class="card shadow-sm p-4 flex-fill text-start">
+                <h5 class="mb-3 ">Detalle de Pasos</h5>
+                <ul class="list-unstyled overflow-auto" style="max-height:400px; text-align:left;" id="timelinePasos"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenedor para pasar datos al JS -->
+<div id="pasosContainer" data-pasos='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Pasos))'></div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/Home.js"></script>
+}

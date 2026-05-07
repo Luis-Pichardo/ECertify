@@ -1,0 +1,373 @@
+@page
+@model eCertify.Pages.Certificacion.FirmarXmlModel
+@using eCertify.Pages.Certificacion
+@{
+    bool esPostulacion = Model.Ctx == FirmarXmlModel.CTX_POSTULACION;
+    bool esDeclaracion = Model.Ctx == FirmarXmlModel.CTX_DECLARACION;
+    string ctxIcon = esPostulacion ? "bi-file-earmark-person-fill"
+                   : esDeclaracion ? "bi-file-earmark-ruled-fill"
+                   : "bi-file-earmark-lock-fill";
+    string ctxLabel = esPostulacion ? "Postulación"
+                    : esDeclaracion ? "Declaración Jurada"
+                    : "Firma libre";
+}
+
+<!-- ── Encabezado de página ── -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">@Model.TituloPagina</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2"><a href="/Home"><i class="bi bi-house-door"></i></a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>@Model.TituloPagina</span></li>
+        </ul>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#fxmlHelp">
+        <i class="bi bi-question-circle me-1"></i> Ayuda
+    </button>
+</div>
+
+<!-- ── Offcanvas de ayuda ── -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="fxmlHelp" style="width:400px">
+    <div class="offcanvas-header border-bottom py-3">
+        <h6 class="offcanvas-title fw-bold mb-0">
+            <i class="bi bi-info-circle-fill me-2 text-primary"></i>Guía: @Model.TituloPagina
+        </h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        @if (esPostulacion)
+        {
+            <p>Para completar la <strong>firma del archivo de Postulación</strong> siga estos pasos:</p>
+            <ol class="ps-3 small">
+                <li class="mb-2">En el portal DGII, complete el formulario de postulación y haga clic en <strong>Generar Archivo</strong>.</li>
+                <li class="mb-2">Suba el archivo generado en la zona de carga de esta página.</li>
+                <li class="mb-2">Haga clic en <strong>Firmar y Descargar</strong>. El archivo firmado se descargará automáticamente.</li>
+                <li class="mb-2">Regrese al portal DGII y cargue el archivo firmado en el campo correspondiente.</li>
+            </ol>
+            <div class="text-center mt-3">
+                <img src="/Images/GenerarPostulacion.png" alt="Generar postulación"
+                     class="img-fluid rounded shadow-sm border" style="max-height:200px" />
+            </div>
+        }
+        else if (esDeclaracion)
+        {
+            <p>Para completar la <strong>firma del archivo de Declaración Jurada</strong> siga estos pasos:</p>
+            <ol class="ps-3 small">
+                <li class="mb-2">En el portal DGII, acceda al paso 14 (Declaración Jurada) y haga clic en <strong>Generar Archivo</strong>.</li>
+                <li class="mb-2">Suba el archivo generado en la zona de carga de esta página.</li>
+                <li class="mb-2">Haga clic en <strong>Firmar y Descargar</strong>. El archivo firmado se descargará automáticamente.</li>
+                <li class="mb-2">Regrese al portal DGII y cargue el archivo firmado en el campo correspondiente.</li>
+            </ol>
+            <div class="text-center mt-3">
+                <img src="/Images/GenerarDeclaracion.png" alt="Generar declaración"
+                     class="img-fluid rounded shadow-sm border" style="max-height:200px" />
+            </div>
+        }
+        else
+        {
+            <p>Utilice esta página para firmar digitalmente <strong>cualquier archivo XML</strong> con el certificado digital de su empresa.</p>
+            <ol class="ps-3 small">
+                <li class="mb-2">Seleccione el archivo XML que desea firmar.</li>
+                <li class="mb-2">Haga clic en <strong>Firmar y Descargar</strong>.</li>
+                <li class="mb-2">El archivo firmado se descargará automáticamente.</li>
+            </ol>
+        }
+        <hr />
+        <div class="alert alert-info py-2 px-3 small mb-0">
+            <i class="bi bi-shield-check me-1"></i>
+            La firma utiliza su certificado <strong>X.509</strong> con algoritmo <strong>RSA-SHA256</strong>, cumpliendo el estándar XMLDSIG de la DGII.
+        </div>
+    </div>
+</div>
+
+<!-- ── Barra de progreso (solo en contextos de paso) ── -->
+@if (Model.TieneContextoDePaso)
+{
+    @await Html.PartialAsync("_ProgressBars")
+}
+
+<!-- ── Banner contextual ── -->
+<div class="fxml-banner mb-4">
+    <div class="fxml-banner__icon">
+        <i class="bi @ctxIcon"></i>
+    </div>
+    <div>
+        <div class="fxml-banner__title">@Model.TituloPagina</div>
+        <div class="fxml-banner__sub">@Model.SubtituloPagina</div>
+    </div>
+    <span class="fxml-ctx-badge">@ctxLabel</span>
+</div>
+
+<!-- ── Layout principal ── -->
+<div class="row g-4 align-items-start">
+
+    <!-- ── Columna de carga (izquierda, más amplia) ── -->
+    <div class="col-lg-8">
+        <div class="fxml-upload-section">
+
+            <!-- Error -->
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="fxml-error-alert">
+                    <i class="bi bi-exclamation-triangle-fill fxml-error-alert__icon"></i>
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+
+            <p class="fxml-section-label">Archivo a firmar</p>
+
+            <form method="post" enctype="multipart/form-data" id="fxmlForm">
+                <input type="hidden" name="Ctx" value="@Model.Ctx" />
+
+                <!-- Zona drag & drop -->
+                <div class="fxml-dropzone" id="fxmlDropzone">
+
+                    <!-- Estado: sin archivo -->
+                    <div class="fxml-dz-idle" id="fxmlIdle">
+                        <i class="bi bi-file-earmark-code fxml-dz-idle__icon"></i>
+                        <p class="fxml-dz-idle__title">Arrastra tu archivo aquí</p>
+                        <p class="fxml-dz-idle__sub">o haz clic para buscarlo en tu equipo</p>
+                        <span class="fxml-dz-idle__badge">.xml &nbsp;·&nbsp; máx. 5 MB</span>
+                    </div>
+
+                    <!-- Estado: archivo seleccionado -->
+                    <div class="fxml-dz-selected" id="fxmlSelected">
+                        <div class="fxml-file-card">
+                            <i class="bi bi-file-earmark-check-fill fxml-file-card__icon"></i>
+                            <div class="fxml-file-card__info">
+                                <span class="fxml-file-card__name" id="fxmlFileName">—</span>
+                                <span class="fxml-file-card__meta" id="fxmlFileMeta">—</span>
+                            </div>
+                            <button type="button" class="fxml-file-remove" id="fxmlRemove" title="Quitar archivo">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <span class="fxml-change-hint" id="fxmlChangeHint">
+                            <i class="bi bi-arrow-repeat me-1"></i>Cambiar archivo
+                        </span>
+                    </div>
+
+                    <!-- Input oculto -->
+                    <input asp-for="ArchivoXml"
+                           type="file"
+                           id="fxmlInput"
+                           accept=".xml"
+                           class="fxml-dropzone__input" />
+                </div>
+
+                <!-- Botón de acción -->
+                <div class="mt-3">
+                    <button type="submit" class="fxml-btn-sign" id="fxmlSubmit" disabled>
+                        <i class="bi bi-pen-fill fxml-btn-sign__icon"></i>
+                        <span id="fxmlBtnLabel">Selecciona un archivo para continuar</span>
+                    </button>
+                </div>
+
+                <!-- Pasos de progreso de firma (ocultos hasta enviar) -->
+                <div class="fxml-progress-steps mt-3 d-none" id="fxmlProgressSteps">
+                    <div class="fxml-pstep fxml-pstep--active" id="fxmlStep1">
+                        <div class="fxml-pstep__dot"><i class="bi bi-arrow-repeat fxml-spin"></i></div>
+                        <span class="fxml-pstep__label">Enviando archivo al servidor…</span>
+                    </div>
+                    <div class="fxml-pstep" id="fxmlStep2">
+                        <div class="fxml-pstep__dot">2</div>
+                        <span class="fxml-pstep__label">Aplicando firma digital (RSA-SHA256)…</span>
+                    </div>
+                    <div class="fxml-pstep" id="fxmlStep3">
+                        <div class="fxml-pstep__dot">3</div>
+                        <span class="fxml-pstep__label">Preparando descarga…</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Columna lateral (derecha) ── -->
+    <div class="col-lg-4">
+
+        <!-- Panel: ¿Cómo funciona? -->
+        <div class="fxml-info-panel">
+            <div class="fxml-info-panel__header">
+                <i class="bi bi-lightning-charge-fill"></i>
+                ¿Cómo funciona?
+            </div>
+            <div class="fxml-info-panel__body">
+                <ul class="fxml-how-steps">
+                    <li class="fxml-how-step">
+                        <span class="fxml-how-step__num">1</span>
+                        <span>Sube el XML generado desde el portal DGII</span>
+                    </li>
+                    <li class="fxml-how-step">
+                        <span class="fxml-how-step__num">2</span>
+                        <span>El sistema aplica tu certificado digital <strong>X.509</strong></span>
+                    </li>
+                    <li class="fxml-how-step">
+                        <span class="fxml-how-step__num">3</span>
+                        <span>El archivo firmado se descarga automáticamente</span>
+                    </li>
+                    <li class="fxml-how-step">
+                        <span class="fxml-how-step__num">4</span>
+                        <span>Carga el archivo firmado de vuelta en el portal DGII</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Panel: Estado del paso (solo con contexto de paso) -->
+        @if (Model.TieneContextoDePaso)
+        {
+            <div class="fxml-step-status">
+                <div class="fxml-step-status__header">
+                    <i class="bi bi-clipboard2-check-fill text-success"></i>
+                    Estado del paso
+                </div>
+                <div class="fxml-step-status__body">
+                    <div id="pasoData" data-completado="@Model.PasoCompletado.ToString().ToLower()"></div>
+                    <form method="post"
+                          asp-page-handler="MarcarCompletado"
+                          id="formCompletado"
+                          class="form-completado"
+                          data-completado="@Model.PasoCompletado.ToString().ToLower()">
+                        <input type="hidden" name="Ctx" value="@Model.Ctx" />
+                        @Html.AntiForgeryToken()
+                        <button type="submit"
+                                class="btn @(Model.PasoCompletado ? "btn-success" : "btn-outline-success") w-100 btn-completado">
+                            <i class="@(Model.PasoCompletado ? "fas" : "far") fa-check-circle me-2"></i>
+                            @(Model.PasoCompletado ? "¡Completado!" : "Marcar como completado")
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    (function () {
+        const dropzone   = document.getElementById('fxmlDropzone');
+        const input      = document.getElementById('fxmlInput');
+        const idle       = document.getElementById('fxmlIdle');
+        const selected   = document.getElementById('fxmlSelected');
+        const fileName   = document.getElementById('fxmlFileName');
+        const fileMeta   = document.getElementById('fxmlFileMeta');
+        const removeBtn  = document.getElementById('fxmlRemove');
+        const changeHint = document.getElementById('fxmlChangeHint');
+        const submitBtn  = document.getElementById('fxmlSubmit');
+        const btnLabel   = document.getElementById('fxmlBtnLabel');
+        const form       = document.getElementById('fxmlForm');
+        const steps      = document.getElementById('fxmlProgressSteps');
+
+        function formatBytes(b) {
+            return b < 1024 ? b + ' B'
+                 : b < 1048576 ? (b / 1024).toFixed(1) + ' KB'
+                 : (b / 1048576).toFixed(2) + ' MB';
+        }
+
+        function showFile(file) {
+            if (!file || !file.name.toLowerCase().endsWith('.xml')) {
+                dropzone.classList.add('fxml-dz--error');
+                return;
+            }
+            dropzone.classList.remove('fxml-dz--error');
+            dropzone.classList.add('fxml-dz--selected');
+            idle.style.display = 'none';
+            selected.classList.add('d-flex');
+            fileName.textContent = file.name;
+            fileMeta.textContent = formatBytes(file.size) + ' · XML';
+            submitBtn.disabled = false;
+            btnLabel.textContent = 'Firmar y Descargar';
+        }
+
+        function clearFile() {
+            dropzone.classList.remove('fxml-dz--selected', 'fxml-dz--error', 'fxml-dz--hover');
+            idle.style.display = '';
+            selected.classList.remove('d-flex');
+            fileName.textContent = '—';
+            fileMeta.textContent = '—';
+            submitBtn.disabled = true;
+            btnLabel.textContent = 'Selecciona un archivo para continuar';
+            input.value = '';
+        }
+
+        input.addEventListener('change', function () {
+            if (this.files.length) showFile(this.files[0]);
+        });
+
+        removeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            clearFile();
+        });
+
+        changeHint.addEventListener('click', function (e) {
+            e.stopPropagation();
+            clearFile();
+            input.click();
+        });
+
+        // Drag & drop
+        dropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            if (!dropzone.classList.contains('fxml-dz--selected'))
+                dropzone.classList.add('fxml-dz--hover');
+        });
+        dropzone.addEventListener('dragleave', function () {
+            dropzone.classList.remove('fxml-dz--hover');
+        });
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dropzone.classList.remove('fxml-dz--hover');
+            const file = e.dataTransfer?.files[0];
+            if (file) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+                showFile(file);
+            }
+        });
+
+        // Animación de pasos al enviar
+        form.addEventListener('submit', function () {
+            if (input.files.length === 0) return;
+            submitBtn.disabled = true;
+            steps.classList.remove('d-none');
+
+            // Simular progreso visual
+            setTimeout(function () {
+                document.getElementById('fxmlStep1').classList.remove('fxml-pstep--active');
+                document.getElementById('fxmlStep1').classList.add('fxml-pstep--done');
+                document.getElementById('fxmlStep1').querySelector('.fxml-pstep__dot').innerHTML =
+                    '<i class="bi bi-check-lg"></i>';
+                document.getElementById('fxmlStep2').classList.add('fxml-pstep--active');
+                document.getElementById('fxmlStep2').querySelector('.fxml-pstep__dot').innerHTML =
+                    '<i class="bi bi-arrow-repeat fxml-spin"></i>';
+            }, 800);
+            setTimeout(function () {
+                document.getElementById('fxmlStep2').classList.remove('fxml-pstep--active');
+                document.getElementById('fxmlStep2').classList.add('fxml-pstep--done');
+                document.getElementById('fxmlStep2').querySelector('.fxml-pstep__dot').innerHTML =
+                    '<i class="bi bi-check-lg"></i>';
+                document.getElementById('fxmlStep3').classList.add('fxml-pstep--active');
+                document.getElementById('fxmlStep3').querySelector('.fxml-pstep__dot').innerHTML =
+                    '<i class="bi bi-arrow-repeat fxml-spin"></i>';
+            }, 1800);
+        });
+
+        // Pasar estado al helper de pasos completados
+        window.pasoCompletado = @Json.Serialize(Model.PasoCompletado);
+    })();
+    </script>
+    @if (Model.TieneContextoDePaso)
+    {
+        <script src="~/js/PasosCompletados.js"></script>
+    }
+}
+
+@section Styles {
+    <link href="~/css/FirmarXml.css" rel="stylesheet" />
+}

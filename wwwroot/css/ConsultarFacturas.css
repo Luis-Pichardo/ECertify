@@ -1,0 +1,23 @@
+﻿.btn-expand {
+    padding: 0.15rem 0.45rem;
+    font-size: 1rem;
+    line-height: 1;
+    width: 26px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    font-weight: bold;
+}
+
+.btn-expand[aria-expanded="true"] {
+    transform: rotate(4deg);
+}
+
+
+table.tabla-detalle,
+table.tabla-detalle > tbody,
+table.tabla-detalle > tbody > tr,
+table.tabla-detalle > tbody > tr > th,
+table.tabla-detalle > tbody > tr > td {
+    background-color: #CCC !important;
+    border: 1px solid #999 !important;
+}

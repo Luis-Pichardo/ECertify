@@ -1,0 +1,217 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertificaDo.</title>
+    <link rel="icon" href="~/assets/favicon.PNG" type="image/x-icon"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="/css/LandingPages.css" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="~/assets/favicon.PNG" alt="Logo" style="height: 50px; margin-right: 10px;" />
+                CertificaDo.
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#principal">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#acerca-de">Acerca de</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#servicios">Servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#planes">Planes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contacto">Contacto</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="d-flex ms-auto">
+                <a href="/Login" class="btn btn-success me-2">Entrar</a>
+            </div>
+        </div>
+    </nav>
+
+    <header id="principal" class="header-bg text-center">
+        <div class="container">
+            <h1 class="display-3 fw-bold p-5">CertificaDo.</h1>
+            <h2 class="fw-bold">Certifica tu empresa con nuestro software</h2>
+            <p class="lead my-4">Conviértete en emisor electrónico autorizado por la DGII en tiempo récord. Nuestra plataforma automatizada guía cada paso del proceso de certificación, eliminando trámites complejos y garantizando el cumplimiento normativo.</p>
+            <a href="#contacto" class="btn btn-primary btn-lg mt-3">¡Solicitar Prueba!</a>
+        </div>
+    </header>
+
+    <section id="acerca-de" class="seccion bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <img src="/Images/ImagenAcercaDE.png" alt="Acerca del software" class="img-fluid rounded shadow-lg">
+                </div>
+                <div class="col-lg-6 d-flex align-items-center">
+                    <div>
+                        <h2 class="mb-4 p-2">Conviertete en emisor electrónico</h2>
+                        <p class="p-2">Nuestro software ha sido diseñado para ser intuitivo y potente. Te permite generar, firmar y enviar comprobantes fiscales electrónicos de manera automática, ahorrándote tiempo y reduciendo errores. Olvídate de los trámites manuales y enfócate en hacer crecer tu negocio al convertirte en emisor de e-CF con nosotros.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="servicios" class="seccion">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Nuestros Servicios</h2>
+                <p class="lead">Automatizamos cada etapa del proceso de certificación:</p>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm p-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Certificación DGII</h5>
+                            <p class="card-text">Toma el control total del proceso de certificación de la DGII. Nuestro software te guía a través de cada paso de forma intuitiva, permitiéndote certificar tu empresa como emisor electrónico de manera completamente automatizada y a tu propio ritmo.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm p-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Pruebas Técnicas Simplificadas</h5>
+                            <p class="card-text">Realiza las pruebas técnicas requeridas por la DGII con nuestra interfaz intuitiva. Automatizamos la generación de casos de prueba, validación de respuestas y documentación de resultados.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm p-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Seguimiento de Proceso</h5>
+                            <p class="card-text text-justify">Monitorea en tiempo real el estado de tu certificación ante la DGII. Recibe alertas automáticas sobre requerimientos adicionales y plazos, manteniendo el control total de tu proceso de certificación.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="planes" class="seccion bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Certificación e-CF</h2>
+                <p class="lead">Obtén tu certificación completando el pago correspondiente y accede a todos los beneficios de la certificación.</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card h-100 shadow text-center p-4">
+                        <div class="card-body">
+                            <h4 class="card-title">Accesso a empresas</h4>
+                            @* <p class="lead fw-bold">USD $10 <small>/ por certificación</small></p> *@
+                            <ul class="list-unstyled mb-4">
+                                <li>Acceso completo al Software</li>
+                                <li>Manejo de pruebas</li>
+                                <li>Soporte y asesoría</li>
+                            </ul>
+                            <a href="#contacto" class="btn btn-primary btn-lg">Solicitar prueba</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contacto" class="py-5 bg-white">
+        <div class="container">
+            <!-- Formulario de JotForm -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="p-4">
+                        <iframe id="JotFormIFrame-252514350403445"
+                                title="Formulario de contacto"
+                                onload="window.parent.scrollTo(0,0)"
+                                allowtransparency="true"
+                                allowfullscreen="true"
+                                allow="geolocation; microphone; camera"
+                                src="https://form.jotform.com/252514350403445"
+                                frameborder="0"
+                                style="min-width:100%; height:800px; border:none;"
+                                scrolling="no">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white pt-5">
+        <div class="container">
+            <div class="row text-center text-md-start">
+
+                <!-- Columna de información -->
+                <div class="col-md-6 mb-4">
+                    <h4 class="fw-bold mb-3">Contáctanos</h4>
+                    <p>
+                        ¿Tienes alguna pregunta o necesitas más información?<br>
+                        Nuestro equipo estará encantado de ayudarte.
+                    </p>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-2">
+                            <i class="bi bi-geo-alt-fill me-2"></i>
+                            San Pedro de Macorís, Rep. Dom.
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-telephone-fill me-2"></i>
+                            +1 (809) 878-0828
+                        </li>
+                        <li>
+                            <i class="bi bi-envelope-fill me-2"></i>
+                            pichardosoftlutions@gmail.com
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Columna de enlaces rápidos (opcional) -->
+                <div class="col-md-6 mb-4 text-md-end">
+                    <h4 class="fw-bold mb-3">Enlaces</h4>
+                    <ul class="list-unstyled">
+                        <li><a href="#acerca-de" class="text-white text-decoration-none">Acerca de</a></li>
+                        <li><a href="#servicios" class="text-white text-decoration-none">Servicios</a></li>
+                        <li><a href="#planes" class="text-white text-decoration-none">Planes</a></li>
+                        <li><a href="#contacto" class="text-white text-decoration-none">Contacto</a></li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <hr class="border-light">
+
+            <!-- Derechos reservados -->
+            <div class="text-center py-3">
+                <p class="mb-0">&copy; 2025 <span class="fw-bold">Pichardo SoftLutions</span>. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="/js/Index.js" ></script>
+</body>
+</html>

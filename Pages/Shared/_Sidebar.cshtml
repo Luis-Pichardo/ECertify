@@ -1,0 +1,78 @@
+@{
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString()?.ToLower() ?? "";
+
+    bool isSignDocuments     = currentPage == "/certificacion/signdocuments";
+    bool isRequirements      = currentPage == "/certificacion/requirements";
+    bool isCertificacionesActive = currentPage.StartsWith("/certificacion");
+}
+
+<div class="sidebar" data-background-color="dark">
+    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+                <li class="nav-item @(currentPage == "/home" ? "active" : "")">
+                    <a asp-page="/Home">
+                        <i class="fas fa-home"></i>
+                        <p>Inicio</p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="d-flex justify-content-between align-items-center"
+                       href="#submenuCertificaciones"
+                       role="button">
+                        <span><i class="fas fa-certificate me-2 no-loading"></i>Certificación</span>
+                        <i></i>
+                    </a>
+                    <div id="submenuCertificaciones">
+                        <ul class="nav nav-collapse flex-column ps-3">
+                            <li class="nav-item @(isRequirements ? "active" : "")">
+                                <a asp-page="/Certificacion/Requirements">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    <span>Requerimientos</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(isSignDocuments ? "active" : "")">
+                                <a asp-page="/Certificacion/SignDocuments">
+                                    <i class="fas fa-file-signature me-2"></i>
+                                    <span>Firmar Documentos</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(currentPage == "/certificacion/pruebas" ? "active" : "")">
+                                <a asp-page="/Certificacion/Pruebas">
+                                    <i class="fas fa-clipboard-check me-2"></i>
+                                    <span>Pruebas e-CF</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(currentPage == "/certificacion/aprobacion" ? "active" : "")">
+                                <a asp-page="/Certificacion/Aprobacion">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span>Aprobación Comercial</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(currentPage == "/certificacion/simulacion" ? "active" : "")">
+                                <a asp-page="/Certificacion/Simulacion">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span>Simulación e-CF</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(currentPage == "/certificacion/representacion" ? "active" : "")">
+                                <a asp-page="/Certificacion/Representacion">
+                                    <i class="fas fa-file-pdf me-2"></i>
+                                    <span>Representación (RI)</span>
+                                </a>
+                            </li>
+                            <li class="nav-item @(currentPage == "/certificacion/urlservicios" ? "active" : "")">
+                                <a asp-page="/Certificacion/Urlservicios">
+                                    <i class="fas fa-link me-2"></i>
+                                    <span>URL Servicios</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>

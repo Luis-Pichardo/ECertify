@@ -1,0 +1,211 @@
+@* Pages/Shared/_Layout.cshtml *@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>eCertify</title>
+    <link rel="icon" href="~/assets/favicon.PNG" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/styles/notify-bootstrap.min.css" />
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="~/assets/css/kaiadmin.min.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link href="~/css/_LoadingOverlay.css" rel="stylesheet" />
+    <link href="~/css/progressbars.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/NotifyJS.css" />
+    <link href="~/css/Pruebas.css" rel="stylesheet" />
+    <link href="~/css/Simulacion.css" rel="stylesheet" />
+    <link href="~/css/DeclaracionJurada.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/ConsultarFacturas.css" />
+    <link rel="stylesheet" href="~/css/FirmarXml.css" />
+    <link rel="stylesheet" href="~/css/Empresa.css" />
+
+    <style>
+        /* ─── Global page loader ─── */
+        .page-loader {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #004d2b 0%, #006B3C 55%, #008f50 100%);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Dual counter-rotating rings */
+        .page-loader__spinner {
+            position: relative;
+            width: 74px;
+            height: 74px;
+        }
+        .page-loader__ring-outer {
+            position: absolute;
+            inset: 0;
+            border: 3px solid rgba(255, 255, 255, 0.18);
+            border-top-color: rgba(255, 255, 255, 0.95);
+            border-right-color: rgba(255, 255, 255, 0.65);
+            border-radius: 50%;
+            animation: loaderSpin 0.85s linear infinite;
+        }
+        .page-loader__ring-inner {
+            position: absolute;
+            inset: 13px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-bottom-color: rgba(255, 255, 255, 0.6);
+            border-left-color: rgba(255, 255, 255, 0.35);
+            border-radius: 50%;
+            animation: loaderSpin 0.65s linear infinite reverse;
+        }
+        .page-loader__icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 1.5rem;
+        }
+
+        .page-loader__brand {
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Bouncing dots */
+        .page-loader__dots {
+            display: flex;
+            gap: 7px;
+        }
+        .page-loader__dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.55);
+            border-radius: 50%;
+            animation: dotBounce 1.3s ease-in-out infinite;
+        }
+        .page-loader__dot:nth-child(2) { animation-delay: 0.2s; }
+        .page-loader__dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @@keyframes loaderSpin { to { transform: rotate(360deg); } }
+        @@keyframes dotBounce {
+            0%, 80%, 100% { transform: scale(0.55); opacity: 0.4; }
+            40%            { transform: scale(1);    opacity: 1;   }
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <!-- Global page loader -->
+    <div class="page-loader" id="pageLoader">
+        <div class="page-loader__spinner">
+            <div class="page-loader__ring-outer"></div>
+            <div class="page-loader__ring-inner"></div>
+            <div class="page-loader__icon">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+        </div>
+        <p class="page-loader__brand">eCertify</p>
+        <div class="page-loader__dots">
+            <div class="page-loader__dot"></div>
+            <div class="page-loader__dot"></div>
+            <div class="page-loader__dot"></div>
+        </div>
+    </div>
+
+    <div class="wrapper">
+        @await Html.PartialAsync("_Sidebar")
+
+        <div class="main-panel">
+            <div class="main-header">
+                @await Html.PartialAsync("_Navbar")
+            </div>
+
+            <main role="main" class="container-fluid" style="padding-top: 4em">
+                <div class="page-inner">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="~/assets/js/plugin/chart.js/chart.min.js"></script>
+    <script src="~/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+    <script src="~/assets/js/plugin/chart-circle/circles.min.js"></script>
+    <script src="~/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="~/assets/js/plugin/jsvectormap/jsvectormap.min.js"></script>
+    <script src="~/assets/js/plugin/jsvectormap/world.js"></script>
+    <script src="~/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="~/assets/js/kaiadmin.min.js"></script>
+    <script src="~/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="~/js/Notify.js"></script>
+    <script src="~/js/progressbars.js"></script>
+
+    <script>
+        WebFont.load({
+            google: { "families": ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+                urls: ['~/assets/css/fonts.min.css']
+            },
+            active: function () { sessionStorage.fonts = true; }
+        });
+
+        // Hide loader once page is fully loaded
+        window.addEventListener("load", function () {
+            const loader = document.getElementById('pageLoader');
+            if (loader) {
+                loader.classList.add('hidden');
+                setTimeout(() => { loader.style.display = 'none'; }, 550);
+            }
+        });
+
+        // Re-show loader when navigating to another page
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('a[href]');
+            if (link && link.href
+                && !link.href.startsWith('#')
+                && !link.href.startsWith('javascript')
+                && !link.target
+                && link.href !== window.location.href) {
+                const loader = document.getElementById('pageLoader');
+                if (loader) {
+                    loader.style.display = 'flex';
+                    loader.classList.remove('hidden');
+                }
+            }
+        });
+    </script>
+
+    <script src="/js/_LoadingOverlay.js"></script>
+    <script src="/js/firmar.js"></script>
+    <script src="~/js/Home.js"></script>
+    @await Html.PartialAsync("_LoadingOverlay")
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

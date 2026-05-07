@@ -1,0 +1,37 @@
+﻿@page
+@model eCertify.Pages.PlanGratuitoModel
+@{
+    ViewData["Title"] = "Plan Gratuito";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm p-4 text-center">
+        <h2 class="mb-3">¡Limitación de Plan Gratuito!</h2>
+        <p class="lead">
+            Actualmente te encuentras en el <strong>plan gratuito</strong>.
+            Este plan solo cubre hasta el <strong>Paso #2: Pruebas e-CF</strong> de la certificación.
+        </p>
+        <p>
+            Para continuar con los pasos restantes y completar la certificación, debes eliminar las limitaciones de esta empresa realizando el pago correspondiente.
+        </p>
+        <a class="btn btn-primary btn-lg mt-3" asp-page="/Pagos/Pago">
+            Realizar Pago
+        </a>
+    </div>
+</div>
+
+<style>
+    .container {
+        max-width: 600px;
+    }
+
+    .card {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>

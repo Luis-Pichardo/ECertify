@@ -1,0 +1,226 @@
+/* ===== Empresa.css — Registro de empresa ===== */
+
+:root {
+    --emp-green:       #006B3C;
+    --emp-green-light: #e6f4ed;
+    --emp-green-mid:   #c3e6d3;
+    --emp-border:      #dee2e6;
+    --emp-radius:      14px;
+    --emp-radius-sm:   8px;
+    --emp-shadow:      0 2px 16px rgba(0,0,0,.08);
+    --emp-transition:  .22s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Banner ── */
+.emp-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, var(--emp-green) 0%, #008f50 100%);
+    color: #fff;
+    border-radius: var(--emp-radius);
+    padding: 1.3rem 1.75rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 18px rgba(0,107,60,.22);
+}
+.emp-banner__icon {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+.emp-banner__title { font-size: 1.2rem; font-weight: 700; margin-bottom: .1rem; }
+.emp-banner__sub   { font-size: .86rem; opacity: .82; }
+
+/* ── Secciones del formulario ── */
+.emp-section {
+    background: #fff;
+    border: 1px solid var(--emp-border);
+    border-radius: var(--emp-radius);
+    overflow: hidden;
+    box-shadow: var(--emp-shadow);
+    margin-bottom: 1.25rem;
+}
+.emp-section__header {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .9rem 1.25rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid var(--emp-border);
+    font-weight: 700;
+    font-size: .9rem;
+    color: #495057;
+}
+.emp-section__header i { color: var(--emp-green); font-size: 1rem; }
+.emp-section__body { padding: 1.4rem 1.25rem; }
+
+/* ── Zona de carga de archivos ── */
+.emp-dropzone {
+    position: relative;
+    border: 2px dashed var(--emp-border);
+    border-radius: var(--emp-radius-sm);
+    background: #fafafa;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color var(--emp-transition),
+                background   var(--emp-transition),
+                box-shadow   var(--emp-transition);
+    overflow: hidden;
+}
+.emp-dropzone:hover,
+.emp-dropzone.emp-dz--hover {
+    border-color: var(--emp-green);
+    background:   var(--emp-green-light);
+    box-shadow:   0 0 0 3px var(--emp-green-mid);
+}
+.emp-dropzone.emp-dz--selected {
+    border-style: solid;
+    border-color: var(--emp-green);
+    background:   var(--emp-green-light);
+    cursor: default;
+}
+.emp-dropzone.emp-dz--error { border-color: #dc3545; background: #fff5f5; }
+.emp-dropzone__input {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer; z-index: 2;
+}
+.emp-dropzone.emp-dz--selected .emp-dropzone__input { pointer-events: none; }
+
+/* Idle state */
+.emp-dz-idle {
+    display: flex; flex-direction: column;
+    align-items: center; gap: .35rem;
+    padding: 1.5rem; text-align: center;
+    pointer-events: none;
+}
+.emp-dz-idle__icon {
+    font-size: 2rem; color: #adb5bd;
+    transition: color var(--emp-transition), transform var(--emp-transition);
+}
+.emp-dropzone:hover .emp-dz-idle__icon,
+.emp-dropzone.emp-dz--hover .emp-dz-idle__icon {
+    color: var(--emp-green);
+    transform: translateY(-3px);
+}
+.emp-dz-idle__title { font-size: .9rem; font-weight: 600; color: #495057; margin: 0; }
+.emp-dz-idle__sub   { font-size: .8rem; color: #6c757d; margin: 0; }
+.emp-dz-idle__badge {
+    display: inline-block; background: #e9ecef; color: #6c757d;
+    border-radius: 20px; padding: .18rem .65rem;
+    font-size: .72rem; font-weight: 500;
+}
+
+/* Selected state */
+.emp-dz-selected {
+    display: none; flex-direction: row;
+    align-items: center; gap: .75rem;
+    padding: .9rem 1.1rem; width: 100%;
+    pointer-events: none;
+}
+.emp-dz-selected.d-flex { display: flex !important; }
+.emp-dz-file-icon { font-size: 1.8rem; color: var(--emp-green); flex-shrink: 0; }
+.emp-dz-file-info { flex: 1; min-width: 0; }
+.emp-dz-file-name {
+    display: block; font-weight: 600; font-size: .88rem; color: #212529;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.emp-dz-file-meta { display: block; font-size: .76rem; color: #6c757d; }
+.emp-dz-remove {
+    background: none; border: none; color: #adb5bd;
+    cursor: pointer; padding: .2rem .3rem; border-radius: 4px;
+    pointer-events: all; z-index: 3; position: relative;
+    transition: color var(--emp-transition);
+}
+.emp-dz-remove:hover { color: #dc3545; }
+.emp-dz-change {
+    font-size: .75rem; color: var(--emp-green); font-weight: 500;
+    pointer-events: all; cursor: pointer;
+    z-index: 3; position: relative;
+    display: block; text-align: center; padding: .3rem 0;
+}
+.emp-dz-change:hover { text-decoration: underline; }
+
+/* ── Password toggle ── */
+.emp-pass-wrap { position: relative; }
+.emp-pass-toggle {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer; color: #6c757d; z-index: 4;
+    background: none; border: none; padding: 0;
+    transition: color var(--emp-transition);
+}
+.emp-pass-toggle:hover { color: var(--emp-green); }
+
+/* ── Botón de envío ── */
+.emp-btn-submit {
+    width: 100%; padding: .85rem 1.5rem;
+    border-radius: var(--emp-radius-sm);
+    font-size: 1rem; font-weight: 600;
+    background: linear-gradient(135deg, var(--emp-green) 0%, #008f50 100%);
+    border: none; color: #fff;
+    display: flex; align-items: center; justify-content: center; gap: .65rem;
+    transition: opacity var(--emp-transition), transform var(--emp-transition), box-shadow var(--emp-transition);
+    box-shadow: 0 4px 14px rgba(0,107,60,.28);
+}
+.emp-btn-submit:hover:not(:disabled) {
+    opacity: .92; transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,107,60,.38); color: #fff;
+}
+.emp-btn-submit:disabled {
+    background: linear-gradient(135deg, #adb5bd 0%, #ced4da 100%);
+    box-shadow: none; cursor: not-allowed;
+}
+
+/* ── Panel lateral informativo ── */
+.emp-info-panel {
+    background: #fff; border: 1px solid var(--emp-border);
+    border-radius: var(--emp-radius); overflow: hidden;
+    box-shadow: var(--emp-shadow);
+}
+.emp-info-panel__header {
+    background: linear-gradient(135deg, var(--emp-green) 0%, #008f50 100%);
+    color: #fff; padding: .9rem 1.1rem;
+    display: flex; align-items: center; gap: .5rem;
+    font-weight: 600; font-size: .9rem;
+}
+.emp-info-panel__body { padding: 1.1rem; }
+
+.emp-tip-list { list-style: none; padding: 0; margin: 0; }
+.emp-tip-list li {
+    display: flex; align-items: flex-start; gap: .6rem;
+    font-size: .84rem; color: #495057; margin-bottom: .7rem;
+}
+.emp-tip-list li:last-child { margin-bottom: 0; }
+.emp-tip-list__icon { color: var(--emp-green); flex-shrink: 0; margin-top: .1rem; }
+
+.emp-cert-tip {
+    margin-top: 1rem; background: var(--emp-green-light);
+    border: 1px solid var(--emp-green-mid);
+    border-left: 4px solid var(--emp-green);
+    border-radius: var(--emp-radius-sm);
+    padding: .85rem 1rem; font-size: .82rem; color: #2d5a3d;
+}
+
+/* ── Alerta de error ── */
+.emp-error-alert {
+    display: flex; align-items: flex-start; gap: .7rem;
+    background: #fff5f5; border: 1px solid #f5c6cb;
+    border-left: 4px solid #dc3545;
+    border-radius: var(--emp-radius-sm);
+    padding: .85rem 1rem; margin-bottom: 1.25rem;
+    font-size: .875rem; color: #721c24;
+}
+.emp-error-alert i { font-size: 1.05rem; color: #dc3545; flex-shrink: 0; margin-top: .05rem; }
+
+/* ── Label sección ── */
+.emp-field-label {
+    font-size: .78rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: #6c757d; margin-bottom: .5rem;
+}

@@ -1,0 +1,38 @@
+## Build output
+bin/
+obj/
+
+## .NET / Visual Studio
+*.user
+*.suo
+*.vs/
+.vs/
+*.csproj.user
+*.ncrunchproject
+
+## Runtime & secrets
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Staging.json
+secrets.json
+
+## Logs
+logs/
+*.log
+
+## Storage (certificates and uploaded files)
+Storage/
+
+## Claude Code (AI assistant local files)
+.claude/
+memory/
+
+## OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+## NuGet
+*.nupkg
+.nuget/
+packages/

@@ -1,0 +1,34 @@
+﻿@using Microsoft.AspNetCore.Html
+@{
+    var contenido = ViewData["AyudaContenido"] as IHtmlContent;
+}
+<link href="~/assets/css/all.min.css" rel="stylesheet" />
+<link href="~/assets/css/brands.min.css" rel="stylesheet" />
+<link href="~/assets/css/fontawesome.min.css" rel="stylesheet" />
+<!-- Botón de ayuda (puedes mover este div según dónde incluyas el partial) -->
+<div class="text-end">
+    <button type="button" class="btn p-2 border-0 bg-transparent shadow-none"
+            data-bs-toggle="modal" data-bs-target="#ayudaModal" title="Ayuda">
+        <i class="fas fa-circle-question text-primary" style="font-size: 2rem;"></i>
+    </button>
+</div>
+
+<!-- Modal de ayuda  -->
+<div class="modal fade" id="ayudaModal" tabindex="-1" aria-labelledby="ayudaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="ayudaModalLabel">
+                    <i class="fas fa-circle-info me-2"></i> Ayuda
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                @contenido
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

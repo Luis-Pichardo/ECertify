@@ -1,0 +1,86 @@
+﻿body {
+    background-color: #f8f9fa;
+}
+
+.form-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2c3e50;
+}
+
+.file-upload {
+    border: 2px dashed #ced4da;
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+    .file-upload:hover {
+        border-color: #6c757d;
+    }
+
+    .file-upload input {
+        display: none;
+    }
+
+.password-toggle {
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.btn-custom {
+    padding: 10px 25px;
+    font-weight: 500;
+}
+
+.btn-previous {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-create {
+    background-color: #2c3e50;
+    color: white;
+}
+
+.field-validation-error {
+    color: #dc3545;
+    font-size: 0.875em;
+}
+
+.file-upload.drag-over {
+    border-color: #007bff;
+    background-color: #e9f7fe;
+}
+
+.acceso-restringido-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding-top: 5rem;
+    background-color: #f8f9fa;
+}
+
+.acceso-restringido-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}

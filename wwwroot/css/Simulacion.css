@@ -1,0 +1,76 @@
+﻿#facturasTable_ECF {
+    border-collapse: collapse !important;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+    #facturasTable_ECF thead {
+        background-color: #f8f9fa;
+    }
+
+        #facturasTable_ECF thead th {
+            color: #343a40;
+            font-weight: 600;
+            border-bottom: none;
+            padding: 0.75rem;
+            vertical-align: middle;
+        }
+
+    #facturasTable_ECF tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+        #facturasTable_ECF tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+    #facturasTable_ECF tbody td {
+        border-top: 1px solid #dee2e6;
+        vertical-align: middle;
+        padding: 0.6rem;
+    }
+
+    #facturasTable_ECF .btn-group .btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.6rem;
+        border-radius: 6px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        #facturasTable_ECF .btn-group .btn:hover {
+            transform: scale(1.02);
+        }
+
+    #facturasTable_ECF .btn i {
+        margin-right: 4px;
+        vertical-align: text-bottom;
+    }
+
+.form-control {
+    font-size: 0.9rem;
+}
+
+.form-control-sm {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.5rem;
+}
+
+button.btn-sm {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+}
+
+#jsonContainer {
+    width: 100%;
+    max-width: 100%;
+}
+
+#jsonEditor {
+    width: 100% !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    font-family: monospace !important;
+    font-size: 0.9rem !important;
+    resize: vertical;
+    box-sizing: border-box;
+}

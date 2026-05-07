@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 15">
+<title>Manual de Usuario — eCertify</title>
+<style>
+  body       { font-family: Calibri, sans-serif; font-size: 11pt; color: #212529; margin: 72pt 72pt 72pt 72pt; }
+  h1         { font-size: 20pt; color: #006B3C; border-bottom: 2px solid #006B3C; padding-bottom: 4pt; margin-top: 24pt; page-break-before: auto; }
+  h2         { font-size: 14pt; color: #004d2b; margin-top: 16pt; }
+  h3         { font-size: 12pt; color: #333; margin-top: 12pt; font-style: italic; }
+  p          { margin: 6pt 0; line-height: 1.6; }
+  ul, ol     { margin: 6pt 0 6pt 20pt; }
+  li         { margin-bottom: 5pt; }
+  .cover     { text-align: center; padding: 60pt 0; }
+  .cover h1  { font-size: 32pt; border: none; color: #006B3C; }
+  .cover h2  { font-size: 18pt; color: #555; border: none; }
+  .cover p   { font-size: 11pt; color: #777; }
+  .tip       { background: #e6f4ed; border-left: 4pt solid #006B3C; padding: 8pt 12pt; margin: 10pt 0; border-radius: 3pt; }
+  .warning   { background: #fff8e6; border-left: 4pt solid #f0ad4e; padding: 8pt 12pt; margin: 10pt 0; border-radius: 3pt; }
+  .step-box  { background: #f8f9fa; border: 1pt solid #dee2e6; border-radius: 5pt; padding: 12pt; margin: 10pt 0; }
+  .step-num  { display: inline-block; background: #006B3C; color: #fff; width: 22pt; height: 22pt; border-radius: 50%; text-align: center; line-height: 22pt; font-weight: bold; margin-right: 6pt; font-size: 10pt; }
+  table      { border-collapse: collapse; width: 100%; margin: 10pt 0; }
+  th         { background: #006B3C; color: #fff; padding: 6pt 10pt; text-align: left; }
+  td         { border: 1pt solid #dee2e6; padding: 5pt 10pt; }
+  tr:nth-child(even) td { background: #f8f9fa; }
+  .faq-q     { font-weight: bold; color: #006B3C; margin-top: 12pt; }
+  .faq-a     { margin-left: 12pt; }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+  <br/><br/><br/>
+  <h1>eCertify</h1>
+  <h2>Manual de Usuario</h2>
+  <br/>
+  <p><strong>Versión 1.0</strong></p>
+  <p>Mayo 2025</p>
+  <br/><br/>
+  <p><strong>Desarrollado por Pichardo SoftLutions</strong></p>
+  <p>pichardosoftlutions@gmail.com</p>
+  <br/><br/><br/>
+  <p style="font-size:10pt;color:#aaa;">
+    Este manual está dirigido a los usuarios finales del sistema eCertify.<br/>
+    Guarda este documento para consultas futuras.
+  </p>
+</div>
+
+<!-- ÍNDICE -->
+<h1>Índice</h1>
+<ol>
+  <li>¿Qué es eCertify?</li>
+  <li>¿Qué es la certificación e-CF?</li>
+  <li>Requisitos del Sistema</li>
+  <li>Primeros Pasos: Registro e Inicio de Sesión</li>
+  <li>Panel Principal</li>
+  <li>Proceso de Certificación Paso a Paso</li>
+  <li>Firma Digital de Archivos XML</li>
+  <li>Consulta de Facturas</li>
+  <li>Preguntas Frecuentes (FAQ)</li>
+  <li>Soporte y Contacto</li>
+</ol>
+
+<!-- 1 -->
+<h1>1. ¿Qué es eCertify?</h1>
+<p>
+  <strong>eCertify</strong> es un software diseñado para ayudar a su empresa a convertirse en
+  <strong>Emisor de Comprobantes Fiscales Electrónicos (e-CF)</strong> de manera sencilla y guiada.
+</p>
+<p>
+  Con eCertify, usted podrá completar todo el proceso de certificación ante la
+  <strong>Dirección General de Impuestos Internos (DGII)</strong> de la República Dominicana
+  sin necesidad de conocimientos técnicos avanzados. El sistema lo guía paso a paso, desde
+  los requisitos previos hasta la firma del último documento requerido.
+</p>
+
+<div class="tip">
+  <strong>Beneficio clave:</strong> Reduzca de semanas a días el proceso de certificación e-CF,
+  eliminando trámites manuales y evitando errores costosos.
+</div>
+
+<!-- 2 -->
+<h1>2. ¿Qué es la certificación e-CF?</h1>
+<p>
+  La <strong>factura electrónica (e-CF)</strong> es el sistema oficial de la DGII para la emisión
+  de comprobantes fiscales en formato digital. Para emitir facturas electrónicas, toda empresa
+  debe obtener su <strong>certificación como emisor e-CF</strong>.
+</p>
+<p>
+  Este proceso implica registrarse en el portal DGII, completar pruebas técnicas, firmar documentos
+  digitalmente con su certificado, y enviar información de su sistema de facturación para su validación.
+</p>
+
+<div class="warning">
+  <strong>Importante:</strong> Sin la certificación e-CF, su empresa no podrá emitir comprobantes
+  fiscales electrónicos, lo cual es obligatorio según la normativa vigente de la DGII.
+</div>
+
+<!-- 3 -->
+<h1>3. Requisitos del Sistema</h1>
+<p>Para utilizar eCertify necesita:</p>
+<ul>
+  <li>Computadora con acceso a Internet</li>
+  <li>Navegador web moderno: Google Chrome, Microsoft Edge, Firefox o Safari (versiones recientes)</li>
+  <li>Su certificado digital <strong>.p12</strong> emitido para la DGII</li>
+  <li>Acceso al <strong>portal de la DGII</strong> (ecf.dgii.gov.do)</li>
+  <li>RNC de su empresa registrado en la DGII</li>
+</ul>
+
+<!-- 4 -->
+<h1>4. Primeros Pasos: Registro e Inicio de Sesión</h1>
+
+<h2>4.1 Registro de Usuario</h2>
+<div class="step-box">
+  <p><span class="step-num">1</span> Ingrese a la dirección del sistema eCertify.</p>
+  <p><span class="step-num">2</span> En la página de inicio, haga clic en <strong>"Solicitar Prueba"</strong> o contacte a Pichardo SoftLutions para obtener su clave de acceso.</p>
+  <p><span class="step-num">3</span> Haga clic en <strong>"Entrar"</strong> en la barra superior y luego en <strong>"Registrarse"</strong>.</p>
+  <p><span class="step-num">4</span> Ingrese la clave de acceso proporcionada.</p>
+  <p><span class="step-num">5</span> Complete el formulario: nombre, apellido, correo electrónico y contraseña.</p>
+  <p><span class="step-num">6</span> Haga clic en <strong>"Crear cuenta"</strong>.</p>
+</div>
+
+<h2>4.2 Inicio de Sesión</h2>
+<div class="step-box">
+  <p><span class="step-num">1</span> Haga clic en <strong>"Entrar"</strong> en la página principal.</p>
+  <p><span class="step-num">2</span> Ingrese su correo electrónico y contraseña.</p>
+  <p><span class="step-num">3</span> Haga clic en <strong>"Iniciar sesión"</strong>.</p>
+</div>
+
+<!-- 5 -->
+<h1>5. Panel Principal</h1>
+<p>
+  Al iniciar sesión, verá el <strong>Panel Principal (Dashboard)</strong>. Desde aquí podrá:
+</p>
+<ul>
+  <li>Ver el resumen del estado de su certificación.</li>
+  <li>Acceder a cada paso del proceso desde el menú lateral izquierdo.</li>
+  <li>Consultar sus facturas electrónicas enviadas.</li>
+  <li>Gestionar la información de su empresa.</li>
+</ul>
+
+<div class="tip">
+  <strong>Consejo:</strong> El menú lateral siempre muestra el paso actual activo con una marca verde.
+  Siga el orden de los pasos para completar la certificación correctamente.
+</div>
+
+<!-- 6 -->
+<h1>6. Proceso de Certificación Paso a Paso</h1>
+<p>
+  El proceso de certificación e-CF se divide en los siguientes pasos. Complételos en orden:
+</p>
+
+<h2>Paso 1 — Requisitos Previos</h2>
+<p>
+  Revise la lista de documentos y requisitos necesarios antes de comenzar.
+  Asegúrese de tener su certificado digital <strong>.p12</strong> disponible.
+</p>
+
+<h2>Paso 2 — Postulación</h2>
+<p>
+  En el portal DGII, complete el formulario de postulación y haga clic en
+  <strong>"Generar Archivo"</strong> para descargar el XML de postulación.
+  Luego, en eCertify, firme ese archivo con su certificado digital y súbalo de vuelta en el portal DGII.
+</p>
+
+<h2>Pasos 3 al 8 — Pruebas Técnicas e-CF</h2>
+<p>
+  eCertify le ayuda a completar las pruebas de tipos de comprobantes requeridas por la DGII:
+  facturas de crédito fiscal, facturas consumidor final, notas de débito/crédito, etc.
+  El sistema genera y envía los XML de prueba automáticamente.
+</p>
+
+<h2>Paso — Aprobación Comercial</h2>
+<p>
+  Una vez completadas las pruebas técnicas, la DGII revisará su postulación.
+  Este paso es informativo: registre en el sistema cuando reciba la aprobación.
+</p>
+
+<h2>Paso — Simulación</h2>
+<p>
+  Realice la simulación de comprobantes en el entorno de certificación DGII.
+  eCertify le permite generar los comprobantes de prueba requeridos.
+</p>
+
+<h2>Paso — Representación Impresa (RI)</h2>
+<p>
+  Configure y genere el modelo de representación gráfica (RI) de sus facturas electrónicas.
+</p>
+
+<h2>Paso — URL de Servicios</h2>
+<p>
+  Registre las URLs de los servicios web de su sistema de facturación en el portal DGII.
+</p>
+
+<h2>Paso 9 — Declaración Jurada</h2>
+<p>
+  Descargue el XML de Declaración Jurada desde el portal DGII (paso 14 del portal),
+  fírmelo en eCertify y súbalo de vuelta en el portal DGII.
+  Este es el último paso de la certificación.
+</p>
+
+<div class="tip">
+  <strong>¡Felicidades!</strong> Al completar el paso 9, su empresa quedará certificada como
+  Emisor de Comprobantes Fiscales Electrónicos en la República Dominicana.
+</div>
+
+<!-- 7 -->
+<h1>7. Firma Digital de Archivos XML</h1>
+<p>
+  eCertify incluye una herramienta de <strong>firma digital</strong> que aplica su certificado
+  X.509 a cualquier archivo XML requerido por la DGII.
+</p>
+
+<h2>7.1 Cómo firmar un archivo XML</h2>
+<div class="step-box">
+  <p><span class="step-num">1</span> En el menú lateral, haga clic en el paso correspondiente
+     (Postulación, Declaración Jurada) o en <strong>"Firmar Archivos"</strong> para firma libre.</p>
+  <p><span class="step-num">2</span> En la zona de carga, <strong>arrastre el archivo XML</strong>
+     o haga clic en el área para buscarlo en su computadora.</p>
+  <p><span class="step-num">3</span> Verifique que el nombre del archivo sea correcto en la tarjeta de archivo.</p>
+  <p><span class="step-num">4</span> Haga clic en el botón verde <strong>"Firmar y Descargar"</strong>.</p>
+  <p><span class="step-num">5</span> El archivo firmado se descargará automáticamente.
+     Guárdelo en un lugar conocido.</p>
+  <p><span class="step-num">6</span> Regrese al portal DGII y <strong>suba el archivo firmado</strong>
+     en el campo indicado.</p>
+</div>
+
+<h2>7.2 Requisitos del archivo</h2>
+<ul>
+  <li>El archivo debe tener extensión <strong>.xml</strong></li>
+  <li>Tamaño máximo: <strong>5 MB</strong></li>
+  <li>Debe ser el archivo generado directamente desde el portal DGII</li>
+</ul>
+
+<div class="warning">
+  <strong>Atención:</strong> No modifique el archivo XML antes de firmarlo. Cualquier cambio
+  en el contenido podría invalidar la firma digital y ser rechazado por la DGII.
+</div>
+
+<!-- 8 -->
+<h1>8. Consulta de Facturas</h1>
+<p>
+  Desde la opción <strong>"Consultar Facturas"</strong> en el menú lateral, puede ver
+  el historial de comprobantes electrónicos enviados a la DGII, incluyendo su estado
+  (aceptado, rechazado, pendiente).
+</p>
+
+<!-- 9 -->
+<h1>9. Preguntas Frecuentes (FAQ)</h1>
+
+<p class="faq-q">¿Qué pasa si olvido mi contraseña?</p>
+<p class="faq-a">
+  Contacte al administrador del sistema o a Pichardo SoftLutions para restablecer su contraseña.
+  En futuras versiones, se habilitará la opción de recuperación por correo electrónico.
+</p>
+
+<p class="faq-q">¿Puedo tener más de una empresa en mi cuenta?</p>
+<p class="faq-a">
+  Sí. Puede agregar múltiples empresas y cambiar entre ellas desde la opción
+  <strong>"Seleccionar Empresa"</strong> en el menú de usuario.
+</p>
+
+<p class="faq-q">¿Dónde debo colocar mi certificado digital .p12?</p>
+<p class="faq-a">
+  El certificado .p12 debe ser cargado por el administrador del sistema en la carpeta
+  correspondiente al RNC de su empresa. Contacte a Pichardo SoftLutions para este proceso.
+</p>
+
+<p class="faq-q">¿Qué hago si el archivo firmado es rechazado por la DGII?</p>
+<p class="faq-a">
+  Verifique que el certificado digital utilizado sea el correcto para su RNC y que no haya
+  expirado. Contacte a soporte si el problema persiste.
+</p>
+
+<p class="faq-q">¿El sistema funciona en dispositivos móviles?</p>
+<p class="faq-a">
+  Sí, eCertify está diseñado con un diseño responsivo que se adapta a smartphones y tabletas,
+  aunque se recomienda el uso en computadora de escritorio para mayor comodidad.
+</p>
+
+<p class="faq-q">¿Cuánto tiempo tarda el proceso de certificación?</p>
+<p class="faq-a">
+  Depende de los tiempos de respuesta de la DGII. Con eCertify, el proceso de su parte
+  puede completarse en 1 a 3 días hábiles. La DGII puede tardar adicionalamente en validar
+  y aprobar su certificación.
+</p>
+
+<p class="faq-q">¿Mis datos y certificados están seguros?</p>
+<p class="faq-a">
+  Sí. Los certificados digitales se almacenan de forma segura en el servidor.
+  La comunicación se realiza mediante HTTPS y los tokens de sesión expiran automáticamente.
+</p>
+
+<!-- 10 -->
+<h1>10. Soporte y Contacto</h1>
+<p>Si necesita ayuda, comuníquese con nuestro equipo de soporte:</p>
+
+<table>
+  <tr><th>Canal</th><th>Información</th></tr>
+  <tr><td>Correo electrónico</td><td>pichardosoftlutions@gmail.com</td></tr>
+  <tr><td>Empresa</td><td>Pichardo SoftLutions</td></tr>
+  <tr><td>Horario de atención</td><td>Lunes a Viernes, 8:00 AM – 6:00 PM</td></tr>
+</table>
+
+<div class="tip">
+  Al contactarnos, por favor indique: su nombre de usuario, el RNC de su empresa y una
+  descripción detallada del problema. Esto nos permitirá ayudarle más rápidamente.
+</div>
+
+<br/><br/>
+<p style="text-align:center;color:#aaa;font-size:9pt;margin-top:40pt;">
+  eCertify — Manual de Usuario v1.0 | Pichardo SoftLutions | 2025<br/>
+  pichardosoftlutions@gmail.com
+</p>
+
+</body>
+</html>

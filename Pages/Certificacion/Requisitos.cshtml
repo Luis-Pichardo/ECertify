@@ -1,0 +1,48 @@
+﻿@page
+@model eCertify.Pages.Certificacion.RequisitosModel
+@{
+    ViewData["Title"] = "Certificación Emisor Electrónico";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">Certificación</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2">
+                <a href="/Home"><i class="bi bi-house-door"></i></a>
+            </li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>Requisitos</span></li>
+        </ul>
+    </div>
+</div>
+
+<div class="card shadow-sm p-4">
+    <h4 class="mb-3">Proceso y requisitos para la certificación como emisor electrónico</h4>
+
+    <p>Obtener la certificación de emisor electrónico ante la DGII requiere cumplir ciertos requisitos previos y seguir un proceso formal establecido por las autoridades tributarias.</p>
+
+    <p>Para poder solicitar la certificación, se debe cumplir con las siguientes condiciones básicas:</p>
+
+    <ul>
+        <li><strong>Inscripción en el RNC:</strong> estar inscrito en el Registro Nacional de Contribuyentes —RNC—de la DGII​.</li>
+        <li><strong>Contribuyente activo:</strong> estar registrado como contribuyente con obligaciones tributarias a su cargo (es decir, tener asignados los impuestos que le corresponden)​.</li>
+        <li><strong>Cumplimiento tributario:</strong> estar al día en el cumplimiento de los deberes formales tributarios (declaraciones presentadas, pagos realizados, sin atrasos ni sanciones pendientes)​. En otras palabras, la empresa debe tener buena conducta fiscal.</li>
+        <li><strong>Clave de Oficina Virtual:</strong> poseer una clave de acceso activa a la Oficina Virtual —OFV— de la DGII. Esto es necesario para gestionar la solicitud en línea.</li>
+        <li><strong>Autorización de NCF:</strong> tener autorización vigente para emitir comprobantes fiscales en papel —NCF tradicionales—. Este es un indicio de que la empresa ya cumple con los requisitos para facturar en general.</li>
+        <li><strong>Certificado digital:</strong> contar con un certificado digital válido para procesos tributarios, emitido por una entidad certificadora autorizada (por ejemplo, un certificado de firma digital)​. Este certificado se usará para firmar electrónicamente los e-CF, garantizando su autenticidad e integridad.</li>
+        <li><strong>Adecuación tecnológica:</strong> contar con un sistema o solución tecnológica capaz de generar comprobantes electrónicos en el formato establecido por la DGII (XML estándar) y de comunicarse con los servicios web de la DGII​. </li>
+        <li><strong>Cumplimiento de la Norma 06-2018:</strong> estar en regla con las disposiciones de la Norma General 06-2018 sobre comprobantes fiscales electrónicos​. Esta norma define los tipos de e-CF, los datos que deben contener y las obligaciones del emisor electrónico, por lo que es fundamental conocerla y aplicarla correctamente.</li>
+    </ul>
+
+    <p>La DGII exige formalmente estos requisitos antes de iniciar la solicitud. Si alguno no se cumple (por ejemplo, la empresa tiene obligaciones tributarias atrasadas o no posee certificado digital), se deberán subsanar primero.</p>
+
+    <div class="d-flex justify-content-end mt-4">
+        <a href="/Certificacion/Postulacion" class="btn btn-primary btn-lg px-5">
+            Empezar
+        </a>
+    </div>
+
+</div>

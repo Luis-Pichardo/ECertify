@@ -1,0 +1,503 @@
+@page
+@model eCertify.Pages.CompanySelectModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Seleccionar Empresa — eCertify</title>
+    <link rel="icon" href="~/assets/favicon.PNG" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link href="/css/_LoadingOverlay.css" rel="stylesheet" />
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #004d2b 0%, #006B3C 55%, #008f50 100%);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding-bottom: 4rem;
+            overflow-x: hidden;
+        }
+
+        /* Blobs */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.07);
+            animation: float ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .blob-1 { width: 520px; height: 520px; top: -200px; left: -180px; animation-duration: 10s; }
+        .blob-2 { width: 400px; height: 400px; bottom: -150px; right: -100px; animation-duration: 12s; animation-delay: 2s; }
+        .blob-3 { width: 240px; height: 240px; top: 40%; left: 5%; animation-duration: 8s; animation-delay: 4s; background: rgba(255,255,255,0.05); }
+        .blob-4 { width: 160px; height: 160px; top: 15%; right: 8%; animation-duration: 14s; animation-delay: 1s; background: rgba(255,255,255,0.04); }
+
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Top nav ── */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem 2rem;
+            background: rgba(0, 0, 0, 0.18);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+        .nav-brand i { font-size: 1.25rem; }
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: rgba(255, 255, 255, 0.85);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            border-radius: 2rem;
+            padding: 0.38rem 1rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ── Main content ── */
+        .main-content {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ── Welcome section ── */
+        .welcome-section {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .user-avatar {
+            width: 62px;
+            height: 62px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.9rem;
+            color: white;
+            flex-shrink: 0;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+        }
+        .welcome-greeting {
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.68);
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.15rem;
+        }
+        .welcome-name {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: white;
+            line-height: 1.2;
+        }
+
+        /* ── Selection panel ── */
+        .selection-panel {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.2rem 2.4rem;
+            box-shadow: 0 28px 65px rgba(0, 0, 0, 0.24);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 1.5rem;
+        }
+        .panel-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #005c33, #00a854);
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 5px 14px rgba(0, 107, 60, 0.4);
+        }
+        .panel-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.2rem;
+        }
+        .panel-subtitle {
+            font-size: 0.83rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        /* Action area */
+        .panel-action {
+            margin-bottom: 1.6rem;
+        }
+
+        /* ── Buttons ── */
+        .btn-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #006B3C, #00a854);
+            border: none;
+            border-radius: 0.55rem;
+            padding: 0.65rem 1.4rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 14px rgba(0, 107, 60, 0.35);
+        }
+        .btn-brand:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 107, 60, 0.45);
+            color: white;
+        }
+        .btn-upgrade {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #92400e, #d97706);
+            border: none;
+            border-radius: 0.55rem;
+            padding: 0.65rem 1.4rem;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+        }
+        .btn-upgrade:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(217, 119, 6, 0.45);
+            color: white;
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem 2rem;
+        }
+        .empty-icon {
+            font-size: 3.8rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+        }
+        .empty-state h4 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.4rem;
+        }
+        .empty-state p {
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        /* ── Company list ── */
+        .empresa-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+        .empresa-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.2rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 0.9rem;
+            background: #fafafa;
+            transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+        }
+        .empresa-item:hover {
+            border-color: #006B3C;
+            box-shadow: 0 4px 18px rgba(0, 107, 60, 0.1);
+            background: white;
+        }
+        .empresa-icon-wrap {
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #006B3C;
+            flex-shrink: 0;
+            border: 1px solid rgba(0, 107, 60, 0.14);
+        }
+        .empresa-data {
+            flex: 1;
+            min-width: 0;
+        }
+        .empresa-name {
+            font-size: 0.94rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.18rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .empresa-rnc {
+            font-size: 0.77rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .empresa-action {
+            flex-shrink: 0;
+        }
+        .btn-select {
+            background: linear-gradient(135deg, #006B3C, #00a854);
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.48rem 1.1rem;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            transition: transform 0.12s, box-shadow 0.12s;
+            box-shadow: 0 3px 10px rgba(0, 107, 60, 0.3);
+        }
+        .btn-select:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(0, 107, 60, 0.42);
+            color: white;
+        }
+        .btn-select:disabled { opacity: 0.7; color: white; }
+
+        /* ── Footer ── */
+        .page-footer {
+            position: fixed;
+            bottom: 1.2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.38);
+            font-size: 0.74rem;
+            z-index: 5;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        @@media (max-width: 600px) {
+            .top-nav { padding: 0.8rem 1.2rem; }
+            .main-content { padding: 1.8rem 1rem; }
+            .selection-panel { padding: 1.5rem 1.2rem; border-radius: 1.1rem; }
+            .welcome-name { font-size: 1.25rem; }
+            .panel-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+            .empresa-item { flex-wrap: wrap; gap: 0.75rem; }
+            .empresa-action { width: 100%; }
+            .btn-select { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+
+    <!-- Top navigation -->
+    <nav class="top-nav">
+        <a href="/Home" class="nav-brand">
+            <i class="bi bi-shield-lock-fill"></i>
+            eCertify
+        </a>
+        <a href="/Logout" class="btn-logout">
+            <i class="bi bi-box-arrow-right"></i>Cerrar sesión
+        </a>
+    </nav>
+
+    <!-- Main content -->
+    <main class="main-content">
+
+        <!-- Welcome -->
+        <div class="welcome-section">
+            <div class="user-avatar">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div>
+                <p class="welcome-greeting">¡Bienvenido de vuelta!</p>
+                <h1 class="welcome-name">@Model.NombreUsuario @Model.ApellidoUsuario</h1>
+            </div>
+        </div>
+
+        <!-- Selection panel -->
+        <div class="selection-panel">
+
+            <div class="panel-header">
+                <div class="panel-icon">
+                    <i class="bi bi-building-fill"></i>
+                </div>
+                <div>
+                    <h2 class="panel-title">Seleccionar Empresa</h2>
+                    <p class="panel-subtitle">Elige la empresa con la que deseas operar en eCertify</p>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>@Model.ErrorMessage</span>
+                </div>
+            }
+
+            <div class="panel-action">
+                @if (Model.PuedeCrearEmpresa)
+                {
+                    <a href="/RegisterCompany" class="btn btn-brand">
+                        <i class="bi bi-plus-circle-fill"></i> Crear nueva empresa
+                    </a>
+                }
+                else
+                {
+                    <a href="/Pagos/Pago" class="btn btn-upgrade">
+                        <i class="bi bi-lock-fill"></i> Adquirir acceso para más empresas
+                    </a>
+                }
+            </div>
+
+            @if (Model.Empresas == null || !Model.Empresas.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="bi bi-building-slash"></i>
+                    </div>
+                    <h4>No tienes empresas registradas</h4>
+                    <p>Crea tu primera empresa para comenzar a usar eCertify.</p>
+                </div>
+            }
+            else
+            {
+                <div class="empresa-list">
+                    @foreach (var empresa in Model.Empresas)
+                    {
+                        <div class="empresa-item">
+                            <div class="empresa-icon-wrap">
+                                <i class="bi bi-building-fill"></i>
+                            </div>
+                            <div class="empresa-data">
+                                <p class="empresa-name">@empresa.RazonSocial</p>
+                                <span class="empresa-rnc">
+                                    <i class="bi bi-tag-fill me-1"></i>RNC: @empresa.RNC
+                                </span>
+                            </div>
+                            <div class="empresa-action">
+                                <form method="post" asp-page="/CompanySelect">
+                                    <input type="hidden" name="empresaId" value="@empresa.ID" />
+                                    <input type="hidden" name="razonSocial" value="@empresa.RazonSocial" />
+                                    <button type="submit" class="btn btn-select d-flex align-items-center gap-2">
+                                        <span class="btn-select-text">Seleccionar</span>
+                                        <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>
+    </main>
+
+    <p class="page-footer">© 2025 eCertify — Todos los derechos reservados</p>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="/js/_LoadingOverlay.js"></script>
+
+    <script>
+        document.querySelectorAll(".empresa-action form").forEach(form => {
+            form.addEventListener("submit", function () {
+                const btn     = form.querySelector("button[type='submit']");
+                const text    = btn.querySelector(".btn-select-text");
+                const spinner = btn.querySelector(".spinner-border");
+
+                text.textContent = "Entrando...";
+                spinner.classList.remove("d-none");
+                btn.disabled = true;
+
+                document.querySelectorAll(".btn-select").forEach(b => {
+                    if (b !== btn) b.disabled = true;
+                });
+
+                showLoader("Cargando empresa…");
+            });
+        });
+    </script>
+
+    <div id="globalLoader">
+        <div class="gl-spinner">
+            <div class="gl-ring-outer"></div>
+            <div class="gl-ring-inner"></div>
+        </div>
+        <p class="gl-text">Procesando&hellip;</p>
+    </div>
+
+</body>
+</html>

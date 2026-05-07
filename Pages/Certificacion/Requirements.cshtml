@@ -1,0 +1,182 @@
+@page
+@model eCertify.Pages.Certificacion.RequirementsModel
+@{
+    ViewData["Title"] = "Requerimientos";
+}
+
+<!-- ── Page header ── -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">Requerimientos</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2"><a href="/Home"><i class="bi bi-house-door"></i></a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>Requerimientos</span></li>
+        </ul>
+    </div>
+</div>
+
+@await Html.PartialAsync("_ProgressBars")
+
+<!-- ── Intro banner ── -->
+<div class="rq-banner mb-4">
+    <div class="rq-banner__icon">
+        <i class="bi bi-patch-check-fill"></i>
+    </div>
+    <div class="rq-banner__body">
+        <div class="rq-banner__title">Certificación como Emisor Electrónico</div>
+        <div class="rq-banner__sub">
+            Antes de iniciar el proceso de certificación ante la DGII, verifica que tu empresa cumple con todos los requerimientos listados a continuación.
+        </div>
+    </div>
+    <span class="rq-badge">
+        <i class="bi bi-list-check me-1"></i>8 requerimientos
+    </span>
+</div>
+
+<!-- ── Requirements grid ── -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-building"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Inscripción en el RNC</h6>
+                <p class="rq-card__text">
+                    La empresa debe estar inscrita en el Registro Nacional de Contribuyentes de la DGII.
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-person-check-fill"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Contribuyente Activo</h6>
+                <p class="rq-card__text">
+                    Debe estar registrado como contribuyente activo con obligaciones tributarias asignadas.
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Cumplimiento Tributario</h6>
+                <p class="rq-card__text">
+                    Estar al día con los deberes formales tributarios: declaraciones presentadas, pagos realizados y sin sanciones pendientes.
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-key-fill"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Clave de Oficina Virtual (OFV)</h6>
+                <p class="rq-card__text">
+                    Poseer una clave de acceso activa a la Oficina Virtual de la DGII para gestionar la solicitud en línea.
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Autorización de NCF</h6>
+                <p class="rq-card__text">
+                    Tener autorización vigente para emitir comprobantes fiscales en papel (NCF tradicionales).
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-file-earmark-lock-fill"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Certificado Digital</h6>
+                <p class="rq-card__text">
+                    Contar con un certificado digital válido emitido por una entidad certificadora autorizada para firmar electrónicamente los e-CF.
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-cpu-fill"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Adecuación Tecnológica</h6>
+                <p class="rq-card__text">
+                    Disponer de un sistema capaz de generar comprobantes electrónicos en formato XML (estándar DGII) y comunicarse con sus servicios web.
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="rq-card">
+            <div class="rq-card__icon-wrap">
+                <i class="bi bi-journal-text"></i>
+            </div>
+            <div class="rq-card__body">
+                <h6 class="rq-card__title">Norma General 06-2018</h6>
+                <p class="rq-card__text">
+                    Cumplir con las disposiciones de la Norma General 06-2018 sobre comprobantes fiscales electrónicos: tipos de e-CF, datos requeridos y obligaciones del emisor.
+                </p>
+            </div>
+            <span class="rq-required-badge">Requerido</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── Notice ── -->
+<div class="rq-notice mb-4">
+    <i class="bi bi-info-circle-fill rq-notice__icon"></i>
+    <div>
+        <strong>Importante:</strong> si alguno de estos requerimientos no se cumple —por ejemplo, obligaciones tributarias atrasadas o ausencia de certificado digital— deberán subsanarse antes de iniciar el proceso de postulación ante la DGII.
+    </div>
+</div>
+
+<!-- ── CTA ── -->
+<div class="d-flex justify-content-end">
+    <a asp-page="/Certificacion/SignDocuments" asp-route-documentType="postulacion" class="rq-btn-start">
+        <span>Comenzar Postulación</span>
+        <i class="bi bi-arrow-right ms-2"></i>
+    </a>
+</div>
+
+@section Styles {
+    <link href="~/css/Requirements.css" rel="stylesheet" />
+}

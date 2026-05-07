@@ -1,0 +1,411 @@
+@page
+@using System.Text.Json
+@model eCertify.Pages.EmpresaModel
+
+<!-- ── Encabezado de página ── -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">Registrar Empresa</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2"><a href="/Home"><i class="bi bi-house-door"></i></a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>Registrar Empresa</span></li>
+        </ul>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#empHelp">
+        <i class="bi bi-question-circle me-1"></i> Ayuda
+    </button>
+</div>
+
+<!-- ── Offcanvas de ayuda ── -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="empHelp" style="width:380px">
+    <div class="offcanvas-header border-bottom py-3">
+        <h6 class="offcanvas-title fw-bold mb-0">
+            <i class="bi bi-info-circle-fill me-2 text-primary"></i>Guía: Registro de Empresa
+        </h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body small">
+        <p>Complete los datos de su empresa para comenzar el proceso de certificación e-CF.</p>
+        <h6 class="fw-bold mt-3">Datos requeridos</h6>
+        <ul class="ps-3">
+            <li class="mb-1"><strong>Razón Social:</strong> nombre legal de su empresa.</li>
+            <li class="mb-1"><strong>RNC:</strong> Registro Nacional del Contribuyente (11 dígitos).</li>
+            <li class="mb-1"><strong>Dirección:</strong> dirección fiscal de la empresa.</li>
+            <li class="mb-1"><strong>Provincia y Municipio:</strong> ubicación de la empresa.</li>
+        </ul>
+        <h6 class="fw-bold mt-3">Certificado Digital (.p12)</h6>
+        <p>Es el archivo de firma digital emitido para su RNC. Sin él no podrá firmar los documentos XML requeridos por la DGII.</p>
+        <h6 class="fw-bold mt-3">Logo</h6>
+        <p>El logo es opcional y se usará en las representaciones gráficas de sus comprobantes.</p>
+        <div class="alert alert-warning py-2 px-3 mt-3 mb-0 small">
+            <i class="bi bi-shield-exclamation me-1"></i>
+            Guarde su contraseña del certificado en un lugar seguro; no podrá recuperarla si la olvida.
+        </div>
+    </div>
+</div>
+
+<!-- ── Banner contextual ── -->
+<div class="emp-banner mb-4">
+    <div class="emp-banner__icon">
+        <i class="bi bi-building-fill-add"></i>
+    </div>
+    <div>
+        <div class="emp-banner__title">Nueva Empresa</div>
+        <div class="emp-banner__sub">Complete los datos para registrar su empresa en eCertify</div>
+    </div>
+</div>
+
+<!-- ── Layout principal ── -->
+<div class="row g-4 align-items-start">
+
+    <!-- ── Columna del formulario ── -->
+    <div class="col-lg-8">
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="emp-error-alert">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span>@Model.ErrorMessage</span>
+            </div>
+        }
+
+        <form method="post" enctype="multipart/form-data" id="empForm">
+            @Html.AntiForgeryToken()
+
+            <!-- Sección 1: Datos de la empresa -->
+            <div class="emp-section">
+                <div class="emp-section__header">
+                    <i class="bi bi-building"></i>
+                    Datos de la Empresa
+                </div>
+                <div class="emp-section__body">
+                    <div class="mb-3">
+                        <label asp-for="Empresa.RazonSocial" class="form-label fw-semibold">
+                            Razón Social <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="Empresa.RazonSocial" class="form-control"
+                               placeholder="Nombre legal de la empresa" autofocus required />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Empresa.RNC" class="form-label fw-semibold">
+                                RNC <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Empresa.RNC" class="form-control"
+                                   placeholder="Ej. 130000000" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Empresa.Direccion" class="form-label fw-semibold">
+                                Dirección <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Empresa.Direccion" class="form-control"
+                                   placeholder="Dirección fiscal" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="provinciaSelect" class="form-label fw-semibold">
+                                Provincia <span class="text-danger">*</span>
+                            </label>
+                            <select id="provinciaSelect" name="Empresa.ProvinciaId"
+                                    class="form-select" required>
+                                <option value="">— Seleccione una provincia —</option>
+                                @foreach (var prov in Model.ProvinciasConMunicipios)
+                                {
+                                    <option value="@prov.Id">@prov.Descripcion</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="municipioSelect" class="form-label fw-semibold">
+                                Municipio <span class="text-danger">*</span>
+                            </label>
+                            <select id="municipioSelect" name="Empresa.MunicipioId"
+                                    class="form-select" disabled required>
+                                <option value="">Seleccione primero una provincia</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 2: Certificado digital -->
+            <div class="emp-section">
+                <div class="emp-section__header">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    Certificado Digital
+                </div>
+                <div class="emp-section__body">
+                    <p class="emp-field-label">Archivo del Certificado (.p12) <span class="text-danger">*</span></p>
+                    <div class="emp-dropzone" id="dzCert">
+                        <div class="emp-dz-idle" id="dzCertIdle">
+                            <i class="bi bi-file-earmark-lock emp-dz-idle__icon"></i>
+                            <p class="emp-dz-idle__title">Arrastra el archivo .p12 aquí</p>
+                            <p class="emp-dz-idle__sub">o haz clic para buscarlo</p>
+                            <span class="emp-dz-idle__badge">.p12</span>
+                        </div>
+                        <div class="emp-dz-selected" id="dzCertSel">
+                            <i class="bi bi-file-earmark-check-fill emp-dz-file-icon"></i>
+                            <div class="emp-dz-file-info">
+                                <span class="emp-dz-file-name" id="certName">—</span>
+                                <span class="emp-dz-file-meta" id="certMeta">—</span>
+                            </div>
+                            <button type="button" class="emp-dz-remove" id="certRemove" title="Quitar">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <span class="emp-dz-change d-none" id="certChange">
+                            <i class="bi bi-arrow-repeat me-1"></i>Cambiar archivo
+                        </span>
+                        <input asp-for="Empresa.Certificado" type="file" id="certInput"
+                               accept=".p12" class="emp-dropzone__input" required />
+                    </div>
+
+                    <div class="mt-3">
+                        <label asp-for="Empresa.CertificadoPass" class="form-label fw-semibold">
+                            Contraseña del Certificado <span class="text-danger">*</span>
+                        </label>
+                        <div class="emp-pass-wrap">
+                            <input asp-for="Empresa.CertificadoPass" type="password"
+                                   class="form-control pe-5" id="certPass"
+                                   placeholder="Contraseña del archivo .p12" required />
+                            <button type="button" class="emp-pass-toggle" id="togglePass">
+                                <i class="bi bi-eye" id="togglePassIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección 3: Logo (opcional) -->
+            <div class="emp-section">
+                <div class="emp-section__header">
+                    <i class="bi bi-image"></i>
+                    Logo de la Empresa
+                    <span class="badge bg-secondary ms-2 fw-normal" style="font-size:.7rem">Opcional</span>
+                </div>
+                <div class="emp-section__body">
+                    <p class="emp-field-label">Imagen del Logo</p>
+                    <div class="emp-dropzone" id="dzLogo">
+                        <div class="emp-dz-idle" id="dzLogoIdle">
+                            <i class="bi bi-image emp-dz-idle__icon"></i>
+                            <p class="emp-dz-idle__title">Arrastra el logo aquí</p>
+                            <p class="emp-dz-idle__sub">o haz clic para buscarlo</p>
+                            <span class="emp-dz-idle__badge">.png · .jpg · .jpeg</span>
+                        </div>
+                        <div class="emp-dz-selected" id="dzLogoSel">
+                            <i class="bi bi-file-earmark-image-fill emp-dz-file-icon"></i>
+                            <div class="emp-dz-file-info">
+                                <span class="emp-dz-file-name" id="logoName">—</span>
+                                <span class="emp-dz-file-meta" id="logoMeta">—</span>
+                            </div>
+                            <button type="button" class="emp-dz-remove" id="logoRemove" title="Quitar">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <span class="emp-dz-change d-none" id="logoChange">
+                            <i class="bi bi-arrow-repeat me-1"></i>Cambiar imagen
+                        </span>
+                        <input asp-for="Empresa.LogoArchivo" type="file" id="logoInput"
+                               accept=".png,.jpg,.jpeg" class="emp-dropzone__input" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de envío -->
+            <button type="submit" class="emp-btn-submit" id="empSubmit">
+                <i class="bi bi-building-fill-check"></i>
+                <span id="empBtnLabel">Registrar Empresa</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- ── Panel lateral ── -->
+    <div class="col-lg-4">
+        <div class="emp-info-panel">
+            <div class="emp-info-panel__header">
+                <i class="bi bi-lightbulb-fill"></i>
+                ¿Para qué sirve cada campo?
+            </div>
+            <div class="emp-info-panel__body">
+                <ul class="emp-tip-list">
+                    <li>
+                        <i class="bi bi-building emp-tip-list__icon"></i>
+                        <span><strong>Razón Social y RNC</strong>: identifican legalmente su empresa ante la DGII.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-geo-alt emp-tip-list__icon"></i>
+                        <span><strong>Dirección, Provincia y Municipio</strong>: datos de ubicación requeridos por la DGII.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-shield-lock emp-tip-list__icon"></i>
+                        <span><strong>Certificado .p12</strong>: su firma digital. Se usa para firmar todos los XML que envía a la DGII.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-key emp-tip-list__icon"></i>
+                        <span><strong>Contraseña</strong>: protege su certificado. Guárdela en un lugar seguro.</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-image emp-tip-list__icon"></i>
+                        <span><strong>Logo</strong>: se muestra en la representación gráfica (RI) de sus facturas electrónicas.</span>
+                    </li>
+                </ul>
+
+                <div class="emp-cert-tip mt-3">
+                    <i class="bi bi-shield-check me-1"></i>
+                    <strong>Certificado X.509:</strong> el archivo <em>.p12</em> contiene su clave privada RSA.
+                    eCertify lo usa exclusivamente para firmar documentos con el estándar <strong>XMLDSIG</strong>
+                    exigido por la DGII.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    (function () {
+        // ── Datos de provincias desde el servidor ──
+        const provincias = @Html.Raw(JsonSerializer.Serialize(
+            Model.ProvinciasConMunicipios,
+            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
+
+        // ── Selects de provincia / municipio ──
+        const provSel  = document.getElementById('provinciaSelect');
+        const muniSel  = document.getElementById('municipioSelect');
+
+        function cargarMunicipios(provId) {
+            muniSel.innerHTML = '';
+            if (!provId) {
+                muniSel.innerHTML = '<option value="">Seleccione primero una provincia</option>';
+                muniSel.disabled = true;
+                return;
+            }
+            const prov = provincias.find(p => p.id == provId);
+            if (prov && prov.municipios.length > 0) {
+                muniSel.disabled = false;
+                muniSel.innerHTML = '<option value="">— Seleccione un municipio —</option>';
+                prov.municipios.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.descripcion;
+                    muniSel.appendChild(opt);
+                });
+            } else {
+                muniSel.innerHTML = '<option value="">Sin municipios disponibles</option>';
+                muniSel.disabled = true;
+            }
+        }
+
+        provSel.addEventListener('change', () => cargarMunicipios(provSel.value));
+
+        // ── Zona de archivos genérica ──
+        function formatBytes(b) {
+            return b < 1024 ? b + ' B'
+                 : b < 1048576 ? (b/1024).toFixed(1) + ' KB'
+                 : (b/1048576).toFixed(2) + ' MB';
+        }
+
+        function initDropzone(cfg) {
+            const dz      = document.getElementById(cfg.dz);
+            const input   = document.getElementById(cfg.input);
+            const idle    = document.getElementById(cfg.idle);
+            const sel     = document.getElementById(cfg.sel);
+            const nameEl  = document.getElementById(cfg.name);
+            const metaEl  = document.getElementById(cfg.meta);
+            const remove  = document.getElementById(cfg.remove);
+            const change  = document.getElementById(cfg.change);
+
+            function showFile(file) {
+                if (!file) return;
+                const ext = file.name.split('.').pop().toLowerCase();
+                if (cfg.accept && !cfg.accept.includes(ext)) {
+                    dz.classList.add('emp-dz--error');
+                    return;
+                }
+                dz.classList.remove('emp-dz--error');
+                dz.classList.add('emp-dz--selected');
+                idle.style.display = 'none';
+                sel.classList.add('d-flex');
+                if (change) { change.classList.remove('d-none'); }
+                nameEl.textContent = file.name;
+                metaEl.textContent = formatBytes(file.size) + ' · ' + ext.toUpperCase();
+            }
+
+            function clearFile() {
+                dz.classList.remove('emp-dz--selected', 'emp-dz--error', 'emp-dz--hover');
+                idle.style.display = '';
+                sel.classList.remove('d-flex');
+                if (change) { change.classList.add('d-none'); }
+                nameEl.textContent = '—';
+                metaEl.textContent = '—';
+                input.value = '';
+            }
+
+            input.addEventListener('change', () => {
+                if (input.files.length) showFile(input.files[0]);
+            });
+
+            if (remove) remove.addEventListener('click', e => { e.stopPropagation(); clearFile(); });
+            if (change) change.addEventListener('click', e => { e.stopPropagation(); clearFile(); input.click(); });
+
+            dz.addEventListener('dragover', e => {
+                e.preventDefault();
+                if (!dz.classList.contains('emp-dz--selected'))
+                    dz.classList.add('emp-dz--hover');
+            });
+            dz.addEventListener('dragleave', () => dz.classList.remove('emp-dz--hover'));
+            dz.addEventListener('drop', e => {
+                e.preventDefault();
+                dz.classList.remove('emp-dz--hover');
+                const file = e.dataTransfer?.files[0];
+                if (file) {
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    input.files = dt.files;
+                    showFile(file);
+                }
+            });
+        }
+
+        initDropzone({
+            dz: 'dzCert', input: 'certInput', idle: 'dzCertIdle', sel: 'dzCertSel',
+            name: 'certName', meta: 'certMeta', remove: 'certRemove', change: 'certChange',
+            accept: ['p12']
+        });
+        initDropzone({
+            dz: 'dzLogo', input: 'logoInput', idle: 'dzLogoIdle', sel: 'dzLogoSel',
+            name: 'logoName', meta: 'logoMeta', remove: 'logoRemove', change: 'logoChange',
+            accept: ['png', 'jpg', 'jpeg']
+        });
+
+        // ── Toggle contraseña ──
+        document.getElementById('togglePass').addEventListener('click', function () {
+            const inp  = document.getElementById('certPass');
+            const icon = document.getElementById('togglePassIcon');
+            const isPass = inp.type === 'password';
+            inp.type = isPass ? 'text' : 'password';
+            icon.className = isPass ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+
+        // ── Submit con estado de carga ──
+        document.getElementById('empForm').addEventListener('submit', function () {
+            const btn   = document.getElementById('empSubmit');
+            const label = document.getElementById('empBtnLabel');
+            btn.disabled = true;
+            label.textContent = 'Registrando…';
+        });
+    })();
+    </script>
+}
+
+@section Styles {
+    <link href="~/css/Empresa.css" rel="stylesheet" />
+}

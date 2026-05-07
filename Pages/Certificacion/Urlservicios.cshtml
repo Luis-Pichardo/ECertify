@@ -1,0 +1,144 @@
+﻿@page
+@model eCertify.Pages.Certificacion.UrlserviciosModel
+@{
+}
+
+<div class="page-header">
+    <h3 class="fw-bold mb-3">URL Servicios Prueba</h3>
+    <ul class="breadcrumbs mb-3 list-unstyled d-flex align-items-center">
+        <li class="nav-home me-2">
+            <a href="#">
+                <i class="bi bi-house-door"></i>
+            </a>
+        </li>
+        <li class="separator me-2">
+            <i class="bi bi-chevron-right"></i>
+        </li>
+        <li class="nav-item me-2">
+            <a href="Dashboard.aspx">Inicio</a>
+        </li>
+        <li class="separator me-2">
+            <i class="bi bi-chevron-right"></i>
+        </li>
+        <li class="nav-item">
+            <span>URL Servicios Prueba</span>
+        </li>
+    </ul>
+</div>
+
+<div class="card p-3 mb-4">
+    @await Html.PartialAsync("_ProgressBars")
+
+    <h5> Paso 6:  URL Servicios Prueba</h5>
+    <p class="text-muted mb-3">
+        Para cumplir con este paso solo debes dirigirte al portal de la DGII y en el paso <strong>7: URL Servicios Prueba</strong>, confirmar que los datos en los campos estén exactamente como se muestran en la imagen más abajo. En caso de que estén vacíos, solo debes rellenarlos tal como aparecen en dicha imagen.
+        Es importante tomar en cuenta que el campo <strong>Servicio de Autenticación</strong> debe dejarse vacío.
+    </p>
+    <div>
+        <img src="~/Images/Urlserviciofe.png" alt="Portal DGII" class="img-fluid rounded border mx-auto d-block w-50" />
+    </div>
+    <p class="text-muted mt-4">
+        Si has seguido todos los pasos como se requiere, ya has completado este paso correctamente, por lo que puedes avanzar al siguiente.
+    </p>
+
+    <hr class="my-4">
+
+    <h5> Paso 7:  Prueba Recepción e-CF</h5>
+    <p class="text-muted mb-3">
+        Para cumplir con este paso solo debes dirigirte al portal de la DGII y en el paso <strong>8: Prueba Recepción e-CF</strong>, confirmar que los datos en los campos estén exactamente como se muestran en la imagen más abajo. En caso de que estén vacíos, solo debes rellenarlos tal como aparecen en dicha imagen.
+        Es importante tomar en cuenta que el campo <strong>Servicio de Autenticación</strong> debe dejarse vacío.
+    </p>
+    <div>
+        <img src="~/Images/Paso8.png" alt="Portal DGII" class="img-fluid rounded border mx-auto d-block w-50" />
+    </div>
+    <p class="text-muted mt-4">
+        Una vez que todos los campos estén correctamente completados, haz clic en el botón <strong>ENVIAR PRUEBA DE COMPROBANTES</strong>. La DGII procesará la solicitud y redirigirá automáticamente al siguiente paso del proceso.
+    </p>
+    <p class="text-muted mt-4">
+        Si has seguido todos los pasos indicados, este proceso se habrá completado de forma satisfactoria. Ya puedes continuar con el siguiente paso.
+    </p>
+
+    <hr class="my-4">
+
+    <h5> Paso 8:  Prueba Recepción Aprobación Comercial</h5>
+    <p class="text-muted mb-3">
+        Para cumplir con este paso solo debes dirigirte al portal de la DGII y en el paso <strong>10: Prueba Recepción Aprobación Comercial</strong>, confirmar que los datos en los campos estén exactamente como se muestran en la imagen más abajo. En caso de que estén vacíos, solo debes rellenarlos tal como aparecen en dicha imagen.
+        Es importante tomar en cuenta que el campo <strong>Servicio de Autenticación</strong> debe dejarse vacío.
+    </p>
+    <div>
+        <img src="~/Images/RecepcionAC.png" alt="Portal DGII" class="img-fluid rounded border mx-auto d-block w-50" />
+    </div>
+    <p class="text-muted mt-4">
+        Una vez que todos los campos estén correctamente completados, haz clic en el botón <strong>ENVIAR PRUEBA DE APROBACIONES COMERCIALES</strong>. La DGII procesará la solicitud y redirigirá automáticamente al siguiente paso del proceso.
+    </p>
+
+    <hr class="my-4">
+
+    <h5> Paso 9: URL Servicios Producción</h5>
+    <p class="text-muted mb-3">
+        Para cumplir con este paso solo debes dirigirte al portal de la DGII y en el paso <strong>12: URL Servicios Producción</strong>, definir la URL(api.sogefe.com) que se utilizará en el ambiente de producción, solo debes rellenarlos tal como aparecen en la imagen.
+        Es importante tomar en cuenta que el campo <strong>Servicio de Autenticación</strong> debe dejarse vacío.
+    </p>
+    <div>
+        <img src="~/Images/UrlsProduccion.png" alt="Portal DGII" class="img-fluid rounded border mx-auto d-block w-50" />
+    </div>
+    <p class="text-muted mt-4">
+        Si has seguido todos los pasos como se requiere, ya has completado este paso correctamente, por lo que puedes avanzar al siguiente.
+    </p>
+</div>
+
+<!-- Botón flotante mejorado -->
+<div id="pasoData" data-completado="@Model.PasoCompletado"></div>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index:1000">
+    <form method="post" asp-page-handler="MarcarCompletado"
+          id="formCompletado" class="form-completado"
+          data-completado="@Model.PasoCompletado.ToString().ToLower()">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn @(Model.PasoCompletado ? "btn-success" : "btn-outline-success") btn-completado">
+            <i class="@(Model.PasoCompletado ? "fas" : "far") fa-check-circle me-2"></i>
+            @(Model.PasoCompletado ? "¡Completado!" : "Marcar como completado")
+        </button>
+    </form>
+</div>
+
+
+<!-- Mensajes de estado -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white">
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white">
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["ErrorMessage"]
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Pasar el estado a JavaScript globalmente
+            window.pasoCompletado = @Json.Serialize(Model.PasoCompletado);
+        });
+    </script>
+    <script src="~/js/PasosCompletados.js"></script>
+}

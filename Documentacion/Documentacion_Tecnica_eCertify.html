@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="UTF-8">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 15">
+<title>Documentación Técnica — eCertify</title>
+<style>
+  body       { font-family: Calibri, sans-serif; font-size: 11pt; color: #212529; margin: 72pt 72pt 72pt 72pt; }
+  h1         { font-size: 20pt; color: #006B3C; border-bottom: 2px solid #006B3C; padding-bottom: 4pt; margin-top: 24pt; }
+  h2         { font-size: 15pt; color: #004d2b; margin-top: 18pt; }
+  h3         { font-size: 12pt; color: #333; margin-top: 14pt; }
+  p          { margin: 6pt 0; line-height: 1.5; }
+  ul         { margin: 6pt 0 6pt 20pt; }
+  li         { margin-bottom: 4pt; }
+  .cover     { text-align: center; padding: 60pt 0; border-bottom: 3px solid #006B3C; margin-bottom: 40pt; }
+  .cover h1  { font-size: 28pt; border: none; color: #006B3C; }
+  .cover p   { font-size: 12pt; color: #555; }
+  .badge     { display: inline-block; background: #006B3C; color: #fff; padding: 3pt 8pt; border-radius: 4pt; font-size: 9pt; }
+  code       { background: #f4f4f4; padding: 1pt 4pt; border-radius: 3pt; font-family: Consolas, monospace; font-size: 10pt; color: #c7254e; }
+  .info-box  { background: #e6f4ed; border-left: 4pt solid #006B3C; padding: 8pt 12pt; margin: 10pt 0; }
+  table      { border-collapse: collapse; width: 100%; margin: 10pt 0; }
+  th         { background: #006B3C; color: #fff; padding: 6pt 10pt; text-align: left; }
+  td         { border: 1pt solid #dee2e6; padding: 5pt 10pt; }
+  tr:nth-child(even) td { background: #f8f9fa; }
+</style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+  <h1>eCertify</h1>
+  <h2 style="font-size:18pt;color:#555;border:none;">Documentación Técnica</h2>
+  <p><strong>Versión:</strong> 1.0 &nbsp;|&nbsp; <strong>Fecha:</strong> Mayo 2025</p>
+  <p><strong>Desarrollado por:</strong> Pichardo SoftLutions</p>
+  <p><strong>Contacto:</strong> pichardosoftlutions@gmail.com</p>
+</div>
+
+<!-- ÍNDICE -->
+<h1>Índice</h1>
+<ol>
+  <li>Descripción General</li>
+  <li>Stack Tecnológico</li>
+  <li>Estructura del Proyecto</li>
+  <li>Sistema de Autenticación</li>
+  <li>Sistema de Firma Digital XML</li>
+  <li>Páginas del Sistema</li>
+  <li>API Interna — Endpoints</li>
+  <li>Base de Datos</li>
+  <li>Configuración (appsettings.json)</li>
+  <li>Endpoints Externos DGII</li>
+  <li>Guía de Despliegue</li>
+</ol>
+
+<!-- 1 -->
+<h1>1. Descripción General</h1>
+<p>
+  <strong>eCertify</strong> es una plataforma web desarrollada en <strong>ASP.NET Core 8 (Razor Pages)</strong>
+  que automatiza el proceso de certificación como <em>Emisor de Comprobantes Fiscales Electrónicos (e-CF)</em>
+  ante la Dirección General de Impuestos Internos (<strong>DGII</strong>) de la República Dominicana.
+</p>
+<p>
+  La plataforma guía a cada empresa a través de los pasos del proceso de certificación:
+  registro, requisitos, postulación, pruebas técnicas, aprobación comercial, simulación,
+  representación gráfica, URL de servicios, declaración jurada y firma digital de documentos XML.
+</p>
+<div class="info-box">
+  <strong>Objetivo principal:</strong> Reducir el tiempo y la complejidad técnica del proceso de certificación
+  e-CF, permitiendo a empresas de cualquier tamaño cumplir con la normativa DGII de forma guiada y automatizada.
+</div>
+
+<!-- 2 -->
+<h1>2. Stack Tecnológico</h1>
+
+<h2>2.1 Backend</h2>
+<table>
+  <tr><th>Tecnología</th><th>Versión</th><th>Uso</th></tr>
+  <tr><td>ASP.NET Core</td><td>8.0</td><td>Framework principal (Razor Pages + Web API)</td></tr>
+  <tr><td>Entity Framework Core</td><td>8.x</td><td>ORM para acceso a base de datos</td></tr>
+  <tr><td>ASP.NET Core Identity</td><td>8.x</td><td>Gestión de usuarios, contraseñas y roles</td></tr>
+  <tr><td>JWT Bearer (HS256)</td><td>—</td><td>Autenticación stateless entre frontend e API</td></tr>
+  <tr><td>System.Security.Cryptography.Xml</td><td>.NET 8</td><td>Firma digital XMLDSIG</td></tr>
+  <tr><td>X.509 / RSA-SHA256</td><td>—</td><td>Algoritmo de firma con certificados digitales</td></tr>
+</table>
+
+<h2>2.2 Frontend</h2>
+<table>
+  <tr><th>Tecnología</th><th>Versión</th><th>Uso</th></tr>
+  <tr><td>Razor Pages (.cshtml)</td><td>—</td><td>Motor de vistas server-side</td></tr>
+  <tr><td>Bootstrap</td><td>5.3.3</td><td>Framework CSS responsivo</td></tr>
+  <tr><td>Bootstrap Icons</td><td>1.11.3</td><td>Iconografía</td></tr>
+  <tr><td>Font Awesome</td><td>6.4.0</td><td>Iconos adicionales (sidebar, botones)</td></tr>
+  <tr><td>SweetAlert2</td><td>11.x</td><td>Modales y alertas enriquecidas</td></tr>
+  <tr><td>DataTables</td><td>1.13.6</td><td>Tablas con paginación y búsqueda</td></tr>
+  <tr><td>Kaiadmin</td><td>—</td><td>Plantilla del panel administrativo</td></tr>
+</table>
+
+<!-- 3 -->
+<h1>3. Estructura del Proyecto</h1>
+<pre style="background:#f4f4f4;padding:10pt;font-family:Consolas;font-size:9pt;line-height:1.6;">
+eCertify/
+├── Pages/
+│   ├── Certificacion/         ← Flujo de certificación e-CF
+│   │   ├── FirmarXml.cshtml   ← Página unificada de firma digital
+│   │   ├── Pruebas.cshtml
+│   │   ├── Aprobacion.cshtml
+│   │   ├── Simulacion.cshtml
+│   │   ├── Representacion.cshtml
+│   │   ├── Urlservicios.cshtml
+│   │   ├── Requisitos.cshtml
+│   │   └── RecepcionEcf.cshtml
+│   ├── Pagos/
+│   │   ├── Pago.cshtml
+│   │   └── PagoExitoso.cshtml
+│   └── Shared/
+│       ├── _Layout.cshtml
+│       ├── _Sidebar.cshtml
+│       ├── _Navbar.cshtml
+│       └── _ProgressBars.cshtml
+├── Controllers/
+│   ├── FirmarXmlController.cs
+│   ├── SemillaController.cs
+│   └── FacturasXmlController.cs
+├── Services/
+│   ├── SemillaService.cs
+│   └── RecepcionEcfService.cs
+├── Services/Front/
+│   ├── PasosCompletadosService.cs
+│   ├── PlanValidator.cs
+│   └── EmpresaAuthService.cs
+├── Models/
+│   ├── Empresa.cs
+│   ├── PasoCompletado.cs
+│   └── Suscripcion.cs
+├── Data/
+│   └── SogeDbContext.cs
+├── DTOs/
+├── Utils/
+│   ├── ClaimHelper.cs
+│   ├── PasosCompletadosHelper.cs
+│   └── XmlUtils.cs
+├── Storage/
+│   └── Certificados/{RNC}/{archivo.p12}
+└── wwwroot/
+    ├── css/
+    │   └── FirmarXml.css
+    └── js/
+</pre>
+
+<!-- 4 -->
+<h1>4. Sistema de Autenticación</h1>
+
+<h2>4.1 Flujo JWT</h2>
+<p>
+  Al iniciar sesión, el servidor genera un token <strong>JWT (HS256)</strong> con duración de
+  <strong>120 minutos</strong>. El token se almacena en una cookie HttpOnly y el
+  <code>HttpClient "ApiClient"</code> lo inyecta automáticamente en cada petición interna.
+</p>
+
+<h2>4.2 Claims del Token</h2>
+<table>
+  <tr><th>Claim</th><th>Descripción</th></tr>
+  <tr><td><code>RNC</code></td><td>RNC de la empresa activa del usuario</td></tr>
+  <tr><td><code>EmpresaID</code></td><td>ID numérico de la empresa en base de datos</td></tr>
+  <tr><td><code>PlanID</code></td><td>Plan de suscripción — controla acceso a funcionalidades</td></tr>
+  <tr><td><code>Email</code></td><td>Correo del usuario autenticado</td></tr>
+</table>
+
+<h2>4.3 Validación de Plan</h2>
+<p>
+  El servicio <code>PlanValidator</code> verifica en cada <code>OnGetAsync()</code> que el usuario
+  tenga un plan de suscripción activo. Si no, redirige a la página de selección de plan.
+</p>
+
+<!-- 5 -->
+<h1>5. Sistema de Firma Digital XML</h1>
+
+<h2>5.1 Estándar Implementado</h2>
+<p>
+  La firma cumple el estándar <strong>W3C XMLDSIG</strong> (XML Digital Signature Syntax and Processing).
+  Utiliza el certificado <strong>X.509 (.p12)</strong> de la empresa almacenado localmente.
+</p>
+<ul>
+  <li>Algoritmo de firma: <code>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</code></li>
+  <li>Algoritmo de digest: <code>http://www.w3.org/2001/04/xmlenc#sha256</code></li>
+  <li>Transformación: <code>XmlDsigEnvelopedSignatureTransform</code></li>
+</ul>
+
+<h2>5.2 Flujo Completo de Firma</h2>
+<ol>
+  <li>El usuario sube un archivo XML en <code>/Certificacion/FirmarXml</code>.</li>
+  <li>La página envía <code>POST api/FirmarXml/FirmarXml</code> con el archivo y el RNC.</li>
+  <li><code>FirmarXmlController</code> busca la empresa por RNC en la base de datos, obtiene nombre y contraseña del certificado.</li>
+  <li><code>SemillaService.FirmarXml()</code> carga el <code>X509Certificate2</code> desde <code>Storage/Certificados/{RNC}/</code>.</li>
+  <li>Extrae la clave privada RSA, configura <code>SignedXml</code>, calcula y añade el elemento <code>&lt;Signature&gt;</code> al documento XML.</li>
+  <li>El controlador retorna el XML firmado como descarga (<code>application/xml</code>).</li>
+</ol>
+
+<h2>5.3 Página Unificada FirmarXml</h2>
+<p>
+  La ruta <code>/Certificacion/FirmarXml</code> reemplaza las antiguas páginas
+  <em>Postulacion</em>, <em>DeclaracionJurada</em> y <em>Firmar</em>.
+  Acepta el parámetro <code>ctx</code> para adaptar su comportamiento:
+</p>
+<table>
+  <tr><th>ctx</th><th>Contexto</th><th>Paso Rastreado</th></tr>
+  <tr><td><code>postulacion</code></td><td>Postulación e-CF</td><td>Paso 1</td></tr>
+  <tr><td><code>declaracion</code></td><td>Declaración Jurada</td><td>Paso 9</td></tr>
+  <tr><td>(vacío)</td><td>Firma libre genérica</td><td>Ninguno</td></tr>
+</table>
+
+<!-- 6 -->
+<h1>6. Páginas del Sistema</h1>
+<table>
+  <tr><th>Ruta</th><th>Descripción</th></tr>
+  <tr><td><code>/</code> o <code>/Index</code></td><td>Landing page pública (CertificaDo.)</td></tr>
+  <tr><td><code>/Login</code></td><td>Inicio de sesión</td></tr>
+  <tr><td><code>/Register</code></td><td>Registro de usuario (protegido por clave de acceso)</td></tr>
+  <tr><td><code>/Home</code></td><td>Dashboard principal (panel de usuario)</td></tr>
+  <tr><td><code>/Empresa</code></td><td>Gestión de empresa y certificado digital</td></tr>
+  <tr><td><code>/CompanySelect</code></td><td>Cambio de empresa activa</td></tr>
+  <tr><td><code>/Certificacion/Requisitos</code></td><td>Paso 1: Requisitos previos</td></tr>
+  <tr><td><code>/Certificacion/FirmarXml?ctx=postulacion</code></td><td>Paso 2: Postulación firmada</td></tr>
+  <tr><td><code>/Certificacion/Pruebas</code></td><td>Pasos 3-8: Pruebas técnicas e-CF</td></tr>
+  <tr><td><code>/Certificacion/Aprobacion</code></td><td>Aprobación comercial</td></tr>
+  <tr><td><code>/Certificacion/Simulacion</code></td><td>Simulación de comprobantes</td></tr>
+  <tr><td><code>/Certificacion/Representacion</code></td><td>Representación impresa (RI)</td></tr>
+  <tr><td><code>/Certificacion/Urlservicios</code></td><td>Configuración URL de servicios</td></tr>
+  <tr><td><code>/Certificacion/FirmarXml?ctx=declaracion</code></td><td>Paso 9: Declaración Jurada</td></tr>
+  <tr><td><code>/Certificacion/FirmarXml</code></td><td>Firma libre (cualquier XML)</td></tr>
+  <tr><td><code>/ConsultarFacturas</code></td><td>Consulta de facturas enviadas</td></tr>
+</table>
+
+<!-- 7 -->
+<h1>7. API Interna — Endpoints</h1>
+<table>
+  <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
+  <tr><td>POST</td><td><code>api/FirmarXml/FirmarXml</code></td><td>Firma un archivo XML con el certificado de la empresa (por RNC)</td></tr>
+  <tr><td>GET</td><td><code>api/Semilla/ObtenerToken/{rnc}</code></td><td>Obtiene token DGII firmando el XML de semilla</td></tr>
+  <tr><td>POST</td><td><code>api/FacturasXml/Enviar</code></td><td>Envía facturas electrónicas a la DGII</td></tr>
+  <tr><td>GET</td><td><code>api/FacturasXml/Consultar</code></td><td>Consulta estado de facturas enviadas</td></tr>
+  <tr><td>POST</td><td><code>api/PasosCompletados/Registrar</code></td><td>Registra un paso del proceso como completado</td></tr>
+  <tr><td>GET</td><td><code>api/PasosCompletados/Obtener</code></td><td>Devuelve los pasos completados de una empresa</td></tr>
+</table>
+
+<!-- 8 -->
+<h1>8. Base de Datos</h1>
+
+<h2>8.1 Entidades Principales</h2>
+<table>
+  <tr><th>Entidad</th><th>Campos clave</th></tr>
+  <tr><td>Empresa</td><td>ID, RNC, RazonSocial, NombreCertificadop12, CertificadoPass, Logo, Status</td></tr>
+  <tr><td>PasoCompletado</td><td>ID, EmpresaID, PasoID, Nombre, Completado, FechaCompletado</td></tr>
+  <tr><td>Suscripcion</td><td>ID, EmpresaID, PlanID, Descripcion, FechaInicio, FechaVencimiento, Status</td></tr>
+  <tr><td>IdentityUser</td><td>Herencia — gestión de usuarios vía ASP.NET Core Identity</td></tr>
+</table>
+
+<h2>8.2 DbContext</h2>
+<p>
+  <code>SogeDbContext</code> hereda de <code>IdentityUserContext&lt;IdentityUser&gt;</code>.
+  La cadena de conexión se configura en <code>appsettings.json</code> bajo
+  <code>ConnectionStrings:DefaultConnection</code>.
+</p>
+
+<!-- 9 -->
+<h1>9. Configuración (appsettings.json)</h1>
+<table>
+  <tr><th>Clave</th><th>Descripción</th></tr>
+  <tr><td><code>ConnectionStrings:DefaultConnection</code></td><td>Cadena de conexión SQL Server</td></tr>
+  <tr><td><code>Jwt:Key</code></td><td>Clave secreta ≥ 128 caracteres para firmar JWT</td></tr>
+  <tr><td><code>Jwt:Issuer</code></td><td>"eCertify"</td></tr>
+  <tr><td><code>Jwt:Audience</code></td><td>"eCertify"</td></tr>
+  <tr><td><code>Jwt:DurationMinutes</code></td><td>120</td></tr>
+  <tr><td><code>ApiSettings:BaseUrl</code></td><td>URL base de la API interna</td></tr>
+</table>
+
+<!-- 10 -->
+<h1>10. Endpoints Externos DGII</h1>
+<table>
+  <tr><th>Nombre</th><th>URL</th></tr>
+  <tr><td>Semilla (autenticación)</td><td><code>https://ecf.dgii.gov.do/CerteCF/Autenticacion/api/Autenticacion/Semilla</code></td></tr>
+  <tr><td>ValidarSemilla</td><td><code>https://ecf.dgii.gov.do/CerteCF/Autenticacion/api/Autenticacion/ValidarSemilla</code></td></tr>
+  <tr><td>Recepción e-CF</td><td><code>https://ecf.dgii.gov.do/CerteCF/Recepcion/api/FacturasElectronicas</code></td></tr>
+</table>
+
+<!-- 11 -->
+<h1>11. Guía de Despliegue</h1>
+
+<h2>11.1 Requisitos</h2>
+<ul>
+  <li>.NET 8 Runtime instalado en el servidor</li>
+  <li>SQL Server (Express o superior)</li>
+  <li>Acceso a internet (endpoints DGII)</li>
+  <li>Certificados .p12 de cada empresa en <code>Storage/Certificados/{RNC}/</code></li>
+</ul>
+
+<h2>11.2 Pasos</h2>
+<ol>
+  <li>Clonar o copiar el proyecto al servidor.</li>
+  <li>Configurar <code>appsettings.json</code> con la cadena de conexión y claves JWT.</li>
+  <li>Ejecutar migraciones: <code>dotnet ef database update</code></li>
+  <li>Publicar: <code>dotnet publish -c Release -o ./publish</code></li>
+  <li>Configurar IIS o servicio systemd apuntando al ejecutable publicado.</li>
+  <li>Colocar los certificados .p12 en <code>Storage/Certificados/{RNC}/</code>.</li>
+</ol>
+
+<p style="text-align:center;margin-top:40pt;color:#aaa;font-size:9pt;">
+  eCertify — Documentación Técnica v1.0 | Pichardo SoftLutions | 2025
+</p>
+
+</body>
+</html>

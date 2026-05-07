@@ -1,0 +1,479 @@
+@page
+@model eCertify.Pages.Certificacion.SignDocumentsModel
+@{
+    string activeType     = Model.documentType;
+    bool   isPostulation  = activeType == "postulacion";
+    bool   isDeclaration  = activeType == "declaracion";
+    bool   isFreeSign     = !isPostulation && !isDeclaration;
+
+    string bannerIcon = isPostulation ? "bi-file-earmark-person-fill"
+                      : isDeclaration ? "bi-file-earmark-ruled-fill"
+                      : "bi-file-earmark-lock-fill";
+
+    string bannerTitle = isPostulation ? "Postulación"
+                       : isDeclaration ? "Declaración Jurada"
+                       : "Firma Libre";
+
+    string bannerSub = isPostulation ? "Firma el XML de postulación generado en el portal DGII"
+                     : isDeclaration ? "Firma el XML de declaración jurada generado en el portal DGII"
+                     : "Firma cualquier archivo XML con el certificado digital de tu empresa";
+}
+
+<!-- ── Page header ── -->
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+        <h5 class="fw-bold mb-0 me-3">Firmar Documentos</h5>
+        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
+            <li class="nav-home me-2"><a href="/Home"><i class="bi bi-house-door"></i></a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
+            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
+            <li class="nav-item"><span>Firmar Documentos</span></li>
+        </ul>
+    </div>
+    <button class="btn btn-sm btn-outline-secondary"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#sdHelp">
+        <i class="bi bi-question-circle me-1"></i> Ayuda
+    </button>
+</div>
+
+<!-- ── Help offcanvas ── -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="sdHelp" style="width:400px">
+    <div class="offcanvas-header border-bottom py-3">
+        <h6 class="offcanvas-title fw-bold mb-0">
+            <i class="bi bi-info-circle-fill me-2 text-primary"></i>Guía: Firmar Documentos
+        </h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div id="helpPostulation" class="sd-help-section" style="display:none">
+            <p>Para completar la <strong>firma del archivo de Postulación</strong>:</p>
+            <ol class="ps-3 small">
+                <li class="mb-2">En el portal DGII, completa el formulario de postulación y haz clic en <strong>Generar Archivo</strong>.</li>
+                <li class="mb-2">Sube el archivo XML generado en la zona de carga.</li>
+                <li class="mb-2">Haz clic en <strong>Firmar y Descargar</strong>. El archivo firmado se descargará automáticamente.</li>
+                <li class="mb-2">Regresa al portal DGII y carga el archivo firmado en el campo correspondiente.</li>
+            </ol>
+            <div class="text-center mt-3">
+                <img src="/Images/GenerarPostulacion.png" alt="Generar postulación"
+                     class="img-fluid rounded shadow-sm border" style="max-height:200px" />
+            </div>
+        </div>
+
+        <div id="helpDeclaration" class="sd-help-section" style="display:none">
+            <p>Para completar la <strong>firma del archivo de Declaración Jurada</strong>:</p>
+            <ol class="ps-3 small">
+                <li class="mb-2">En el portal DGII, accede al paso 14 y haz clic en <strong>Generar Archivo</strong>.</li>
+                <li class="mb-2">Sube el archivo XML generado en la zona de carga.</li>
+                <li class="mb-2">Haz clic en <strong>Firmar y Descargar</strong>. El archivo firmado se descargará automáticamente.</li>
+                <li class="mb-2">Regresa al portal DGII y carga el archivo firmado en el campo correspondiente.</li>
+            </ol>
+            <div class="text-center mt-3">
+                <img src="/Images/GenerarDeclaracion.png" alt="Generar declaración"
+                     class="img-fluid rounded shadow-sm border" style="max-height:200px" />
+            </div>
+        </div>
+
+        <div id="helpFreeSign" class="sd-help-section" style="display:none">
+            <p>Utiliza esta opción para firmar digitalmente <strong>cualquier archivo XML</strong> con el certificado de tu empresa.</p>
+            <ol class="ps-3 small">
+                <li class="mb-2">Selecciona el archivo XML que deseas firmar.</li>
+                <li class="mb-2">Haz clic en <strong>Firmar y Descargar</strong>.</li>
+                <li class="mb-2">El archivo firmado se descargará automáticamente.</li>
+            </ol>
+        </div>
+
+        <hr />
+        <div class="alert alert-info py-2 px-3 small mb-0">
+            <i class="bi bi-shield-check me-1"></i>
+            La firma utiliza tu certificado <strong>X.509</strong> con algoritmo <strong>RSA-SHA256</strong>,
+            cumpliendo el estándar XMLDSIG de la DGII.
+        </div>
+    </div>
+</div>
+
+<!-- ── Progress bars (only when step context is active) ── -->
+<div id="sdProgressBarsWrapper" class="@(Model.hasStepContext ? "" : "d-none")">
+    @await Html.PartialAsync("_ProgressBars")
+</div>
+
+<!-- ── Document type selector ── -->
+<div class="sd-type-selector mb-4">
+    <button type="button" class="sd-type-btn @(isFreeSign ? "sd-type-btn--active" : "")" data-type="">
+        <div class="sd-type-btn__icon">
+            <i class="bi bi-file-earmark-lock-fill"></i>
+        </div>
+        <div class="sd-type-btn__text">
+            <span class="sd-type-btn__label">Firma Libre</span>
+            <span class="sd-type-btn__hint">Cualquier archivo XML</span>
+        </div>
+    </button>
+    <button type="button" class="sd-type-btn @(isPostulation ? "sd-type-btn--active" : "")" data-type="postulacion">
+        <div class="sd-type-btn__icon">
+            <i class="bi bi-file-earmark-person-fill"></i>
+        </div>
+        <div class="sd-type-btn__text">
+            <span class="sd-type-btn__label">Postulación</span>
+            <span class="sd-type-btn__hint">Paso 1 de certificación</span>
+        </div>
+    </button>
+    <button type="button" class="sd-type-btn @(isDeclaration ? "sd-type-btn--active" : "")" data-type="declaracion">
+        <div class="sd-type-btn__icon">
+            <i class="bi bi-file-earmark-ruled-fill"></i>
+        </div>
+        <div class="sd-type-btn__text">
+            <span class="sd-type-btn__label">Declaración Jurada</span>
+            <span class="sd-type-btn__hint">Paso 14 de certificación</span>
+        </div>
+    </button>
+</div>
+
+<!-- ── Banner ── -->
+<div class="sd-banner mb-4" id="sdBanner">
+    <div class="sd-banner__icon" id="sdBannerIcon">
+        <i class="bi @bannerIcon"></i>
+    </div>
+    <div>
+        <div class="sd-banner__title" id="sdBannerTitle">@bannerTitle</div>
+        <div class="sd-banner__sub"   id="sdBannerSub">@bannerSub</div>
+    </div>
+    <span class="sd-ctx-badge" id="sdCtxBadge">@(isFreeSign ? "Firma libre" : isPostulation ? "Postulación" : "Declaración Jurada")</span>
+</div>
+
+<!-- ── Main layout ── -->
+<div class="row g-4 align-items-start">
+
+    <!-- ── Upload column ── -->
+    <div class="col-lg-8">
+        <div class="sd-upload-section">
+
+            @if (!string.IsNullOrEmpty(Model.errorMessage))
+            {
+                <div class="sd-error-alert">
+                    <i class="bi bi-exclamation-triangle-fill sd-error-alert__icon"></i>
+                    <span>@Model.errorMessage</span>
+                </div>
+            }
+
+            <p class="sd-section-label">Archivo a firmar</p>
+
+            <form method="post" enctype="multipart/form-data" id="sdForm">
+                <input type="hidden" name="documentType" id="sdDocType" value="@Model.documentType" />
+                @Html.AntiForgeryToken()
+
+                <!-- Drop zone -->
+                <div class="sd-dropzone" id="sdDropzone">
+                    <div class="sd-dz-idle" id="sdIdle">
+                        <i class="bi bi-file-earmark-code sd-dz-idle__icon"></i>
+                        <p class="sd-dz-idle__title">Arrastra tu archivo aquí</p>
+                        <p class="sd-dz-idle__sub">o haz clic para buscarlo en tu equipo</p>
+                        <span class="sd-dz-idle__badge">.xml &nbsp;·&nbsp; máx. 5 MB</span>
+                    </div>
+
+                    <div class="sd-dz-selected" id="sdSelected">
+                        <div class="sd-file-card">
+                            <i class="bi bi-file-earmark-check-fill sd-file-card__icon"></i>
+                            <div class="sd-file-card__info">
+                                <span class="sd-file-card__name" id="sdFileName">—</span>
+                                <span class="sd-file-card__meta" id="sdFileMeta">—</span>
+                            </div>
+                            <button type="button" class="sd-file-remove" id="sdRemove" title="Quitar archivo">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <span class="sd-change-hint" id="sdChangeHint">
+                            <i class="bi bi-arrow-repeat me-1"></i>Cambiar archivo
+                        </span>
+                    </div>
+
+                    <input asp-for="xmlFile"
+                           type="file"
+                           id="sdInput"
+                           accept=".xml"
+                           class="sd-dropzone__input" />
+                </div>
+
+                <!-- Sign button -->
+                <div class="mt-3">
+                    <button type="submit" class="sd-btn-sign" id="sdSubmit" disabled>
+                        <i class="bi bi-pen-fill sd-btn-sign__icon"></i>
+                        <span id="sdBtnLabel">Selecciona un archivo para continuar</span>
+                        <div id="sdBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status"></div>
+                    </button>
+                </div>
+
+                <!-- Progress steps -->
+                <div class="sd-progress-steps mt-3 d-none" id="sdProgressSteps">
+                    <div class="sd-pstep sd-pstep--active" id="sdStep1">
+                        <div class="sd-pstep__dot"><i class="bi bi-arrow-repeat sd-spin"></i></div>
+                        <span class="sd-pstep__label">Enviando archivo al servidor…</span>
+                    </div>
+                    <div class="sd-pstep" id="sdStep2">
+                        <div class="sd-pstep__dot">2</div>
+                        <span class="sd-pstep__label">Aplicando firma digital (RSA-SHA256)…</span>
+                    </div>
+                    <div class="sd-pstep" id="sdStep3">
+                        <div class="sd-pstep__dot">3</div>
+                        <span class="sd-pstep__label">Preparando descarga…</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── Sidebar column ── -->
+    <div class="col-lg-4">
+
+        <!-- How it works panel -->
+        <div class="sd-info-panel">
+            <div class="sd-info-panel__header">
+                <i class="bi bi-lightning-charge-fill"></i>
+                ¿Cómo funciona?
+            </div>
+            <div class="sd-info-panel__body">
+                <ul class="sd-how-steps">
+                    <li class="sd-how-step">
+                        <span class="sd-how-step__num">1</span>
+                        <span>Selecciona el tipo de documento y sube el XML del portal DGII</span>
+                    </li>
+                    <li class="sd-how-step">
+                        <span class="sd-how-step__num">2</span>
+                        <span>El sistema aplica tu certificado digital <strong>X.509</strong></span>
+                    </li>
+                    <li class="sd-how-step">
+                        <span class="sd-how-step__num">3</span>
+                        <span>El archivo firmado se descarga automáticamente</span>
+                    </li>
+                    <li class="sd-how-step">
+                        <span class="sd-how-step__num">4</span>
+                        <span>Carga el archivo firmado de vuelta en el portal DGII</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Step status panel (only for step contexts) -->
+        <div class="sd-step-status mt-3" id="sdStepPanel" style="display:none">
+            <div class="sd-step-status__header">
+                <i class="bi bi-clipboard2-check-fill text-success"></i>
+                Estado del paso
+            </div>
+            <div class="sd-step-status__body">
+                <form method="post"
+                      asp-page-handler="MarkStepCompleted"
+                      id="sdFormMarkStep"
+                      class="sd-form-mark-step"
+                      data-completed="@Model.stepCompleted.ToString().ToLower()">
+                    <input type="hidden" name="documentType" id="sdDocTypeStep" value="@Model.documentType" />
+                    @Html.AntiForgeryToken()
+                    <button type="submit"
+                            class="btn @(Model.stepCompleted ? "btn-success" : "btn-outline-success") w-100 sd-btn-mark-step">
+                        <i class="@(Model.stepCompleted ? "fas" : "far") fa-check-circle me-2"></i>
+                        @(Model.stepCompleted ? "¡Completado!" : "Marcar como completado")
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    (function () {
+        // ── DOM refs ──
+        const dropzone    = document.getElementById('sdDropzone');
+        const fileInput   = document.getElementById('sdInput');
+        const idle        = document.getElementById('sdIdle');
+        const selected    = document.getElementById('sdSelected');
+        const fileName    = document.getElementById('sdFileName');
+        const fileMeta    = document.getElementById('sdFileMeta');
+        const removeBtn   = document.getElementById('sdRemove');
+        const changeHint  = document.getElementById('sdChangeHint');
+        const submitBtn   = document.getElementById('sdSubmit');
+        const btnLabel    = document.getElementById('sdBtnLabel');
+        const btnSpinner  = document.getElementById('sdBtnSpinner');
+        const form        = document.getElementById('sdForm');
+        const steps       = document.getElementById('sdProgressSteps');
+        const docTypeIn   = document.getElementById('sdDocType');
+        const docTypeStep = document.getElementById('sdDocTypeStep');
+        const stepPanel   = document.getElementById('sdStepPanel');
+        const progressWrap = document.getElementById('sdProgressBarsWrapper');
+        const typeBtns    = document.querySelectorAll('.sd-type-btn');
+
+        const bannerIcon  = document.querySelector('#sdBannerIcon i');
+        const bannerTitle = document.getElementById('sdBannerTitle');
+        const bannerSub   = document.getElementById('sdBannerSub');
+        const ctxBadge    = document.getElementById('sdCtxBadge');
+
+        // ── Type config ──
+        const typeConfig = {
+            '': {
+                icon:  'bi-file-earmark-lock-fill',
+                title: 'Firma Libre',
+                sub:   'Firma cualquier archivo XML con el certificado digital de tu empresa',
+                badge: 'Firma libre',
+                hasStep: false
+            },
+            'postulacion': {
+                icon:  'bi-file-earmark-person-fill',
+                title: 'Postulación',
+                sub:   'Firma el XML de postulación generado en el portal DGII',
+                badge: 'Postulación',
+                hasStep: true
+            },
+            'declaracion': {
+                icon:  'bi-file-earmark-ruled-fill',
+                title: 'Declaración Jurada',
+                sub:   'Firma el XML de declaración jurada generado en el portal DGII',
+                badge: 'Declaración Jurada',
+                hasStep: true
+            }
+        };
+
+        // ── Initial help panel ──
+        updateHelpPanel('@activeType');
+
+        // ── Document type switcher ──
+        typeBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const type = this.dataset.type;
+
+                typeBtns.forEach(b => b.classList.remove('sd-type-btn--active'));
+                this.classList.add('sd-type-btn--active');
+
+                docTypeIn.value   = type;
+                docTypeStep.value = type;
+
+                const cfg = typeConfig[type];
+                bannerIcon.className  = 'bi ' + cfg.icon;
+                bannerTitle.textContent = cfg.title;
+                bannerSub.textContent   = cfg.sub;
+                ctxBadge.textContent    = cfg.badge;
+
+                stepPanel.style.display    = cfg.hasStep ? '' : 'none';
+                progressWrap.style.display = cfg.hasStep ? '' : 'none';
+
+                updateHelpPanel(type);
+            });
+        });
+
+        function updateHelpPanel(type) {
+            document.getElementById('helpPostulation').style.display = type === 'postulacion' ? '' : 'none';
+            document.getElementById('helpDeclaration').style.display = type === 'declaracion' ? '' : 'none';
+            document.getElementById('helpFreeSign').style.display    = (!type || type === '') ? '' : 'none';
+        }
+
+        // ── Initial step panel visibility ──
+        const initialHasStep = @Json.Serialize(Model.hasStepContext);
+        stepPanel.style.display    = initialHasStep ? '' : 'none';
+        progressWrap.style.display = initialHasStep ? '' : 'none';
+
+        // ── File size formatter ──
+        function formatBytes(b) {
+            return b < 1024        ? b + ' B'
+                 : b < 1_048_576  ? (b / 1024).toFixed(1) + ' KB'
+                 : (b / 1_048_576).toFixed(2) + ' MB';
+        }
+
+        // ── Show selected file ──
+        function showFile(file) {
+            if (!file || !file.name.toLowerCase().endsWith('.xml')) {
+                dropzone.classList.add('sd-dz--error');
+                return;
+            }
+            dropzone.classList.remove('sd-dz--error');
+            dropzone.classList.add('sd-dz--selected');
+            idle.style.display = 'none';
+            selected.classList.add('d-flex');
+            fileName.textContent = file.name;
+            fileMeta.textContent = formatBytes(file.size) + ' · XML';
+            submitBtn.disabled   = false;
+            btnLabel.textContent = 'Firmar y Descargar';
+        }
+
+        // ── Clear file ──
+        function clearFile() {
+            dropzone.classList.remove('sd-dz--selected', 'sd-dz--error', 'sd-dz--hover');
+            idle.style.display = '';
+            selected.classList.remove('d-flex');
+            fileName.textContent = '—';
+            fileMeta.textContent = '—';
+            submitBtn.disabled   = true;
+            btnLabel.textContent = 'Selecciona un archivo para continuar';
+            fileInput.value      = '';
+        }
+
+        fileInput.addEventListener('change', function () {
+            if (this.files.length) showFile(this.files[0]);
+        });
+
+        removeBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            clearFile();
+        });
+
+        changeHint.addEventListener('click', function (e) {
+            e.stopPropagation();
+            clearFile();
+            fileInput.click();
+        });
+
+        // ── Drag & drop ──
+        dropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            if (!dropzone.classList.contains('sd-dz--selected'))
+                dropzone.classList.add('sd-dz--hover');
+        });
+        dropzone.addEventListener('dragleave', function () {
+            dropzone.classList.remove('sd-dz--hover');
+        });
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dropzone.classList.remove('sd-dz--hover');
+            const file = e.dataTransfer?.files[0];
+            if (file) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                showFile(file);
+            }
+        });
+
+        // ── Form submit — show progress steps ──
+        form.addEventListener('submit', function () {
+            if (!fileInput.files.length) return;
+
+            submitBtn.disabled = true;
+            btnLabel.textContent = 'Firmando…';
+            btnSpinner.classList.remove('d-none');
+            steps.classList.remove('d-none');
+
+            const advanceStep = (from, to, delay) => setTimeout(function () {
+                const fromEl = document.getElementById('sdStep' + from);
+                const toEl   = document.getElementById('sdStep' + to);
+                fromEl.classList.remove('sd-pstep--active');
+                fromEl.classList.add('sd-pstep--done');
+                fromEl.querySelector('.sd-pstep__dot').innerHTML = '<i class="bi bi-check-lg"></i>';
+                toEl.classList.add('sd-pstep--active');
+                toEl.querySelector('.sd-pstep__dot').innerHTML   = '<i class="bi bi-arrow-repeat sd-spin"></i>';
+            }, delay);
+
+            advanceStep(1, 2, 800);
+            advanceStep(2, 3, 1800);
+        });
+
+        // ── Pass completed state to step tracking ──
+        window.stepCompleted = @Json.Serialize(Model.stepCompleted);
+    })();
+    </script>
+    @if (Model.hasStepContext)
+    {
+        <script src="~/js/StepTracking.js"></script>
+    }
+}
+
+@section Styles {
+    <link href="~/css/SignDocuments.css" rel="stylesheet" />
+}

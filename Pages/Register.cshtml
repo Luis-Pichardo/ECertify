@@ -1,0 +1,476 @@
+@page
+@model eCertify.Pages.RegisterModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crear Cuenta — eCertify</title>
+    <link rel="icon" href="~/assets/favicon.PNG" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #004d2b 0%, #006B3C 55%, #008f50 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 2rem 1rem;
+        }
+
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            animation: float ease-in-out infinite;
+            pointer-events: none;
+        }
+        .blob-1 { width: 500px; height: 500px; top: -200px; left: -180px; animation-duration: 9s; }
+        .blob-2 { width: 380px; height: 380px; bottom: -130px; right: -100px; animation-duration: 11s; animation-delay: 2s; }
+        .blob-3 { width: 220px; height: 220px; bottom: 120px; left: 80px; animation-duration: 7s; animation-delay: 4s; }
+        .blob-4 { width: 160px; height: 160px; top: 80px; right: 120px; animation-duration: 13s; animation-delay: 1s; background: rgba(255,255,255,0.04); }
+        .blob-5 { width: 80px; height: 80px; top: 45%; left: 8%; animation-duration: 6s; animation-delay: 3s; background: rgba(255,255,255,0.12); }
+
+        @@keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-22px); }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-card {
+            background: #fff;
+            border-radius: 1.5rem;
+            padding: 2.6rem 2.5rem;
+            width: 100%;
+            max-width: 490px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.28);
+            position: relative;
+            z-index: 10;
+        }
+
+        .brand-icon {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2.1rem; color: #fff;
+            background: linear-gradient(135deg, #005c33, #00a854);
+            box-shadow: 0 8px 24px rgba(0,107,60,0.4);
+        }
+
+        .brand-label {
+            font-size: 0.78rem; font-weight: 700;
+            letter-spacing: 3px; color: #006B3C;
+            text-transform: uppercase;
+        }
+        .card-title { font-size: 1.6rem; font-weight: 700; color: #111827; margin: 0.2rem 0 0.35rem; }
+        .card-subtitle { font-size: 0.86rem; color: #6b7280; margin-bottom: 1.5rem; line-height: 1.45; }
+
+        .form-label { font-size: 0.82rem; font-weight: 600; color: #374151; margin-bottom: 0.3rem; }
+        .form-control {
+            border-radius: 0.55rem;
+            border: 1.5px solid #d1d5db;
+            padding: 0.62rem 0.9rem;
+            font-size: 0.91rem; color: #111827;
+            background: #f9fafb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control::placeholder { color: #9ca3af; }
+        .form-control:focus {
+            border-color: #006B3C;
+            box-shadow: 0 0 0 3px rgba(0, 107, 60, 0.14);
+            background: #fff;
+        }
+        .form-control.is-invalid { border-color: #dc3545 !important; }
+
+        .input-group .form-control { border-right: none; border-radius: 0.55rem 0 0 0.55rem; }
+        .input-group .form-control:focus { z-index: 3; }
+        .input-group-text {
+            background: #f9fafb; border: 1.5px solid #d1d5db; border-left: none;
+            border-radius: 0 0.55rem 0.55rem 0; cursor: pointer;
+            color: #6b7280; padding: 0 0.9rem; transition: color 0.15s;
+        }
+        .input-group-text:hover { color: #006B3C; }
+        .input-group:focus-within .input-group-text { border-color: #006B3C; }
+        .input-group.is-invalid .form-control,
+        .input-group.is-invalid .input-group-text { border-color: #dc3545 !important; }
+        .input-group.is-valid .form-control,
+        .input-group.is-valid .input-group-text { border-color: #198754 !important; }
+
+        .pwd-feedback { font-size: 0.78rem; margin-top: 0.3rem; min-height: 1.15rem; transition: color 0.2s; }
+        .pwd-feedback.ok    { color: #198754; }
+        .pwd-feedback.error { color: #dc3545; }
+
+        .clave-divider {
+            border: none; border-top: 1.5px dashed #d1d5db;
+            margin: 1.4rem 0 1.2rem;
+        }
+        .clave-label-hint {
+            font-size: 0.77rem; color: #9ca3af;
+            margin-bottom: 0.4rem; display: block;
+        }
+
+        .btn-brand {
+            background: linear-gradient(135deg, #006B3C, #00a854);
+            border: none; border-radius: 0.55rem;
+            padding: 0.72rem 1.4rem;
+            font-size: 0.95rem; font-weight: 600; letter-spacing: 0.4px;
+            color: #fff; transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 18px rgba(0, 107, 60, 0.38);
+        }
+        .btn-brand:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 22px rgba(0, 107, 60, 0.48);
+            color: #fff;
+        }
+        .btn-brand:disabled { opacity: 0.72; color: #fff; }
+
+        .btn-outline-brand {
+            background: transparent; border: 1.5px solid #d1d5db;
+            border-radius: 0.55rem; padding: 0.68rem 1.2rem;
+            font-size: 0.91rem; font-weight: 600; color: #374151;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+        .btn-outline-brand:hover { border-color: #006B3C; color: #006B3C; background: rgba(0,107,60,0.04); }
+
+        .divider { border: none; border-top: 1px solid #e5e7eb; margin: 1.2rem 0; }
+        .link-brand { color: #006B3C; font-weight: 600; text-decoration: none; }
+        .link-brand:hover { text-decoration: underline; color: #004d2b; }
+
+        .page-footer {
+            position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%);
+            color: rgba(255,255,255,0.4); font-size: 0.74rem;
+            z-index: 5; pointer-events: none; white-space: nowrap;
+        }
+
+        [data-valmsg-summary] { display: none !important; }
+
+        /* ── Blocking overlay ─────────────────────────────────── */
+        #blockOverlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0, 0, 0, 0.72);
+            backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+        }
+        #blockOverlay.active { display: flex; }
+        .block-box {
+            background: #fff; border-radius: 1.4rem;
+            padding: 2.8rem 2.6rem; max-width: 400px; width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.35);
+            animation: blockIn 0.35s ease;
+        }
+        @@keyframes blockIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+        .block-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            background: linear-gradient(135deg, #b91c1c, #ef4444);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.2rem;
+            font-size: 2.4rem; color: #fff;
+            box-shadow: 0 8px 24px rgba(185,28,28,0.35);
+        }
+        .block-title { font-size: 1.4rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem; }
+        .block-text  { font-size: 0.9rem; color: #6b7280; line-height: 1.55; }
+
+        @@media (max-width: 520px) {
+            .auth-card { padding: 2rem 1.4rem; border-radius: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+
+    <!-- ── Full-page blocking overlay (session locked) ── -->
+    <div id="blockOverlay">
+        <div class="block-box">
+            <div class="block-icon"><i class="bi bi-shield-lock-fill"></i></div>
+            <p class="block-title">Página bloqueada</p>
+            <p class="block-text">
+                Has superado el número máximo de intentos con la clave de acceso.<br />
+                Esta sesión ha sido bloqueada. Cierra el navegador o inicia una nueva sesión para intentarlo de nuevo.
+            </p>
+        </div>
+    </div>
+
+    <!-- ── Hidden state flags for JS ── -->
+    <input type="hidden" id="flagBlocked"   value="@Model.isBlocked.ToString().ToLower()" />
+    <input type="hidden" id="flagBlockWarn" value="@Model.showBlockWarn.ToString().ToLower()" />
+    <input type="hidden" id="flagClaveErr"  value="@(Model.accessKeyError ?? "")" />
+
+    <!-- ── Registration card ── -->
+    <div class="auth-card text-center">
+
+        <div class="brand-icon">
+            <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <p class="brand-label mb-1">eCertify</p>
+        <h1 class="card-title">Crear Cuenta</h1>
+        <p class="card-subtitle">Completa los datos para unirte a eCertify.</p>
+
+        <form id="registerForm" method="post" class="text-start" novalidate>
+            <div asp-validation-summary="ModelOnly" class="text-danger small"></div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-6">
+                    <label asp-for="input.Name" class="form-label">Nombre <span class="text-danger">*</span></label>
+                    <input asp-for="input.Name" class="form-control" placeholder="Juan"
+                           autocomplete="given-name" autofocus required />
+                </div>
+                <div class="col-6">
+                    <label asp-for="input.LastName" class="form-label">Apellido <span class="text-danger">*</span></label>
+                    <input asp-for="input.LastName" class="form-control" placeholder="Pérez"
+                           autocomplete="family-name" required />
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="input.Email" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                <input asp-for="input.Email" class="form-control" placeholder="correo@ejemplo.com"
+                       autocomplete="username" required />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="input.Password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <input asp-for="input.Password" type="password" id="passwordField" class="form-control"
+                           placeholder="••••••••" autocomplete="new-password" required />
+                    <span class="input-group-text" onclick="toggleField('passwordField','pwdEye')">
+                        <i class="bi bi-eye-slash" id="pwdEye"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="mb-1">
+                <label asp-for="input.ConfirmPassword" class="form-label">Confirmar contraseña <span class="text-danger">*</span></label>
+                <div class="input-group" id="confirmGroup">
+                    <input asp-for="input.ConfirmPassword" type="password" id="confirmField" class="form-control"
+                           placeholder="••••••••" autocomplete="new-password" required />
+                    <span class="input-group-text" onclick="toggleField('confirmField','confirmEye')">
+                        <i class="bi bi-eye-slash" id="confirmEye"></i>
+                    </span>
+                </div>
+                <p class="pwd-feedback" id="confirmFeedback"></p>
+            </div>
+
+            <!-- ── Clave de acceso ── -->
+            <hr class="clave-divider" />
+
+            <div class="mb-3">
+                <label for="ClaveAcceso" class="form-label">
+                    Clave de acceso <span class="text-danger">*</span>
+                </label>
+                <span class="clave-label-hint">
+                    <i class="bi bi-info-circle me-1"></i>Requerida para crear una cuenta en eCertify.
+                </span>
+                <div class="input-group" id="claveGroup">
+                    <input type="password" name="ClaveAcceso" id="claveField"
+                           class="form-control" placeholder="••••••••"
+                           autocomplete="off" required />
+                    <span class="input-group-text" onclick="toggleField('claveField','claveEye')">
+                        <i class="bi bi-eye-slash" id="claveEye"></i>
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3 mb-3">
+                <button type="button" class="btn btn-outline-brand" id="btnAnterior">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </button>
+                <button type="submit" class="btn btn-brand flex-grow-1 d-flex align-items-center justify-content-center gap-2" id="btnRegistrar">
+                    <span id="btnText">Registrarme</span>
+                    <div id="spinner" class="spinner-border spinner-border-sm d-none" role="status"></div>
+                </button>
+            </div>
+
+            <hr class="divider" />
+            <p class="text-center mb-0" style="font-size:.86rem;color:#6b7280;">
+                ¿Ya tienes una cuenta? <a href="/Login" class="link-brand">Inicia sesión</a>
+            </p>
+        </form>
+    </div>
+
+    <p class="page-footer">© 2025 eCertify — Todos los derechos reservados</p>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function toggleField(fieldId, iconId) {
+            const f = document.getElementById(fieldId);
+            const i = document.getElementById(iconId);
+            f.type = f.type === 'password' ? 'text' : 'password';
+            i.className = f.type === 'password' ? 'bi bi-eye-slash' : 'bi bi-eye';
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+
+            const isBlocked   = document.getElementById('flagBlocked').value   === 'true';
+            const showWarn    = document.getElementById('flagBlockWarn').value  === 'true';
+            const claveError  = document.getElementById('flagClaveErr').value;
+
+            // ── Show blocking overlay immediately if session is locked ──
+            if (isBlocked) {
+                document.getElementById('blockOverlay').classList.add('active');
+                document.getElementById('registerForm').querySelectorAll('input, button[type=submit]').forEach(el => {
+                    el.disabled = true;
+                });
+                return; // no further UI setup needed
+            }
+
+            document.querySelector("input[name='input.Name']")?.focus();
+
+            // ── Wrong key SweetAlert ──
+            if (claveError) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Clave incorrecta',
+                    text: claveError,
+                    confirmButtonColor: '#006B3C',
+                    confirmButtonText: 'Intentar de nuevo'
+                }).then(() => {
+                    document.getElementById('claveField')?.focus();
+                });
+            }
+
+            // ── One-attempt-left warning ──
+            if (showWarn) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Último intento',
+                    html: 'Si introduces la clave incorrectamente <strong>una vez más</strong>, esta página quedará <strong>bloqueada</strong> para tu sesión.',
+                    confirmButtonColor: '#006B3C',
+                    confirmButtonText: 'Entendido'
+                }).then(() => {
+                    document.getElementById('claveField')?.focus();
+                });
+            }
+
+            // Volver
+            document.getElementById("btnAnterior")?.addEventListener("click", () => {
+                window.location.href = "/Login";
+            });
+
+            // Server-side model validation errors
+            const valSummary = document.querySelector('[data-valmsg-summary]');
+            if (valSummary) {
+                const errors = [...valSummary.querySelectorAll('li')]
+                    .map(li => li.textContent.trim()).filter(t => t);
+                if (errors.length) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Errores de validación',
+                        html: errors.map(e => `<div style="text-align:left">• ${e}</div>`).join(''),
+                        confirmButtonColor: '#006B3C'
+                    });
+                }
+            }
+
+            // ── Confirm password real-time validation ──
+            const pwdField     = document.getElementById("passwordField");
+            const confirmField = document.getElementById("confirmField");
+            const confirmGroup = document.getElementById("confirmGroup");
+            const feedback     = document.getElementById("confirmFeedback");
+
+            function validatePasswords() {
+                if (!confirmField.value) {
+                    confirmGroup.classList.remove("is-valid", "is-invalid");
+                    feedback.textContent = "";
+                    return true;
+                }
+                if (pwdField.value === confirmField.value) {
+                    confirmGroup.classList.add("is-valid");
+                    confirmGroup.classList.remove("is-invalid");
+                    feedback.className = "pwd-feedback ok";
+                    feedback.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Las contraseñas coinciden';
+                    return true;
+                } else {
+                    confirmGroup.classList.add("is-invalid");
+                    confirmGroup.classList.remove("is-valid");
+                    feedback.className = "pwd-feedback error";
+                    feedback.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>Las contraseñas no coinciden';
+                    return false;
+                }
+            }
+
+            confirmField.addEventListener("input", validatePasswords);
+            pwdField.addEventListener("input", () => { if (confirmField.value) validatePasswords(); });
+
+            // ── Form submit ──
+            const form    = document.getElementById("registerForm");
+            const btn     = document.getElementById("btnRegistrar");
+            const spinner = document.getElementById("spinner");
+            const btnText = document.getElementById("btnText");
+
+            form?.addEventListener("submit", (e) => {
+                const name    = form.querySelector("input[name='input.Name']").value.trim();
+                const last    = form.querySelector("input[name='input.LastName']").value.trim();
+                const email   = form.querySelector("input[name='input.Email']").value.trim();
+                const pwd     = pwdField.value.trim();
+                const confirm = confirmField.value.trim();
+                const clave   = document.getElementById('claveField').value.trim();
+
+                if (!name || !last || !email || !pwd || !confirm || !clave) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Campos requeridos',
+                        text: 'Por favor, completa todos los campos obligatorios, incluida la clave de acceso.',
+                        confirmButtonColor: '#006B3C'
+                    });
+                    return;
+                }
+
+                if (!validatePasswords()) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Contraseñas no coinciden',
+                        text: 'La contraseña y su confirmación deben ser idénticas.',
+                        confirmButtonColor: '#006B3C'
+                    });
+                    confirmField.focus();
+                    return;
+                }
+
+                spinner.classList.remove("d-none");
+                btnText.textContent = "Registrando...";
+                btn.disabled = true;
+            });
+        });
+    </script>
+
+</body>
+</html>
