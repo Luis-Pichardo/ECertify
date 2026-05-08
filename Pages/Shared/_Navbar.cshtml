@@ -1,68 +1,74 @@
-﻿@* _Navbar.cshtml *@
-@using Microsoft.AspNetCore.Http
+@* Pages/Shared/_Navbar.cshtml *@
+@using System.Security.Claims
 @inject IHttpContextAccessor HttpContextAccessor
 
 @{
-    var user = HttpContextAccessor.HttpContext?.User;
-    var nombre = user?.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "";
-    var apellido = user?.FindFirst("Apellido")?.Value ?? "";
-    var empresa = user?.FindFirst("RazonSocial")?.Value ?? "";
+    var currentUser = HttpContextAccessor.HttpContext?.User;
+    var userName    = currentUser?.FindFirst(ClaimTypes.Name)?.Value ?? "";
+    var userSurname = currentUser?.FindFirst("Apellido")?.Value ?? "";
+    var companyName = currentUser?.FindFirst("RazonSocial")?.Value ?? "";
+    var currentPath = HttpContextAccessor.HttpContext?.Request.Path.Value?.ToLower() ?? "";
 }
 
-<div class="main-header">
-    <div class="main-header-logo">
-        <div class="logo-header bg-dark">
-            <a href="/Dashboard" class="logo">
-                <img src="/assets/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand" height="20" />
-            </a>
-            <div class="nav-toggle">
-                <button class="btn btn-toggle toggle-sidebar text-white">
-                    <i class="gg-menu-right"></i>
+<nav class="top-nav" id="appTopNav">
+
+    <!-- Brand -->
+    <a href="/Home" class="top-nav__brand">
+        <i class="bi bi-shield-lock-fill"></i>
+        <span>eCertify</span>
+    </a>
+
+    <!-- Right controls -->
+    <div class="top-nav__controls">
+
+        <!-- Company switcher -->
+        @if (!string.IsNullOrWhiteSpace(companyName))
+        {
+            <div class="dropdown">
+                <button class="tnav-company" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-building-fill"></i>
+                    <span class="tnav-company__name">@companyName</span>
+                    <i class="bi bi-chevron-down tnav-company__caret"></i>
                 </button>
-                <button class="btn btn-toggle sidenav-toggler text-white">
-                    <i class="gg-menu-left"></i>
-                </button>
+                <ul class="dropdown-menu dropdown-menu-end tnav-dropdown">
+                    <li>
+                        <span class="tnav-dropdown__header">
+                            <i class="bi bi-building-fill me-1"></i>@companyName
+                        </span>
+                    </li>
+                    <li><hr class="dropdown-divider my-1" /></li>
+                    <li>
+                        <a class="tnav-dropdown__item" href="/CompanySelect">
+                            <i class="bi bi-arrow-repeat"></i>
+                            Cambiar empresa
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <button class="topbar-toggler more text-white">
-                <i class="gg-more-vertical-alt"></i>
-            </button>
-        </div>
-    </div>
+            <div class="tnav-divider"></div>
+        }
 
-    <nav class="navbar navbar-header navbar-expand-lg border-bottom bg-white">
-        <div class="container-fluid">
-
-            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form p-0 d-none d-lg-flex">
-                <div class="d-flex align-items-center px-3">
-                    <span class="nav-link fs-5 fw-semibold text-dark m-0">
-                        <i class="bi bi-person-circle me-2"></i> ¡Bienvenido! <span class="text-primary">@nombre @apellido</span>
-                    </span>
+        <!-- User info -->
+        @if (!string.IsNullOrWhiteSpace(userName))
+        {
+            <div class="tnav-user">
+                <div class="tnav-user__avatar">
+                    <i class="bi bi-person-fill"></i>
                 </div>
-            </nav>
+                <span class="tnav-user__name d-none d-md-inline">@userName @userSurname</span>
+            </div>
+            <div class="tnav-divider d-none d-md-block"></div>
+        }
 
-            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+        <!-- Logout -->
+        <button class="tnav-logout" type="button"
+                onclick="document.getElementById('logoutForm').submit();"
+                title="Cerrar sesión">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="d-none d-sm-inline">Salir</span>
+        </button>
+        <form id="logoutForm" method="post" asp-page="/Logout" style="display:none;"></form>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle text-dark fw-semibold" href="#" id="empresaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-building me-2"></i> @empresa
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="empresaDropdown">
-                        <li>
-                            <a class="dropdown-item" href="/CompanySelect">
-                                <i class="bi bi-arrow-repeat me-2"></i> Cambiar empresa
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="nav-item ms-3">
-                    <a href="javascript:void(0);" class="nav-link text-dark fw-semibold" title="Cerrar sesión" onclick="document.getElementById('logout-form').submit();">
-                        <i class="bi bi-box-arrow-right text-danger me-2"></i> Cerrar sesión
-                    </a>
-                    <form id="logout-form" method="post" asp-page="/Logout" style="display: none;"></form>
-                </li>
-
-            </ul>
-        </div>
-    </nav>
-</div>
+    </div>
+</nav>

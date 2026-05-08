@@ -44,9 +44,9 @@ namespace eCertify.Pages.Certificacion
 
             // Buscar el paso actual (por nombre o ID)
             var paso = pasos.FirstOrDefault(p =>
-                p.Nombre.Equals("Aprobaci�n Comercial", StringComparison.OrdinalIgnoreCase));
+                p.Name.Equals("Aprobación Comercial", StringComparison.OrdinalIgnoreCase));
 
-            PasoCompletado = paso?.Completado ?? false;
+            PasoCompletado = paso?.Completed ?? false;
 
             return Page();
         }

@@ -427,6 +427,59 @@
             .register-card { padding: 1.5rem 1.2rem; border-radius: 1.1rem; }
             .page-header-title { font-size: 1.25rem; }
         }
+
+        /* ── RNC Lookup ── */
+        .rnc-field-wrap { position: relative; }
+        .rnc-status-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            pointer-events: none;
+            line-height: 1;
+        }
+        .rnc-spinner {
+            width: 14px; height: 14px;
+            border: 2px solid #d1d5db;
+            border-top-color: var(--green);
+            border-radius: 50%;
+            display: inline-block;
+            animation: rncSpin 0.65s linear infinite;
+        }
+        @@keyframes rncSpin { to { transform: rotate(360deg); } }
+        .rnc-suggestions {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0; right: 0;
+            background: white;
+            border: 1.5px solid #d1d5db;
+            border-radius: 0.55rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+            z-index: 200;
+            max-height: 260px;
+            overflow-y: auto;
+            display: none;
+        }
+        .rnc-sug-item {
+            padding: 0.55rem 0.9rem;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.1s;
+        }
+        .rnc-sug-item:last-child { border-bottom: none; }
+        .rnc-sug-item:hover, .rnc-sug-item:focus { background: var(--green-light); outline: none; }
+        .rnc-sug-name { display: block; font-size: 0.85rem; font-weight: 600; color: #111827; }
+        .rnc-sug-rnc  { display: block; font-size: 0.74rem; color: #6b7280; font-family: monospace; }
+        .rnc-sug-estado {
+            display: inline-block; font-size: 0.68rem; font-weight: 600;
+            padding: 0.1rem 0.45rem; border-radius: 20px; margin-top: 0.15rem;
+        }
+        .rnc-sug-estado--activo   { background: #dcfce7; color: #15803d; }
+        .rnc-sug-estado--inactivo { background: #fee2e2; color: #b91c1c; }
+        .rnc-sug-estado--otro     { background: #fef9c3; color: #92400e; }
     </style>
 </head>
 <body>
@@ -501,16 +554,27 @@
                                     <label asp-for="Empresa.RazonSocial" class="form-label">
                                         Razón Social <span class="text-danger">*</span>
                                     </label>
-                                    <input asp-for="Empresa.RazonSocial" class="form-control"
-                                           placeholder="Nombre legal de la empresa" autofocus required />
+                                    <div class="rnc-field-wrap" id="razonSocialWrap">
+                                        <input asp-for="Empresa.RazonSocial" id="razonSocialInput"
+                                               class="form-control pe-4"
+                                               placeholder="Nombre legal de la empresa"
+                                               autofocus required autocomplete="off" />
+                                        <span class="rnc-status-icon" id="rsStatusIcon"></span>
+                                        <div class="rnc-suggestions" id="rncSuggestions"></div>
+                                    </div>
                                 </div>
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
                                         <label asp-for="Empresa.RNC" class="form-label">
                                             RNC <span class="text-danger">*</span>
                                         </label>
-                                        <input asp-for="Empresa.RNC" class="form-control"
-                                               placeholder="Ej. 130000000" required />
+                                        <div class="rnc-field-wrap">
+                                            <input asp-for="Empresa.RNC" id="rncInput"
+                                                   class="form-control pe-4"
+                                                   placeholder="Ej. 130000000"
+                                                   required maxlength="13" />
+                                            <span class="rnc-status-icon" id="rncStatusIcon"></span>
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label asp-for="Empresa.Direccion" class="form-label">
@@ -817,6 +881,122 @@
             inp.type = isPass ? 'text' : 'password';
             icon.className = isPass ? 'bi bi-eye-slash' : 'bi bi-eye';
         });
+
+        // ── RNC / Razón Social lookup dinámico ──
+        (function () {
+            const rncInput        = document.getElementById('rncInput');
+            const rsInput         = document.getElementById('razonSocialInput');
+            const rncIcon         = document.getElementById('rncStatusIcon');
+            const rsIcon          = document.getElementById('rsStatusIcon');
+            const sugBox          = document.getElementById('rncSuggestions');
+
+            let rncTimer, rsTimer;
+            let lastRnc = '', lastRs = '';
+
+            function setIcon(el, state) {
+                el.innerHTML = '';
+                if (state === 'loading') {
+                    el.innerHTML = '<span class="rnc-spinner"></span>';
+                } else if (state === 'ok') {
+                    el.innerHTML = '<i class="bi bi-check-circle-fill" style="color:#006B3C"></i>';
+                } else if (state === 'error') {
+                    el.innerHTML = '<i class="bi bi-exclamation-circle-fill" style="color:#dc3545"></i>';
+                }
+            }
+
+            function hideSug() {
+                sugBox.style.display = 'none';
+                sugBox.innerHTML = '';
+            }
+
+            function escHtml(s) {
+                return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            }
+
+            function estadoBadge(estado) {
+                const e = (estado || '').toUpperCase();
+                if (e === 'ACTIVO') return `<span class="rnc-sug-estado rnc-sug-estado--activo">ACTIVO</span>`;
+                if (e === 'SUSPENDIDO' || e === 'DADO DE BAJA') return `<span class="rnc-sug-estado rnc-sug-estado--inactivo">${escHtml(estado)}</span>`;
+                return `<span class="rnc-sug-estado rnc-sug-estado--otro">${escHtml(estado)}</span>`;
+            }
+
+            function showSug(resultados) {
+                sugBox.innerHTML = '';
+                const items = resultados.slice(0, 8);
+                items.forEach(r => {
+                    const d = document.createElement('div');
+                    d.className = 'rnc-sug-item';
+                    d.setAttribute('tabindex', '0');
+                    d.innerHTML = `
+                        <span class="rnc-sug-name">${escHtml(r.nombre_razon_social || '')}</span>
+                        <span class="rnc-sug-rnc">${escHtml(r.cedula_rnc || '')}</span>
+                        ${estadoBadge(r.estado)}`;
+                    d.addEventListener('mousedown', ev => {
+                        ev.preventDefault();
+                        rsInput.value  = r.nombre_razon_social || '';
+                        rncInput.value = (r.cedula_rnc || '').replace(/-/g, '');
+                        hideSug();
+                        setIcon(rsIcon,  'ok');
+                        setIcon(rncIcon, 'ok');
+                        lastRnc = rncInput.value;
+                        lastRs  = rsInput.value;
+                    });
+                    sugBox.appendChild(d);
+                });
+                sugBox.style.display = items.length ? 'block' : 'none';
+            }
+
+            // RNC → Razón Social
+            rncInput.addEventListener('input', function () {
+                clearTimeout(rncTimer);
+                setIcon(rncIcon, '');
+                const digits = rncInput.value.replace(/\D/g, '');
+                if (digits.length !== 9 && digits.length !== 11) return;
+                if (digits === lastRnc) return;
+                rncTimer = setTimeout(async () => {
+                    lastRnc = digits;
+                    setIcon(rncIcon, 'loading');
+                    try {
+                        const res  = await fetch(`/api/Rnc/consulta?rnc=${digits}`);
+                        const data = await res.json();
+                        if (!data.error && data.nombre_razon_social) {
+                            rsInput.value = data.nombre_razon_social;
+                            lastRs = rsInput.value;
+                            setIcon(rncIcon, 'ok');
+                        } else {
+                            setIcon(rncIcon, 'error');
+                        }
+                    } catch { setIcon(rncIcon, 'error'); }
+                }, 350);
+            });
+
+            // Razón Social → dropdown de sugerencias
+            rsInput.addEventListener('input', function () {
+                clearTimeout(rsTimer);
+                hideSug();
+                setIcon(rsIcon, '');
+                const term = rsInput.value.trim();
+                if (term.length < 4) return;
+                if (term === lastRs) return;
+                rsTimer = setTimeout(async () => {
+                    lastRs = term;
+                    setIcon(rsIcon, 'loading');
+                    try {
+                        const res  = await fetch(`/api/Rnc/nombres?buscar=${encodeURIComponent(term)}`);
+                        const data = await res.json();
+                        setIcon(rsIcon, '');
+                        if (!data.error && data.resultados && data.resultados.length > 0) {
+                            showSug(data.resultados);
+                        }
+                    } catch { setIcon(rsIcon, ''); }
+                }, 500);
+            });
+
+            rsInput.addEventListener('blur', () => setTimeout(hideSug, 160));
+            document.addEventListener('click', e => {
+                if (!e.target.closest('#razonSocialWrap')) hideSug();
+            });
+        })();
 
         // ── Submit ──
         document.getElementById('empForm').addEventListener('submit', function (e) {

@@ -74,8 +74,8 @@ namespace eCertify.Pages.Certificacion
                 var pasos = await _pasosCompletadosService.ObtenerPasosAsync(User);
                 var nombre = Ctx == CTX_POSTULACION ? "Postulación" : "Declaración Jurada";
                 PasoCompletado = pasos
-                    .FirstOrDefault(p => p.Nombre.Equals(nombre, StringComparison.OrdinalIgnoreCase))
-                    ?.Completado ?? false;
+                    .FirstOrDefault(p => p.Name.Equals(nombre, StringComparison.OrdinalIgnoreCase))
+                    ?.Completed ?? false;
             }
 
             return Page();

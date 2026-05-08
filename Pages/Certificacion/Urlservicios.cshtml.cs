@@ -45,8 +45,8 @@ namespace eCertify.Pages.Certificacion
             var todosCompletados = pasosAValidar.All(p =>
                 pasos.Any(x =>
                     x.Id == p.Id &&
-                    x.Nombre.Equals(p.Nombre, StringComparison.OrdinalIgnoreCase) &&
-                    x.Completado));
+                    x.Name.Equals(p.Nombre, StringComparison.OrdinalIgnoreCase) &&
+                    x.Completed));
 
             PasoCompletado = todosCompletados;
 

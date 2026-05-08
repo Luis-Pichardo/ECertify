@@ -1,4 +1,11 @@
 @* Pages/Shared/_Layout.cshtml *@
+@using System.Security.Claims
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var layoutUser    = HttpContextAccessor.HttpContext?.User;
+    var layoutRnc     = layoutUser?.FindFirst("RNC")?.Value ?? "";
+    var layoutCompany = layoutUser?.FindFirst("RazonSocial")?.Value ?? "";
+}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,16 +14,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>eCertify</title>
     <link rel="icon" href="~/assets/favicon.PNG" type="image/x-icon" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/styles/notify-bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <!-- Bootstrap JS (must be before Bootstrap CSS consumers) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <!-- KaiAdmin theme (component styles: tables, cards, forms) -->
     <link rel="stylesheet" href="~/assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/assets/css/plugins.min.css" />
     <link rel="stylesheet" href="~/assets/css/kaiadmin.min.css" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+    <!-- SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <!-- Notify -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/styles/notify-bootstrap.min.css" />
+    <!-- App styles -->
     <link href="~/css/_LoadingOverlay.css" rel="stylesheet" />
     <link href="~/css/progressbars.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/NotifyJS.css" />
@@ -28,94 +43,284 @@
     <link rel="stylesheet" href="~/css/Empresa.css" />
 
     <style>
-        /* ─── Global page loader ─── */
+        /* ── Page loader ── */
         .page-loader {
-            position: fixed;
-            inset: 0;
+            position: fixed; inset: 0;
             background: linear-gradient(135deg, #004d2b 0%, #006B3C 55%, #008f50 100%);
             z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1.2rem;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 1.2rem;
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-        .page-loader.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        /* Dual counter-rotating rings */
-        .page-loader__spinner {
-            position: relative;
-            width: 74px;
-            height: 74px;
-        }
+        .page-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .page-loader__spinner { position: relative; width: 74px; height: 74px; }
         .page-loader__ring-outer {
-            position: absolute;
-            inset: 0;
-            border: 3px solid rgba(255, 255, 255, 0.18);
-            border-top-color: rgba(255, 255, 255, 0.95);
-            border-right-color: rgba(255, 255, 255, 0.65);
+            position: absolute; inset: 0;
+            border: 3px solid rgba(255,255,255,0.18);
+            border-top-color: rgba(255,255,255,0.95);
+            border-right-color: rgba(255,255,255,0.65);
             border-radius: 50%;
-            animation: loaderSpin 0.85s linear infinite;
+            animation: plSpin 0.85s linear infinite;
         }
         .page-loader__ring-inner {
-            position: absolute;
-            inset: 13px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-bottom-color: rgba(255, 255, 255, 0.6);
-            border-left-color: rgba(255, 255, 255, 0.35);
+            position: absolute; inset: 13px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-bottom-color: rgba(255,255,255,0.6);
+            border-left-color: rgba(255,255,255,0.35);
             border-radius: 50%;
-            animation: loaderSpin 0.65s linear infinite reverse;
+            animation: plSpin 0.65s linear infinite reverse;
         }
         .page-loader__icon {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255, 255, 255, 0.92);
-            font-size: 1.5rem;
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(255,255,255,0.92); font-size: 1.5rem;
         }
-
         .page-loader__brand {
-            color: rgba(255, 255, 255, 0.92);
-            font-size: 0.88rem;
-            font-weight: 700;
-            letter-spacing: 4px;
-            text-transform: uppercase;
+            color: rgba(255,255,255,0.92); font-size: 0.88rem; font-weight: 700;
+            letter-spacing: 4px; text-transform: uppercase;
             font-family: 'Segoe UI', system-ui, sans-serif;
         }
-
-        /* Bouncing dots */
-        .page-loader__dots {
-            display: flex;
-            gap: 7px;
-        }
+        .page-loader__dots { display: flex; gap: 7px; }
         .page-loader__dot {
-            width: 8px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.55);
-            border-radius: 50%;
-            animation: dotBounce 1.3s ease-in-out infinite;
+            width: 8px; height: 8px;
+            background: rgba(255,255,255,0.55); border-radius: 50%;
+            animation: plBounce 1.3s ease-in-out infinite;
         }
         .page-loader__dot:nth-child(2) { animation-delay: 0.2s; }
         .page-loader__dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @@keyframes loaderSpin { to { transform: rotate(360deg); } }
-        @@keyframes dotBounce {
+        @@keyframes plSpin   { to { transform: rotate(360deg); } }
+        @@keyframes plBounce {
             0%, 80%, 100% { transform: scale(0.55); opacity: 0.4; }
             40%            { transform: scale(1);    opacity: 1;   }
         }
+
+        /* ── App shell — no sidebar ── */
+        body {
+            background: #f4f6f9;
+            margin: 0; padding: 0;
+        }
+        /* Neutralise KaiAdmin sidebar-dependent layout */
+        .wrapper     { display: block !important; }
+        .main-panel  { margin-left: 0 !important; width: 100% !important; float: none !important; }
+
+        .app-shell {
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+        .app-content-row {
+            display: flex; flex: 1; min-height: 0;
+        }
+        .app-body {
+            flex: 1; min-width: 0;
+            padding: 1.5rem;
+        }
+        .page-inner { width: 100%; }
+
+        /* ── Top navigation bar ── */
+        .top-nav {
+            display: flex; align-items: center; justify-content: space-between;
+            height: 62px; padding: 0 1.8rem;
+            background: white;
+            border-bottom: 1px solid #e8ecf0;
+            box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+            position: sticky; top: 0; z-index: 1000;
+        }
+        .top-nav__brand {
+            display: flex; align-items: center; gap: 0.55rem;
+            color: #006B3C; font-size: 1.05rem; font-weight: 800;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            text-decoration: none !important;
+            transition: opacity .15s;
+            flex-shrink: 0;
+        }
+        .top-nav__brand:hover { opacity: 0.8; }
+        .top-nav__brand i { font-size: 1.2rem; }
+
+        .top-nav__controls {
+            display: flex; align-items: center; gap: 0.35rem;
+        }
+
+        /* Company button */
+        .tnav-company {
+            display: flex; align-items: center; gap: 0.45rem;
+            background: #f9fafb; border: 1.5px solid #e5e7eb;
+            border-radius: 2rem; padding: 0.38rem 0.85rem;
+            font-size: 0.82rem; font-weight: 600; color: #374151;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, color .15s;
+            max-width: 240px;
+        }
+        .tnav-company:hover, .tnav-company:focus {
+            background: #f0fdf4; border-color: #006B3C; color: #006B3C;
+            outline: none;
+        }
+        .tnav-company__name {
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            max-width: 160px;
+        }
+        .tnav-company__caret { font-size: 0.62rem; opacity: 0.55; flex-shrink: 0; }
+
+        /* Dropdown */
+        .tnav-dropdown {
+            border: 1.5px solid #e5e7eb; border-radius: 0.8rem;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.1);
+            padding: 0.4rem; min-width: 210px;
+        }
+        .tnav-dropdown__header {
+            display: block; font-size: 0.75rem; font-weight: 700;
+            color: #9ca3af; padding: 0.4rem 0.75rem;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .tnav-dropdown__item {
+            display: flex; align-items: center; gap: 0.55rem;
+            font-size: 0.83rem; font-weight: 600;
+            border-radius: 0.5rem; padding: 0.55rem 0.75rem;
+            color: #374151; text-decoration: none !important;
+            transition: background .12s, color .12s;
+        }
+        .tnav-dropdown__item:hover { background: #f0fdf4; color: #006B3C; }
+
+        /* Divider */
+        .tnav-divider {
+            width: 1px; height: 24px; background: #e5e7eb;
+            margin: 0 0.2rem; flex-shrink: 0;
+        }
+
+        /* User */
+        .tnav-user { display: flex; align-items: center; gap: 0.5rem; padding: 0 0.2rem; }
+        .tnav-user__avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #e6f4ed; color: #006B3C;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; flex-shrink: 0;
+        }
+        .tnav-user__name {
+            font-size: 0.82rem; font-weight: 600; color: #374151; white-space: nowrap;
+        }
+
+        /* Logout */
+        .tnav-logout {
+            display: flex; align-items: center; gap: 0.4rem;
+            background: none; border: 1.5px solid #fecaca;
+            border-radius: 2rem; padding: 0.36rem 0.8rem;
+            font-size: 0.8rem; font-weight: 600; color: #dc2626;
+            cursor: pointer; transition: background .15s, border-color .15s;
+            flex-shrink: 0;
+        }
+        .tnav-logout:hover { background: #fef2f2; border-color: #dc2626; }
+
+        /* ── Company info panel (frosted green glass) ── */
+        .cp-panel {
+            width: 250px; flex-shrink: 0;
+            background: linear-gradient(160deg,
+                rgba(0,107,60,0.10) 0%,
+                rgba(0,77,43,0.07)  50%,
+                rgba(0,107,60,0.09) 100%);
+            backdrop-filter: blur(28px) saturate(1.8) brightness(1.01);
+            -webkit-backdrop-filter: blur(28px) saturate(1.8) brightness(1.01);
+            border-right: 1px solid rgba(0,107,60,0.13);
+            box-shadow: 2px 0 24px rgba(0,107,60,0.07),
+                        inset -1px 0 0 rgba(255,255,255,0.55);
+            display: flex; flex-direction: column;
+            padding: 1.4rem 1rem 1rem;
+            position: sticky; top: 62px;
+            height: calc(100vh - 62px);
+            overflow-y: auto;
+        }
+        .cp-avatar {
+            width: 60px; height: 60px; border-radius: 14px;
+            background: linear-gradient(135deg, #006B3C 0%, #008f50 100%);
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.35rem; font-weight: 800;
+            margin: 0 auto 0.9rem;
+            letter-spacing: 1px; text-transform: uppercase;
+            box-shadow: 0 4px 16px rgba(0,107,60,0.32);
+        }
+        .cp-company-name {
+            font-size: 0.82rem; font-weight: 700; color: #004d2b;
+            text-align: center; line-height: 1.35;
+            margin-bottom: 0.25rem;
+            overflow: hidden; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+        .cp-rnc-label {
+            font-size: 0.72rem; color: #6b7280;
+            text-align: center; margin-bottom: 0.85rem; letter-spacing: 0.3px;
+        }
+        .cp-rnc-label span { font-weight: 600; color: #374151; }
+        .cp-badges {
+            display: flex; flex-direction: column; gap: 0.42rem;
+            margin-bottom: 0.5rem;
+        }
+        .cp-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.3rem; font-size: 0.7rem; font-weight: 700;
+            padding: 0.3rem 0.75rem; border-radius: 2rem;
+            letter-spacing: 0.2px;
+        }
+        .cp-badge--active   { background: #dcfce7; color: #15803d; }
+        .cp-badge--inactive { background: #fee2e2; color: #dc2626; }
+        .cp-badge--pending  { background: #fef9c3; color: #a16207; }
+        .cp-divider { height: 1px; background: rgba(0,107,60,0.1); margin: 0.75rem 0; }
+        .cp-fields { display: flex; flex-direction: column; gap: 0.7rem; flex: 1; }
+        .cp-field  { display: flex; flex-direction: column; gap: 0.1rem; }
+        .cp-field__label {
+            font-size: 0.67rem; font-weight: 700; color: #9ca3af;
+            text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .cp-field__value {
+            font-size: 0.75rem; font-weight: 600; color: #374151; line-height: 1.35;
+            overflow: hidden; display: -webkit-box;
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+        }
+        .cp-ecf-status {
+            margin-top: 0.85rem;
+            border-radius: 0.65rem;
+            padding: 0.7rem 0.85rem;
+            font-size: 0.72rem; font-weight: 600; line-height: 1.5;
+        }
+        .cp-ecf-status--yes { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .cp-ecf-status--no  { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; }
+        .cp-ecf-status__title {
+            display: flex; align-items: center; gap: 0.35rem;
+            font-size: 0.73rem; font-weight: 800; margin-bottom: 0.3rem;
+        }
+        .cp-footer {
+            margin-top: auto; padding-top: 0.85rem;
+            font-size: 0.69rem; color: #9ca3af; text-align: center;
+            border-top: 1px solid rgba(0,107,60,0.1);
+        }
+        /* Skeleton shimmer */
+        .cp-skel {
+            background: linear-gradient(90deg,
+                rgba(0,107,60,0.07) 25%,
+                rgba(0,107,60,0.14) 50%,
+                rgba(0,107,60,0.07) 75%);
+            background-size: 200% 100%;
+            animation: cpShimmer 1.5s ease-in-out infinite;
+            border-radius: 6px; margin-bottom: 0.55rem;
+        }
+        .cp-skel--avatar { width: 60px; height: 60px; border-radius: 14px; margin: 0 auto 0.9rem; display: block; }
+        .cp-skel--line   { height: 11px; display: block; }
+        .cp-skel--badge  { height: 22px; border-radius: 2rem; display: block; }
+        @@keyframes cpShimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        @@media (max-width: 991px) { .cp-panel { display: none; } }
+        @@media (max-width: 480px) {
+            .top-nav { padding: 0 1rem; }
+            .tnav-company { max-width: 120px; }
+            .tnav-company__name { max-width: 80px; }
+        }
     </style>
+
     @RenderSection("Styles", required: false)
 </head>
 <body>
 
-    <!-- Global page loader -->
+    <!-- Page transition loader -->
     <div class="page-loader" id="pageLoader">
         <div class="page-loader__spinner">
             <div class="page-loader__ring-outer"></div>
@@ -132,22 +337,55 @@
         </div>
     </div>
 
-    <div class="wrapper">
-        @await Html.PartialAsync("_Sidebar")
+    <div class="app-shell">
+        @await Html.PartialAsync("_Navbar")
 
-        <div class="main-panel">
-            <div class="main-header">
-                @await Html.PartialAsync("_Navbar")
-            </div>
+        <div class="app-content-row">
 
-            <main role="main" class="container-fluid" style="padding-top: 4em">
+            @if (!string.IsNullOrWhiteSpace(layoutRnc))
+            {
+                <aside class="cp-panel" id="cpPanel"
+                       data-rnc="@layoutRnc"
+                       data-company="@layoutCompany">
+                    <!-- Skeleton shown while DGII API loads -->
+                    <div id="cpSkeleton">
+                        <div class="cp-skel cp-skel--avatar"></div>
+                        <div class="cp-skel cp-skel--line" style="width:78%;margin:0 auto .55rem"></div>
+                        <div class="cp-skel cp-skel--line" style="width:52%;margin:0 auto .85rem"></div>
+                        <div class="cp-skel cp-skel--badge" style="width:65%;margin:0 auto .9rem"></div>
+                        <div style="margin-top:1.1rem">
+                            <div class="cp-skel cp-skel--line" style="width:40%;margin-bottom:.45rem"></div>
+                            <div class="cp-skel cp-skel--line" style="width:82%;margin-bottom:.9rem"></div>
+                            <div class="cp-skel cp-skel--line" style="width:42%;margin-bottom:.45rem"></div>
+                            <div class="cp-skel cp-skel--line" style="width:70%"></div>
+                        </div>
+                    </div>
+                    <!-- Content populated by JS -->
+                    <div id="cpContent" style="display:none">
+                        <div class="cp-avatar" id="cpAvatar"></div>
+                        <div class="cp-company-name" id="cpName">@layoutCompany</div>
+                        <div class="cp-rnc-label">RNC <span id="cpRnc">@layoutRnc</span></div>
+                        <div class="cp-badges" id="cpBadges"></div>
+                        <div class="cp-divider"></div>
+                        <div class="cp-fields" id="cpFields"></div>
+                        <div id="cpEcfStatus"></div>
+                    </div>
+                    <div class="cp-footer">
+                        <i class="bi bi-shield-check-fill me-1"></i>Datos DGII
+                    </div>
+                </aside>
+            }
+
+            <main class="app-body container-fluid">
                 <div class="page-inner">
                     @RenderBody()
                 </div>
             </main>
+
         </div>
     </div>
 
+    <!-- Vendor scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
     <script src="~/assets/js/plugin/chart.js/chart.min.js"></script>
@@ -176,7 +414,6 @@
             active: function () { sessionStorage.fonts = true; }
         });
 
-        // Hide loader once page is fully loaded
         window.addEventListener("load", function () {
             const loader = document.getElementById('pageLoader');
             if (loader) {
@@ -185,7 +422,6 @@
             }
         });
 
-        // Re-show loader when navigating to another page
         document.addEventListener('click', function (e) {
             const link = e.target.closest('a[href]');
             if (link && link.href
@@ -202,9 +438,98 @@
         });
     </script>
 
+    <!-- Company info panel — fetch DGII data on every page load -->
+    <script>
+    (async function () {
+        const panel = document.getElementById('cpPanel');
+        if (!panel) return;
+
+        const rnc     = panel.dataset.rnc;
+        const company = panel.dataset.company;
+
+        if (!rnc) { showContent(company); return; }
+
+        try {
+            const res = await fetch('/api/Rnc/consulta?rnc=' + encodeURIComponent(rnc));
+            if (!res.ok) { showContent(company); return; }
+            const data = await res.json();
+            populatePanel(data, company);
+        } catch {
+            showContent(company);
+        }
+
+        function populatePanel(data, fallback) {
+            const nombreRs = data.nombre_razon_social || fallback || '';
+
+            const nameEl = document.getElementById('cpName');
+            const rncEl  = document.getElementById('cpRnc');
+            if (nameEl) nameEl.textContent = nombreRs;
+            if (rncEl)  rncEl.textContent  = data.cedula_rnc || rnc;
+
+            const avatarEl = document.getElementById('cpAvatar');
+            if (avatarEl) {
+                const initials = nombreRs.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'E';
+                avatarEl.textContent = initials;
+            }
+
+            const badgesEl = document.getElementById('cpBadges');
+            if (badgesEl) {
+                const estado = (data.estado || '').trim().toUpperCase();
+                let cls = 'cp-badge--pending';
+                if (estado === 'ACTIVO')                               cls = 'cp-badge--active';
+                if (estado === 'SUSPENDIDO' || estado === 'INACTIVO') cls = 'cp-badge--inactive';
+                badgesEl.innerHTML =
+                    `<span class="cp-badge ${cls}"><i class="bi bi-circle-fill" style="font-size:.45rem"></i>${data.estado || 'Desconocido'}</span>`;
+            }
+
+            const fieldsEl = document.getElementById('cpFields');
+            if (fieldsEl) {
+                const rows = [
+                    { label: 'Actividad',      value: data.actividad_economica  },
+                    { label: 'Régimen',        value: data.regimen_de_pagos     },
+                    { label: 'Administración', value: data.administracion_local }
+                ].filter(r => r.value && r.value.trim());
+
+                fieldsEl.innerHTML = rows.map(r =>
+                    `<div class="cp-field">
+                        <span class="cp-field__label">${r.label}</span>
+                        <span class="cp-field__value">${r.value}</span>
+                    </div>`
+                ).join('');
+            }
+
+            const ecfEl = document.getElementById('cpEcfStatus');
+            if (ecfEl) {
+                const isEcf = (data.facturador_electronico || '').trim().toUpperCase() === 'SI';
+                ecfEl.className = 'cp-ecf-status ' + (isEcf ? 'cp-ecf-status--yes' : 'cp-ecf-status--no');
+                ecfEl.innerHTML = isEcf
+                    ? `<div class="cp-ecf-status__title"><i class="bi bi-check-circle-fill"></i>Facturador e-CF</div>
+                       Ya usted ha completado todos los pasos correctamente.`
+                    : `<div class="cp-ecf-status__title"><i class="bi bi-hourglass-split"></i>Pendiente</div>
+                       Complete todos los pasos para convertirse en facturador electrónico.`;
+            }
+
+            showContent();
+        }
+
+        function showContent(fallbackName) {
+            const skeleton = document.getElementById('cpSkeleton');
+            const content  = document.getElementById('cpContent');
+            if (skeleton) skeleton.style.display = 'none';
+            if (content)  content.style.display  = '';
+            if (fallbackName) {
+                const nameEl   = document.getElementById('cpName');
+                const avatarEl = document.getElementById('cpAvatar');
+                if (nameEl) nameEl.textContent = fallbackName;
+                if (avatarEl && !avatarEl.textContent.trim()) {
+                    avatarEl.textContent = (fallbackName.split(/\s+/).slice(0, 2).map(w => w[0]).join('') || 'E').toUpperCase();
+                }
+            }
+        }
+    })();
+    </script>
+
     <script src="/js/_LoadingOverlay.js"></script>
-    <script src="/js/firmar.js"></script>
-    <script src="~/js/Home.js"></script>
     @await Html.PartialAsync("_LoadingOverlay")
     @RenderSection("Scripts", required: false)
 </body>

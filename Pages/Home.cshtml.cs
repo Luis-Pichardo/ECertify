@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using eCertify.Utils;
 
@@ -7,97 +7,105 @@ namespace eCertify.Pages
     public class HomeModel : PageModel
     {
         private readonly HttpClient _httpClient;
+        private readonly ILogger<HomeModel> _logger;
 
-        public HomeModel(IHttpClientFactory httpClientFactory)
+        private static readonly IReadOnlyList<string> FixedStepNames = new[]
+        {
+            "Postulación",
+            "Pruebas de Datos e-CF",
+            "Aprobación Comercial",
+            "Pruebas Simulación e-CF",
+            "Pruebas Representación Impresa",
+            "URL Servicios Prueba",
+            "Recepción e-CF",
+            "Recepción Aprobación Comercial",
+            "Declaración Jurada"
+        };
+
+        public HomeModel(IHttpClientFactory httpClientFactory, ILogger<HomeModel> logger)
         {
             _httpClient = httpClientFactory.CreateClient("ApiClient");
+            _logger = logger;
         }
 
-        public List<PasoViewModel> Pasos { get; set; } = new();
+        public List<CertificationStepViewModel> Steps { get; set; } = new();
+        public string CompanyName { get; set; } = string.Empty;
 
-        public async Task OnGetAsync(long empresaId)
+        public async Task OnGetAsync()
         {
+            var company = ClaimHelper.ObtenerEmpresaDesdeClaims(User);
+            CompanyName = company.RazonSocial;
 
-            // Obtener la empresa desde los claims del usuario
-            var empresa = ClaimHelper.ObtenerEmpresaDesdeClaims(User);
-
-            if (empresa.ID <= 0)
+            if (company.ID <= 0)
             {
-                // Redirigir a selecci�n de empresa si no hay ninguna v�lida
                 Response.Redirect("/CompanySelect");
                 return;
             }
 
+            var completedSteps = await FetchCompletedStepsAsync(company.ID);
 
-            // Lista de pasos fijos
-            var listaFija = new List<string>
+            Steps = FixedStepNames.Select((name, index) =>
             {
-                "Postulaci�n",
-                "Pruebas de Datos e-CF",
-                "Aprobaci�n Comercial",
-                "Pruebas Simulaci�n e-CF",
-                "Pruebas Representaci�n Impresa",
-                "URL Servicios Prueba",
-                "Recepci�n e-CF",
-                "Recepci�n Aprobaci�n Comercial",
-                "Declaraci�n Jurada"
-            };
+                var match = completedSteps.FirstOrDefault(s =>
+                    s.StepName.Equals(name, StringComparison.OrdinalIgnoreCase) && s.Completed);
 
-            // Llamada al API
-            var response = await _httpClient.GetAsync($"api/HistorialPruebasExcel/por-empresa/{empresa.ID}");
-            var content = await response.Content.ReadAsStringAsync();
-
-            List<PasoCompletadoDto> completados = new();
-
-            if (response.IsSuccessStatusCode)
-            {
-                try
+                return new CertificationStepViewModel
                 {
-                    completados = JsonConvert.DeserializeObject<List<PasoCompletadoDto>>(content) ?? new();
-                }
-                catch (JsonException ex)
-                {
-                    // Loggea o maneja el error de deserializaci�n
-                    Console.WriteLine($"Error deserializando la respuesta: {ex.Message}");
-                }
-            }
-            else
-            {
-                // Manejar error del API
-                Console.WriteLine($"Error {response.StatusCode}: {content}");
-            }
-
-            // Armar el modelo comparando lista fija con completados
-            Pasos = listaFija.Select((nombre, index) =>
-            {
-                var encontrado = completados.FirstOrDefault(c =>
-                    c.PasoNombre.Equals(nombre, StringComparison.OrdinalIgnoreCase) && c.Completado);
-
-                return new PasoViewModel
-                {
-                    Id = index + 1,
-                    Nombre = nombre,
-                    Completado = encontrado != null,
-                    FechaCompletado = encontrado?.FechaCompletado
+                    Id         = index + 1,
+                    Name       = name,
+                    Completed  = match != null,
+                    CompletedOn = match?.CompletedOn
                 };
             }).ToList();
         }
+
+        private async Task<List<StepProgressDto>> FetchCompletedStepsAsync(long companyId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"api/HistorialPruebasExcel/por-empresa/{companyId}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Step history API returned {Status} for company {CompanyId}",
+                        response.StatusCode, companyId);
+                    return new();
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<List<StepProgressDto>>(json) ?? new();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch step history for company {CompanyId}", companyId);
+                return new();
+            }
+        }
     }
 
-    public class PasoCompletadoDto
+    public class StepProgressDto
     {
-        public int PasoId { get; set; }
-        public string PasoNombre { get; set; }
-        public bool Completado { get; set; }
-        public DateTime? FechaCompletado { get; set; }
-        public int PorcentajeCompletado { get; set; }
+        [JsonProperty("pasoId")]
+        public int StepId { get; set; }
+
+        [JsonProperty("pasoNombre")]
+        public string StepName { get; set; } = string.Empty;
+
+        [JsonProperty("completado")]
+        public bool Completed { get; set; }
+
+        [JsonProperty("fechaCompletado")]
+        public DateTime? CompletedOn { get; set; }
+
+        [JsonProperty("porcentajeCompletado")]
+        public int CompletionPercentage { get; set; }
     }
 
-    public class PasoViewModel
+    public class CertificationStepViewModel
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
-        public bool Completado { get; set; }
-        public DateTime? FechaCompletado { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public bool Completed { get; set; }
+        public DateTime? CompletedOn { get; set; }
     }
 }

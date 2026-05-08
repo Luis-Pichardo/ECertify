@@ -44,9 +44,9 @@ namespace eCertify.Pages.Certificacion
 
             // Buscar el paso actual (por nombre o ID)
             var paso = pasos.FirstOrDefault(p =>
-                p.Nombre.Equals("Pruebas Simulación e-CF", StringComparison.OrdinalIgnoreCase));
+                p.Name.Equals("Pruebas Simulación e-CF", StringComparison.OrdinalIgnoreCase));
 
-            PasoCompletado = paso?.Completado ?? false;
+            PasoCompletado = paso?.Completed ?? false;
 
         }
 

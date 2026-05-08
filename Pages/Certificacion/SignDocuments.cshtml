@@ -441,8 +441,54 @@
             }
         });
 
-        // ── Form submit — show progress steps ──
-        form.addEventListener('submit', function () {
+        // ── Progress step helpers ──
+        function advanceStep(fromNum, toNum) {
+            const fromEl = document.getElementById('sdStep' + fromNum);
+            const toEl   = document.getElementById('sdStep' + toNum);
+            if (!fromEl || !toEl) return;
+            fromEl.classList.remove('sd-pstep--active');
+            fromEl.classList.add('sd-pstep--done');
+            fromEl.querySelector('.sd-pstep__dot').innerHTML = '<i class="bi bi-check-lg"></i>';
+            toEl.classList.add('sd-pstep--active');
+            toEl.querySelector('.sd-pstep__dot').innerHTML   = '<i class="bi bi-arrow-repeat sd-spin"></i>';
+        }
+
+        function completeLastStep() {
+            const step3 = document.getElementById('sdStep3');
+            if (!step3) return;
+            step3.classList.remove('sd-pstep--active');
+            step3.classList.add('sd-pstep--done');
+            step3.querySelector('.sd-pstep__dot').innerHTML      = '<i class="bi bi-check-lg"></i>';
+            step3.querySelector('.sd-pstep__label').textContent  = '¡Descarga completada!';
+            btnLabel.textContent = '¡Descargado!';
+            btnSpinner.classList.add('d-none');
+        }
+
+        function resetProgressSteps() {
+            const labels = ['Enviando archivo al servidor…', 'Aplicando firma digital (RSA-SHA256)…', 'Preparando descarga…'];
+            [1, 2, 3].forEach(n => {
+                const el = document.getElementById('sdStep' + n);
+                if (!el) return;
+                el.className = 'sd-pstep' + (n === 1 ? ' sd-pstep--active' : '');
+                el.querySelector('.sd-pstep__dot').innerHTML        = n === 1 ? '<i class="bi bi-arrow-repeat sd-spin"></i>' : String(n);
+                el.querySelector('.sd-pstep__label').textContent    = labels[n - 1];
+            });
+        }
+
+        function resetToIdle() {
+            steps.classList.add('d-none');
+            resetProgressSteps();
+            clearFile();
+        }
+
+        function extractFilename(disposition) {
+            const m = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"'\r\n]+)/i);
+            return m ? decodeURIComponent(m[1].replace(/["']/g, '').trim()) : null;
+        }
+
+        // ── Form submit — fetch-based (detects download completion) ──
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
             if (!fileInput.files.length) return;
 
             submitBtn.disabled = true;
@@ -450,18 +496,53 @@
             btnSpinner.classList.remove('d-none');
             steps.classList.remove('d-none');
 
-            const advanceStep = (from, to, delay) => setTimeout(function () {
-                const fromEl = document.getElementById('sdStep' + from);
-                const toEl   = document.getElementById('sdStep' + to);
-                fromEl.classList.remove('sd-pstep--active');
-                fromEl.classList.add('sd-pstep--done');
-                fromEl.querySelector('.sd-pstep__dot').innerHTML = '<i class="bi bi-check-lg"></i>';
-                toEl.classList.add('sd-pstep--active');
-                toEl.querySelector('.sd-pstep__dot').innerHTML   = '<i class="bi bi-arrow-repeat sd-spin"></i>';
-            }, delay);
+            setTimeout(() => advanceStep(1, 2), 800);
+            setTimeout(() => advanceStep(2, 3), 1800);
 
-            advanceStep(1, 2, 800);
-            advanceStep(2, 3, 1800);
+            try {
+                const [response] = await Promise.all([
+                    fetch(form.action || window.location.pathname, {
+                        method: 'POST',
+                        body: new FormData(form)
+                    }),
+                    new Promise(r => setTimeout(r, 2200))
+                ]);
+
+                if (!response.ok) {
+                    throw new Error('El servidor respondió con un error (' + response.status + ').');
+                }
+
+                const disposition = response.headers.get('Content-Disposition') || '';
+                if (!disposition.includes('attachment')) {
+                    throw new Error('No se pudo generar el archivo firmado. Verifica que el certificado de tu empresa esté configurado correctamente y que el archivo XML sea válido.');
+                }
+
+                const blob = await response.blob();
+                const url  = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href     = url;
+                link.download = extractFilename(disposition) || 'documento-firmado.xml';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+                completeLastStep();
+                setTimeout(resetToIdle, 3500);
+
+            } catch (err) {
+                resetProgressSteps();
+                steps.classList.add('d-none');
+                Swal.fire({
+                    icon:  'error',
+                    title: 'Error al firmar',
+                    text:  err.message || 'Ocurrió un error inesperado. Intenta nuevamente.',
+                    confirmButtonColor: '#006B3C'
+                });
+                submitBtn.disabled   = false;
+                btnLabel.textContent = 'Firmar y Descargar';
+                btnSpinner.classList.add('d-none');
+            }
         });
 
         // ── Pass completed state to step tracking ──

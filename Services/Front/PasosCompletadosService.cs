@@ -17,14 +17,14 @@ namespace eCertify.Services.Front
             _logger = logger;
         }
 
-        public async Task<List<PasoViewModel>> ObtenerPasosAsync(ClaimsPrincipal user)
+        public async Task<List<CertificationStepViewModel>> ObtenerPasosAsync(ClaimsPrincipal user)
         {
             var empresa = ClaimHelper.ObtenerEmpresaDesdeClaims(user);
 
             if (empresa.ID <= 0)
             {
                 _logger.LogWarning("Empresa inválida o sin ID en claims. Usuario: {User}", user.Identity?.Name);
-                return new List<PasoViewModel>();
+                return new List<CertificationStepViewModel>();
             }
 
             var listaFija = new List<string>
@@ -73,12 +73,12 @@ namespace eCertify.Services.Front
                 var encontrado = completados.FirstOrDefault(c =>
                     c.PasoNombre.Equals(nombre, StringComparison.OrdinalIgnoreCase) && c.Completado);
 
-                return new PasoViewModel
+                return new CertificationStepViewModel
                 {
                     Id = index + 1,
-                    Nombre = nombre,
-                    Completado = encontrado != null,
-                    FechaCompletado = encontrado?.FechaCompletado
+                    Name = nombre,
+                    Completed = encontrado != null,
+                    CompletedOn = encontrado?.FechaCompletado
                 };
             }).ToList();
 

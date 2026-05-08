@@ -5,6 +5,6 @@ namespace eCertify.Services.Front
 {
     public interface IPasosCompletadosService
     {
-        Task<List<PasoViewModel>> ObtenerPasosAsync(ClaimsPrincipal user);
+        Task<List<CertificationStepViewModel>> ObtenerPasosAsync(ClaimsPrincipal user);
     }
 }

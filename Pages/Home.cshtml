@@ -1,74 +1,434 @@
-﻿@page
+@page
+@using System.Text.Json
 @model eCertify.Pages.HomeModel
 @{
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="container py-4">
-    <!-- KPIs -->
-    <div class="row text-center mb-4 g-3">
-        <!-- Completados -->
-        <div class="col-12 col-md-4">
-            <div class="card shadow-sm p-3">
-                <h6 class="text-muted">Pasos Completados</h6>
-                <div class="d-flex align-items-center justify-content-center gap-2">
-                    <i class="fas fa-list-check fa-lg text-success"></i>
-                    <h2 class="text-success fw-bold mb-0" id="kpiCompletados">0</h2>
-                </div>
-            </div>
-        </div>
+@section Styles {
+<style>
+    /* ── Dashboard tokens ── */
+    :root {
+        --dg:        #006B3C;
+        --dg-dk:     #004d2b;
+        --dg-lt:     #e6f4ed;
+        --dg-md:     #c3e6d3;
+        --dr:        16px;
+        --drs:       10px;
+        --dshadow:   0 2px 14px rgba(0,0,0,0.07);
+        --dshadow-h: 0 18px 48px rgba(0,0,0,0.13);
+        --dtrans:    .22s cubic-bezier(.4,0,.2,1);
+    }
 
-        <!-- Pendientes -->
-        <div class="col-12 col-md-4">
-            <div class="card shadow-sm p-3">
-                <h6 class="text-muted">Pasos Pendientes</h6>
-                <div class="d-flex align-items-center justify-content-center gap-2">
-                    <i class="fas fa-hourglass-half fa-2x text-danger mb-2"></i>
-                    <h2 class="text-danger fw-bold mb-0" id="kpiPendientes">0</h2>
-                </div>
-            </div>
-        </div>
+    /* ── Hero ── */
+    .dash-hero {
+        background: linear-gradient(135deg, #004d2b 0%, #006B3C 55%, #00a85a 100%);
+        border-radius: var(--dr);
+        padding: 2rem 2.4rem;
+        margin-bottom: 1.5rem;
+        display: flex; align-items: center; justify-content: space-between;
+        overflow: hidden; position: relative;
+        box-shadow: 0 16px 48px rgba(0,107,60,0.32);
+    }
+    .dash-hero::before {
+        content: '';
+        position: absolute; inset: 0;
+        background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
+        background-size: 30px 30px;
+        pointer-events: none;
+    }
+    .dh-blob {
+        position: absolute; border-radius: 50%;
+        background: rgba(255,255,255,0.07); pointer-events: none;
+        animation: dhFloat ease-in-out infinite;
+    }
+    .dh-blob-1 { width: 280px; height: 280px; top: -110px; right: 50px;  animation-duration: 9s;  }
+    .dh-blob-2 { width: 150px; height: 150px; bottom:-55px; right: 290px; animation-duration: 12s; animation-delay: 2s; }
+    .dh-blob-3 { width: 90px;  height: 90px;  top: 20%;  left: 35%;      animation-duration: 7s;  animation-delay: 1s; background: rgba(255,255,255,0.04); }
+    @@keyframes dhFloat {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-14px); }
+    }
 
-        <!-- Porcentaje -->
-        <div class="col-12 col-md-4">
-            <div class="card shadow-sm p-3">
-                <h6 class="text-muted">% Completado</h6>
-                <div class="d-flex align-items-center justify-content-center gap-2">
-                    <h2 class="text-primary fw-bold mb-0" id="kpiPorcentaje">0</h2>
-                </div>
-            </div>
+    .dh-content { position: relative; z-index: 1; }
+    .dh-badge {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: rgba(255,255,255,0.14); backdrop-filter: blur(8px);
+        color: rgba(255,255,255,0.9); font-size: 0.68rem; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase;
+        padding: 0.28rem 0.72rem; border-radius: 2rem;
+        border: 1px solid rgba(255,255,255,0.22); margin-bottom: 0.6rem;
+    }
+    .dh-sub { font-size: 0.78rem; color: rgba(255,255,255,0.52); margin-bottom: 1rem; }
+
+    .dh-chips { display: flex; gap: 0.55rem; flex-wrap: wrap; }
+    .dh-chip {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 2rem; padding: 0.26rem 0.7rem;
+        font-size: 0.73rem; font-weight: 600; color: white;
+        transition: background var(--dtrans);
+    }
+    .dh-chip i { font-size: 0.8rem; }
+    .dh-chip--ok   { background: rgba(74,222,128,0.18); border-color: rgba(74,222,128,0.32); }
+    .dh-chip--warn { background: rgba(251,191,36,0.18);  border-color: rgba(251,191,36,0.32);  }
+
+    .dh-deco {
+        flex-shrink: 0; width: 100px; height: 100px;
+        background: rgba(255,255,255,0.12); border: 2.5px solid rgba(255,255,255,0.22);
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 2.6rem; color: rgba(255,255,255,0.9);
+        position: relative; z-index: 1;
+        animation: dhPulse 3.5s ease-in-out infinite;
+    }
+    @@keyframes dhPulse {
+        0%, 100% { box-shadow: 0 0 0 0   rgba(255,255,255,0.12); transform: scale(1); }
+        50%       { box-shadow: 0 0 0 16px rgba(255,255,255,0);   transform: scale(1.05); }
+    }
+    @@media (max-width: 600px) {
+        .dh-deco { display: none; }
+        .dash-hero { padding: 1.6rem 1.4rem; }
+    }
+
+    /* ── Section heading ── */
+    .dash-sh {
+        display: flex; align-items: center; gap: 0.5rem;
+        font-size: 0.7rem; font-weight: 700; color: #9ca3af;
+        letter-spacing: 0.11em; text-transform: uppercase;
+        margin-bottom: 0.85rem;
+    }
+    .dash-sh i { color: var(--dg); font-size: 0.88rem; }
+
+    /* ── Quick-access nav grid ── */
+    .dash-nav-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.85rem; margin-bottom: 1.5rem;
+    }
+    @@media (max-width: 1280px) { .dash-nav-grid { grid-template-columns: repeat(4, 1fr); } }
+    @@media (max-width: 768px)  { .dash-nav-grid { grid-template-columns: repeat(3, 1fr); } }
+    @@media (max-width: 440px)  { .dash-nav-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .nav-card {
+        display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+        padding: 1.1rem 0.65rem 0.95rem;
+        background: white; border: 1.5px solid #f1f5f9;
+        border-radius: var(--dr); text-decoration: none !important;
+        box-shadow: var(--dshadow); position: relative; overflow: hidden;
+        transition: transform var(--dtrans), box-shadow var(--dtrans), border-color var(--dtrans);
+    }
+    .nav-card::after {
+        content: ''; position: absolute; inset: 0; opacity: 0;
+        background: linear-gradient(150deg, rgba(0,107,60,0.04) 0%, transparent 70%);
+        transition: opacity var(--dtrans); pointer-events: none;
+    }
+    .nav-card:hover {
+        transform: translateY(-9px) scale(1.015);
+        box-shadow: var(--dshadow-h);
+        border-color: rgba(0,107,60,0.18);
+    }
+    .nav-card:hover::after  { opacity: 1; }
+    .nav-card:hover .nc-ico { transform: scale(1.12) rotate(-5deg); }
+
+    .nc-ico {
+        width: 54px; height: 54px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.55rem; color: white; flex-shrink: 0;
+        transition: transform var(--dtrans);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+    }
+    .nc-label {
+        font-size: 0.69rem; font-weight: 700; color: #374151;
+        text-align: center; line-height: 1.3; margin: 0;
+    }
+    .nc-done-badge {
+        position: absolute; top: 7px; right: 7px;
+        width: 17px; height: 17px; border-radius: 50%;
+        background: #16a34a; color: white;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.58rem; font-weight: 700;
+        opacity: 0; transform: scale(0);
+        transition: opacity var(--dtrans), transform var(--dtrans);
+        box-shadow: 0 2px 6px rgba(22,163,74,0.45);
+    }
+    .nav-card.nc--done .nc-done-badge { opacity: 1; transform: scale(1); }
+    .nav-card.nc--done { border-color: #dcfce7; }
+    .nav-card.nc--done .nc-label { color: #15803d; }
+
+    /* Icon gradient presets */
+    .nci-green  { background: linear-gradient(135deg, #004d2b, #006B3C); }
+    .nci-blue   { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+    .nci-purple { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+    .nci-amber  { background: linear-gradient(135deg, #78350f, #d97706); }
+    .nci-sky    { background: linear-gradient(135deg, #0c4a6e, #0284c7); }
+    .nci-red    { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+    .nci-teal   { background: linear-gradient(135deg, #134e4a, #0d9488); }
+
+    /* ── Bottom two-column row ── */
+    .dash-main-row {
+        display: grid; grid-template-columns: 300px 1fr; gap: 1.2rem;
+        margin-bottom: 1.5rem;
+    }
+    @@media (max-width: 992px) { .dash-main-row { grid-template-columns: 1fr; } }
+
+    /* ── Generic card ── */
+    .dcard {
+        background: white; border: 1.5px solid #f1f5f9;
+        border-radius: var(--dr); box-shadow: var(--dshadow);
+    }
+    .dcard__head {
+        display: flex; align-items: center; gap: 0.65rem;
+        padding: 1rem 1.3rem; border-bottom: 1px solid #f3f4f6;
+    }
+    .dcard__head-ico {
+        width: 34px; height: 34px; border-radius: 9px;
+        background: var(--dg-lt); color: var(--dg);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.95rem; flex-shrink: 0;
+    }
+    .dcard__title { font-size: 0.92rem; font-weight: 700; color: #111827; margin: 0; }
+    .dcard__sub   { font-size: 0.7rem; color: #9ca3af; margin: 0; }
+    .dcard__body  { padding: 1.3rem; }
+
+    /* ── Progress ring ── */
+    .dash-ring-wrap {
+        position: relative; width: 175px; height: 175px;
+        margin: 0 auto 1.25rem;
+    }
+    .dash-ring-wrap canvas { position: absolute; inset: 0; }
+    .dash-ring-center {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        pointer-events: none;
+    }
+    .dash-ring-pct {
+        font-size: 2rem; font-weight: 800; color: #111827; line-height: 1;
+    }
+    .dash-ring-lbl {
+        font-size: 0.62rem; font-weight: 700; color: #9ca3af;
+        text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.2rem;
+    }
+
+    /* ── KPI mini grid ── */
+    .dash-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; }
+    .dash-kpi {
+        text-align: center; padding: 0.65rem 0.35rem;
+        border-radius: var(--drs); background: #f9fafb;
+        border: 1px solid #f1f5f9;
+    }
+    .dash-kpi__val {
+        display: block; font-size: 1.4rem; font-weight: 800;
+        line-height: 1; margin-bottom: 0.16rem;
+    }
+    .dash-kpi__lbl {
+        display: block; font-size: 0.6rem; font-weight: 700;
+        color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .dk--ok   .dash-kpi__val { color: #16a34a; }
+    .dk--warn .dash-kpi__val { color: #dc2626; }
+    .dk--info .dash-kpi__val { color: var(--dg); }
+
+    /* ── Certification stepper ── */
+    .dash-stepper {
+        display: flex; flex-direction: column;
+        max-height: 426px; overflow-y: auto;
+        padding: 0.1rem 0.3rem 0.1rem 0;
+    }
+    .dash-stepper::-webkit-scrollbar { width: 3px; }
+    .dash-stepper::-webkit-scrollbar-track { background: transparent; }
+    .dash-stepper::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+
+    .step-row {
+        display: flex; align-items: flex-start; gap: 0.85rem;
+        padding-bottom: 1rem;
+    }
+    .step-row:last-child { padding-bottom: 0; }
+
+    .step-track {
+        display: flex; flex-direction: column; align-items: center;
+        flex-shrink: 0; width: 30px;
+    }
+    .step-dot {
+        width: 30px; height: 30px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+    .sd--done {
+        background: linear-gradient(135deg, #15803d, #22c55e);
+        color: white; box-shadow: 0 3px 10px rgba(21,128,61,0.38);
+    }
+    .sd--pend { background: #f3f4f6; color: #9ca3af; border: 2px solid #e5e7eb; }
+
+    .step-line {
+        flex: 1; width: 2px; min-height: 18px; margin-top: 3px;
+        background: #e5e7eb; border-radius: 2px;
+    }
+    .sl--done { background: linear-gradient(to bottom, #22c55e, #bbf7d0); }
+    .step-row:last-child .step-line { display: none; }
+
+    .step-info { flex: 1; padding-top: 0.3rem; }
+    .step-name {
+        display: block; font-size: 0.83rem; font-weight: 700;
+        line-height: 1.3; margin-bottom: 0.15rem;
+    }
+    .sn--done { color: #15803d; }
+    .sn--pend { color: #6b7280; }
+    .step-date { display: block; font-size: 0.7rem; color: #9ca3af; margin-bottom: 0.2rem; }
+    .step-pill {
+        display: inline-flex; align-items: center; gap: 0.2rem;
+        font-size: 0.6rem; font-weight: 700; padding: 0.12rem 0.45rem;
+        border-radius: 2rem; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .sp--done { background: #dcfce7; color: #15803d; }
+    .sp--pend { background: #f3f4f6; color: #9ca3af; }
+</style>
+}
+
+<!-- ── Hero ────────────────────────────────────────────── -->
+<div class="dash-hero">
+    <div class="dh-blob dh-blob-1"></div>
+    <div class="dh-blob dh-blob-2"></div>
+    <div class="dh-blob dh-blob-3"></div>
+
+    <div class="dh-content">
+        <div class="dh-badge">
+            <i class="bi bi-shield-lock-fill"></i>
+            Panel de Control
+        </div>
+        <p class="dh-sub" style="margin-top:.35rem">Sistema de Certificación e-CF &middot; DGII</p>
+        <div class="dh-chips">
+            <span class="dh-chip dh-chip--ok">
+                <i class="bi bi-check-circle-fill"></i>
+                <span id="heroChipCompleted">—</span>
+            </span>
+            <span class="dh-chip dh-chip--warn">
+                <i class="bi bi-hourglass-split"></i>
+                <span id="heroChipPending">—</span>
+            </span>
+            <span class="dh-chip">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span id="heroChipPercent">—</span>
+            </span>
+            <span class="dh-chip">
+                <i class="bi bi-calendar3"></i>
+                <span id="heroDate"></span>
+            </span>
         </div>
     </div>
 
-
-    <!-- Gráfico y Timeline -->
-    <div class="row g-3">
-        <!-- Donut Chart -->
-        <div class="col-12 col-md-6 d-flex">
-            <div class="card shadow-sm p-4 flex-fill">
-                <h5 class="mb-3 text-center">Progreso General</h5>
-                <div class="d-flex justify-content-center">
-                    <div class="w-100">
-                        <canvas id="donutChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Timeline -->
-        <div class="col-12 col-md-6">
-            <div class="card shadow-sm p-4 flex-fill text-start">
-                <h5 class="mb-3 ">Detalle de Pasos</h5>
-                <ul class="list-unstyled overflow-auto" style="max-height:400px; text-align:left;" id="timelinePasos"></ul>
-            </div>
-        </div>
+    <div class="dh-deco">
+        <i class="bi bi-building-fill-check"></i>
     </div>
 </div>
 
-<!-- Contenedor para pasar datos al JS -->
-<div id="pasosContainer" data-pasos='@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Pasos))'></div>
+<!-- ── Quick Access ─────────────────────────────────────── -->
+<div class="dash-sh"><i class="bi bi-grid-3x3-gap-fill"></i> Acceso Rápido</div>
+<div class="dash-nav-grid">
+
+    <a href="/Certificacion/Requirements" class="nav-card" data-step-name="Postulación">
+        <div class="nc-ico nci-green"><i class="bi bi-file-earmark-text-fill"></i></div>
+        <span class="nc-label">Requerimientos</span>
+        <div class="nc-done-badge"><i class="bi bi-check-lg"></i></div>
+    </a>
+
+    <a href="/Certificacion/SignDocuments" class="nav-card" data-step-name="Declaración Jurada">
+        <div class="nc-ico nci-blue"><i class="bi bi-pen-fill"></i></div>
+        <span class="nc-label">Firmar Documentos</span>
+        <div class="nc-done-badge"><i class="bi bi-check-lg"></i></div>
+    </a>
+
+    <a href="/Certificacion/Pruebas" class="nav-card" data-step-name="Pruebas de Datos e-CF">
+        <div class="nc-ico nci-purple"><i class="bi bi-clipboard2-check-fill"></i></div>
+        <span class="nc-label">Pruebas e-CF</span>
+        <div class="nc-done-badge"><i class="bi bi-check-lg"></i></div>
+    </a>
+
+    <a href="/Certificacion/Aprobacion" class="nav-card" data-step-name="Aprobación Comercial">
+        <div class="nc-ico nci-amber"><i class="bi bi-patch-check-fill"></i></div>
+        <span class="nc-label">Aprobación Comercial</span>
+        <div class="nc-done-badge"><i class="bi bi-check-lg"></i></div>
+    </a>
+
+    <a href="/Certificacion/Simulacion" class="nav-card" data-step-name="Pruebas Simulación e-CF">
+        <div class="nc-ico nci-sky"><i class="bi bi-cpu-fill"></i></div>
+        <span class="nc-label">Simulación e-CF</span>
+        <div class="nc-done-badge"><i class="bi bi-check-lg"></i></div>
+    </a>
+
+    <a href="/Certificacion/Representacion" class="nav-card" data-step-name="Pruebas Representación Impresa">
+        <div class="nc-ico nci-red"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+        <span class="nc-label">Representación (RI)</span>
+        <div class="nc-done-badge"><i class="bi bi-check-lg"></i></div>
+    </a>
+
+    <a href="/Certificacion/Urlservicios" class="nav-card" data-step-name="URL Servicios Prueba">
+        <div class="nc-ico nci-teal"><i class="bi bi-link-45deg"></i></div>
+        <span class="nc-label">URL Servicios</span>
+        <div class="nc-done-badge"><i class="bi bi-check-lg"></i></div>
+    </a>
+
+</div>
+
+<!-- ── Progress + Steps ─────────────────────────────────── -->
+<div class="dash-main-row">
+
+    <!-- Progress card -->
+    <div class="dcard">
+        <div class="dcard__head">
+            <div class="dcard__head-ico"><i class="bi bi-bar-chart-fill"></i></div>
+            <div>
+                <p class="dcard__title">Progreso</p>
+                <p class="dcard__sub">Certificación e-CF</p>
+            </div>
+        </div>
+        <div class="dcard__body">
+            <div class="dash-ring-wrap">
+                <canvas id="progressChart"></canvas>
+                <div class="dash-ring-center">
+                    <span class="dash-ring-pct" id="progressValue">0%</span>
+                    <span class="dash-ring-lbl">completado</span>
+                </div>
+            </div>
+            <div class="dash-kpi-row">
+                <div class="dash-kpi dk--ok">
+                    <span class="dash-kpi__val" id="kpiCompleted">—</span>
+                    <span class="dash-kpi__lbl">Completados</span>
+                </div>
+                <div class="dash-kpi dk--warn">
+                    <span class="dash-kpi__val" id="kpiPending">—</span>
+                    <span class="dash-kpi__lbl">Pendientes</span>
+                </div>
+                <div class="dash-kpi dk--info">
+                    <span class="dash-kpi__val" id="kpiTotal">—</span>
+                    <span class="dash-kpi__lbl">Total</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Steps card -->
+    <div class="dcard">
+        <div class="dcard__head">
+            <div class="dcard__head-ico"><i class="bi bi-list-check"></i></div>
+            <div>
+                <p class="dcard__title">Pasos de Certificación</p>
+                <p class="dcard__sub">Estado del proceso ante la DGII</p>
+            </div>
+        </div>
+        <div class="dcard__body">
+            <div class="dash-stepper" id="dashStepper"></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Steps data bridge -->
+<div id="stepsDataContainer"
+     data-steps='@Html.Raw(JsonSerializer.Serialize(Model.Steps))'
+     style="display:none;"></div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script src="~/js/Home.js"></script>
 }

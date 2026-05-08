@@ -107,8 +107,8 @@ namespace eCertify.Pages.Certificacion
             var stepName = documentType == ctxPostulation ? "Postulación" : "Declaración Jurada";
 
             stepCompleted = steps
-                .FirstOrDefault(s => s.Nombre.Equals(stepName, StringComparison.OrdinalIgnoreCase))
-                ?.Completado ?? false;
+                .FirstOrDefault(s => s.Name.Equals(stepName, StringComparison.OrdinalIgnoreCase))
+                ?.Completed ?? false;
         }
 
         private string? ValidateFile()
