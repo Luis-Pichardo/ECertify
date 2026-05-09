@@ -13,22 +13,37 @@
 }
 
 <!-- ── Encabezado de página ── -->
-<div class="page-header d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center">
-        <h5 class="fw-bold mb-0 me-3">@Model.TituloPagina</h5>
-        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
-            <li class="nav-home me-2"><a href="/Home"><i class="bi bi-house-door"></i></a></li>
-            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
-            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
-            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
-            <li class="nav-item"><span>@Model.TituloPagina</span></li>
-        </ul>
+<div class="step-hero">
+    <div class="sh-content">
+        <div class="sh-badge">
+            <i class="bi @ctxIcon"></i>
+            Certificación e-CF &middot; @ctxLabel
+        </div>
+        <h5 class="sh-title">@Model.TituloPagina</h5>
     </div>
-    <button class="btn btn-sm btn-outline-secondary"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#fxmlHelp">
-        <i class="bi bi-question-circle me-1"></i> Ayuda
-    </button>
+    <div class="sh-actions">
+        <a href="/Home" class="sh-btn">
+            <i class="bi bi-house-door"></i> Inicio
+        </a>
+        <button type="button" class="sh-btn" data-bs-toggle="offcanvas" data-bs-target="#fxmlHelp">
+            <i class="bi bi-question-circle"></i> Ayuda
+        </button>
+        @if (Model.TieneContextoDePaso)
+        {
+            <form method="post" asp-page-handler="MarcarCompletado"
+                  id="formCompletado" class="form-completado"
+                  data-completado="@Model.PasoCompletado.ToString().ToLower()"
+                  style="margin:0">
+                <input type="hidden" name="Ctx" value="@Model.Ctx" />
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="sh-btn sh-btn--complete btn-completado @(Model.PasoCompletado ? "is-done" : "")">
+                    <i class="@(Model.PasoCompletado ? "fas" : "far") fa-check-circle"></i>
+                    @(Model.PasoCompletado ? "¡Completado!" : "Marcar Completado")
+                </button>
+            </form>
+        }
+    </div>
 </div>
 
 <!-- ── Offcanvas de ayuda ── -->
@@ -218,32 +233,6 @@
             </div>
         </div>
 
-        <!-- Panel: Estado del paso (solo con contexto de paso) -->
-        @if (Model.TieneContextoDePaso)
-        {
-            <div class="fxml-step-status">
-                <div class="fxml-step-status__header">
-                    <i class="bi bi-clipboard2-check-fill text-success"></i>
-                    Estado del paso
-                </div>
-                <div class="fxml-step-status__body">
-                    <div id="pasoData" data-completado="@Model.PasoCompletado.ToString().ToLower()"></div>
-                    <form method="post"
-                          asp-page-handler="MarcarCompletado"
-                          id="formCompletado"
-                          class="form-completado"
-                          data-completado="@Model.PasoCompletado.ToString().ToLower()">
-                        <input type="hidden" name="Ctx" value="@Model.Ctx" />
-                        @Html.AntiForgeryToken()
-                        <button type="submit"
-                                class="btn @(Model.PasoCompletado ? "btn-success" : "btn-outline-success") w-100 btn-completado">
-                            <i class="@(Model.PasoCompletado ? "fas" : "far") fa-check-circle me-2"></i>
-                            @(Model.PasoCompletado ? "¡Completado!" : "Marcar como completado")
-                        </button>
-                    </form>
-                </div>
-            </div>
-        }
     </div>
 </div>
 

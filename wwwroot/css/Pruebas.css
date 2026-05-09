@@ -1,115 +1,295 @@
-﻿body {
-}
-.file-drop-area {
+/* ── Upload zone ── */
+#uploadZone {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 30px;
     border: 2px dashed #d1d5db;
-    border-radius: 6px;
+    border-radius: 10px;
     background-color: #f9fafb;
     cursor: pointer;
+    transition: all 0.25s ease-in-out;
+    padding: 2rem 1rem;
+    text-align: center;
 }
 
-    .file-drop-area:hover {
-        background-color: #f1f5f9;
-    }
+#uploadZone:hover,
+#uploadZone.drag-over {
+    border-color: #006B3C;
+    background-color: #f0fdf4;
+    box-shadow: 0 0 12px rgba(0,107,60,0.18);
+}
 
-#logConsole_ECF, #logConsole_RFCE {
-    background-color: #f1f1f1;
-    color: #333;
-    padding: 10px;
-    border-radius: 5px;
-    height: 200px;
+#uploadZone:hover i,
+#uploadZone.drag-over i {
+    color: #006B3C !important;
+}
+
+/* ── Log console ── */
+#sendLog {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    border-radius: 8px;
+    padding: 1rem;
+    height: calc(100vh - 280px);
+    min-height: 400px;
     overflow-y: auto;
-    font-family: monospace;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.82rem;
+    border: 1px solid #21262d;
+}
+
+.log-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0.55rem 0.6rem;
+    border-radius: 5px;
+    margin-bottom: 6px;
+    background-color: rgba(255,255,255,0.04);
+    border-left: 3px solid transparent;
+    animation: fadeInEntry 0.2s ease;
+}
+
+@keyframes fadeInEntry {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+.log-entry--info    { border-left-color: #388bfd; }
+.log-entry--success { border-left-color: #3fb950; }
+.log-entry--error   { border-left-color: #f85149; }
+.log-entry--warning { border-left-color: #d29922; }
+.log-entry--download{ border-left-color: #a371f7; }
+
+.log-entry__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.log-entry__time {
+    color: #8b949e;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.log-entry__file {
+    color: #79c0ff;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+.log-entry__msg {
+    color: #c9d1d9;
+    flex: 1;
+}
+
+.log-entry__actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.log-btn {
+    font-size: 0.72rem;
+    padding: 2px 10px;
+    border-radius: 4px;
+    border: 1px solid;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.15s;
+}
+
+.log-btn--view {
+    color: #79c0ff;
+    border-color: #388bfd44;
+}
+
+.log-btn--view:hover {
+    background: rgba(56,139,253,0.12);
+}
+
+.log-btn--download {
+    color: #3fb950;
+    border-color: #3fb95044;
+}
+
+.log-btn--download:hover {
+    background: rgba(63,185,80,0.12);
+}
+
+.log-entry__xml-preview {
+    background: #161b22;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    margin-top: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    font-size: 0.75rem;
+    color: #8b949e;
+    display: none;
+}
+
+/* ── Processing overlay ── */
+#processingOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    backdrop-filter: blur(3px);
+}
+
+#processingOverlay .overlay-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem 2.5rem;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+    max-width: 340px;
+}
+
+#processingOverlay .overlay-box p {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* ── Help offcanvas ── */
+.help-offcanvas .offcanvas-header {
+    background: #f0fdf4;
+    border-bottom: 1px solid #bbf7d0;
+}
+
+.help-offcanvas .offcanvas-title {
+    color: #166534;
+    font-weight: 700;
+}
+
+.help-offcanvas ol li {
+    margin-bottom: 0.65rem;
+    line-height: 1.55;
     font-size: 0.9rem;
 }
 
-    /* Estilos para los mensajes en el log */
-    #logConsole_ECF pre, #logConsole_RFCE pre {
-        white-space: pre-wrap;
-        word-wrap: break-word;
-        background-color: #fff;
-        padding: 5px;
-        border-radius: 3px;
-        border-left: 3px solid #0d6efd;
-    }
-
-    #logConsole_ECF .text-danger, #logConsole_RFCE .text-danger {
-        color: #dc3545 !important;
-        font-weight: bold;
-    }
-
-#facturasTable_ECF {
-    border-collapse: collapse !important;
-    width: 100%;
-    font-size: 0.9rem;
+/* ── Forced-download badge in log ── */
+.badge-forced {
+    background: rgba(163,113,247,0.2);
+    color: #a371f7;
+    border: 1px solid rgba(163,113,247,0.3);
+    border-radius: 4px;
+    font-size: 0.68rem;
+    padding: 1px 7px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
 }
 
-    #facturasTable_ECF thead {
-        background-color: #f8f9fa;
-    }
-
-        #facturasTable_ECF thead th {
-            color: #343a40;
-            font-weight: 600;
-            border-bottom: none;
-            padding: 0.75rem;
-            vertical-align: middle;
-        }
-
-    #facturasTable_ECF tbody tr {
-        transition: background-color 0.2s ease;
-    }
-
-        #facturasTable_ECF tbody tr:hover {
-            background-color: #f1f3f5;
-        }
-
-    #facturasTable_ECF tbody td {
-        border-top: 1px solid #dee2e6;
-        vertical-align: middle;
-        padding: 0.6rem;
-    }
-
-    #facturasTable_ECF .badge {
-        font-size: 0.75rem;
-        padding: 0.4em 0.6em;
-    }
-
-    #facturasTable_ECF .btn-group .btn {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.6rem;
-        border-radius: 6px;
-        transition: all 0.2s ease-in-out;
-    }
-
-        #facturasTable_ECF .btn-group .btn:hover {
-            transform: scale(1.02);
-        }
-
-    #facturasTable_ECF .btn i {
-        margin-right: 4px;
-        vertical-align: text-bottom;
-    }
-
-#uploadBox {
-    transition: all 0.3s ease-in-out;
-    border: 2px dashed #ccc;
-    background-color: #f8f9fa;
+/* ── Step hero header ── */
+.step-hero {
+    background: linear-gradient(135deg, #004d2b 0%, #006B3C 55%, #008848 100%);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 36px rgba(0,107,60,0.28);
 }
 
-    #uploadBox:hover {
-        border-color: #0d6efd;
-        background-color: #e9f2ff;
-        box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
-        transform: scale(1.01);
-    }
+.step-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+}
 
-        #uploadBox:hover i,
-        #uploadBox:hover p {
-            color: #0d6efd;
-        }
+.sh-content {
+    position: relative;
+    z-index: 1;
+}
+
+.sh-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255,255,255,0.13);
+    backdrop-filter: blur(8px);
+    color: rgba(255,255,255,0.85);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.68rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    margin-bottom: 0.45rem;
+}
+
+.sh-title {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.sh-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.sh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    border-radius: 8px;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.12);
+    color: #fff !important;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+
+.sh-btn:hover {
+    background: rgba(255,255,255,0.22);
+    border-color: rgba(255,255,255,0.42);
+    color: #fff;
+}
+
+.sh-btn--complete.is-done {
+    background: rgba(74,222,128,0.22);
+    border-color: rgba(74,222,128,0.5);
+    color: #bbf7d0 !important;
+}
+
+.sh-btn--complete.is-done:hover {
+    background: rgba(74,222,128,0.32);
+}
+
+@media (max-width: 640px) {
+    .step-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.25rem 1.4rem;
+    }
+    .sh-actions { flex-wrap: wrap; }
+}

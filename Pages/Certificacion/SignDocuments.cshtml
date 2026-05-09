@@ -20,22 +20,38 @@
 }
 
 <!-- ── Page header ── -->
-<div class="page-header d-flex justify-content-between align-items-center">
-    <div class="d-flex align-items-center">
-        <h5 class="fw-bold mb-0 me-3">Firmar Documentos</h5>
-        <ul class="breadcrumbs mb-0 list-unstyled d-flex align-items-center">
-            <li class="nav-home me-2"><a href="/Home"><i class="bi bi-house-door"></i></a></li>
-            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
-            <li class="nav-item me-2"><a href="/Home">Inicio</a></li>
-            <li class="separator me-2"><i class="bi bi-chevron-right"></i></li>
-            <li class="nav-item"><span>Firmar Documentos</span></li>
-        </ul>
+<div class="step-hero">
+    <div class="sh-content">
+        <div class="sh-badge">
+            <i class="bi bi-file-earmark-lock-fill"></i>
+            Certificación e-CF
+        </div>
+        <h5 class="sh-title">Firmar Documentos</h5>
     </div>
-    <button class="btn btn-sm btn-outline-secondary"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#sdHelp">
-        <i class="bi bi-question-circle me-1"></i> Ayuda
-    </button>
+    <div class="sh-actions">
+        <a href="/Home" class="sh-btn">
+            <i class="bi bi-house-door"></i> Inicio
+        </a>
+        <button type="button" class="sh-btn" data-bs-toggle="offcanvas" data-bs-target="#sdHelp">
+            <i class="bi bi-question-circle"></i> Ayuda
+        </button>
+        <div id="sdHeroComplete" style="@(Model.hasStepContext ? "" : "display:none")">
+            <form method="post"
+                  asp-page-handler="MarkStepCompleted"
+                  id="sdFormMarkStep"
+                  class="sd-form-mark-step"
+                  data-completed="@Model.stepCompleted.ToString().ToLower()"
+                  style="margin:0">
+                <input type="hidden" name="documentType" id="sdDocTypeStep" value="@Model.documentType" />
+                @Html.AntiForgeryToken()
+                <button type="submit"
+                        class="sh-btn sh-btn--complete sd-btn-mark-step @(Model.stepCompleted ? "is-done" : "")">
+                    <i class="@(Model.stepCompleted ? "fas" : "far") fa-check-circle"></i>
+                    @(Model.stepCompleted ? "¡Completado!" : "Marcar Completado")
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <!-- ── Help offcanvas ── -->
@@ -253,28 +269,6 @@
             </div>
         </div>
 
-        <!-- Step status panel (only for step contexts) -->
-        <div class="sd-step-status mt-3" id="sdStepPanel" style="display:none">
-            <div class="sd-step-status__header">
-                <i class="bi bi-clipboard2-check-fill text-success"></i>
-                Estado del paso
-            </div>
-            <div class="sd-step-status__body">
-                <form method="post"
-                      asp-page-handler="MarkStepCompleted"
-                      id="sdFormMarkStep"
-                      class="sd-form-mark-step"
-                      data-completed="@Model.stepCompleted.ToString().ToLower()">
-                    <input type="hidden" name="documentType" id="sdDocTypeStep" value="@Model.documentType" />
-                    @Html.AntiForgeryToken()
-                    <button type="submit"
-                            class="btn @(Model.stepCompleted ? "btn-success" : "btn-outline-success") w-100 sd-btn-mark-step">
-                        <i class="@(Model.stepCompleted ? "fas" : "far") fa-check-circle me-2"></i>
-                        @(Model.stepCompleted ? "¡Completado!" : "Marcar como completado")
-                    </button>
-                </form>
-            </div>
-        </div>
 
     </div>
 </div>
@@ -298,7 +292,7 @@
         const steps       = document.getElementById('sdProgressSteps');
         const docTypeIn   = document.getElementById('sdDocType');
         const docTypeStep = document.getElementById('sdDocTypeStep');
-        const stepPanel   = document.getElementById('sdStepPanel');
+        const stepPanel   = document.getElementById('sdHeroComplete');
         const progressWrap = document.getElementById('sdProgressBarsWrapper');
         const typeBtns    = document.querySelectorAll('.sd-type-btn');
 

@@ -146,35 +146,76 @@ namespace eCertify.Controllers
             if (string.IsNullOrWhiteSpace(rnc) || string.IsNullOrWhiteSpace(fileName))
                 return BadRequest("RNC y nombre de archivo son requeridos");
 
-            string carpetaXmls = _fileStorageManager.GetDynamicFolderPath(rnc, FileStorageManager.StorageType.Certificacion);
-            string rutaArchivo = Path.Combine(carpetaXmls, fileName);
+            string folderPath = _fileStorageManager.GetDynamicFolderPath(rnc, FileStorageManager.StorageType.Certificacion);
+            string filePath = Path.Combine(folderPath, fileName);
 
-            if (!System.IO.File.Exists(rutaArchivo))
+            if (!System.IO.File.Exists(filePath))
                 return NotFound("Archivo no encontrado");
 
             try
             {
-                string xmlContent = System.IO.File.ReadAllText(rutaArchivo);
-                var factura = XmlUtils.DeserializarXml<FacturasModels>(xmlContent);
+                string xmlContent = System.IO.File.ReadAllText(filePath);
+                var invoice = XmlUtils.DeserializarXml<FacturasModels>(xmlContent);
 
-                string tipoECF = factura?.Encabezado?.IdDoc?.TipoeCF ?? "";
-                string montoTotalStr = factura?.Encabezado?.Totales?.MontoTotal ?? "0";
+                string ecfType = invoice?.Encabezado?.IdDoc?.TipoeCF ?? "";
+                decimal totalAmount = ParseDecimalFlexible(invoice?.Encabezado?.Totales?.MontoTotal ?? "0");
 
-                decimal montoTotal = 0;
-                decimal.TryParse(montoTotalStr, out montoTotal);
-
-                if (tipoECF != "32" || montoTotal >= 250000)
+                if (ecfType != "32" || totalAmount >= 250000)
                     return Forbid("No autorizado para descargar este archivo");
 
-                var fileBytes = System.IO.File.ReadAllBytes(rutaArchivo);
-                var contentType = "application/xml";
-
-                return File(fileBytes, contentType, fileName);
+                return File(System.IO.File.ReadAllBytes(filePath), "application/xml", fileName);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al descargar archivo XML {FileName} para RNC {Rnc}", fileName, rnc);
+                _logger.LogError(ex, "Error al descargar XML {FileName} para RNC {Rnc}", fileName, rnc);
                 return StatusCode(500, "Error interno al procesar la descarga");
+            }
+        }
+
+        [HttpGet("DescargarXmlGeneral")]
+        public IActionResult DescargarXmlGeneral([FromQuery] string rnc, [FromQuery] string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(rnc) || string.IsNullOrWhiteSpace(fileName))
+                return BadRequest(new { success = false, message = "RNC y nombre de archivo son requeridos" });
+
+            try
+            {
+                string folderPath = _fileStorageManager.GetDynamicFolderPath(rnc, FileStorageManager.StorageType.Certificacion);
+                string filePath = Path.Combine(folderPath, fileName);
+
+                if (!System.IO.File.Exists(filePath))
+                    return NotFound(new { success = false, message = "Archivo no encontrado" });
+
+                return File(System.IO.File.ReadAllBytes(filePath), "application/xml", fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al descargar XML {FileName} para RNC {Rnc}", fileName, rnc);
+                return StatusCode(500, new { success = false, message = "Error interno al procesar la descarga" });
+            }
+        }
+
+        [HttpGet("VerContenidoXml")]
+        public IActionResult VerContenidoXml([FromQuery] string rnc, [FromQuery] string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(rnc) || string.IsNullOrWhiteSpace(fileName))
+                return BadRequest(new { success = false, message = "RNC y nombre de archivo son requeridos" });
+
+            try
+            {
+                string folderPath = _fileStorageManager.GetDynamicFolderPath(rnc, FileStorageManager.StorageType.Certificacion);
+                string filePath = Path.Combine(folderPath, fileName);
+
+                if (!System.IO.File.Exists(filePath))
+                    return NotFound(new { success = false, message = "Archivo no encontrado" });
+
+                string content = System.IO.File.ReadAllText(filePath);
+                return Ok(new { success = true, content });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al leer contenido XML {FileName} para RNC {Rnc}", fileName, rnc);
+                return StatusCode(500, new { success = false, message = "Error interno al leer el archivo" });
             }
         }
 
@@ -368,42 +409,36 @@ namespace eCertify.Controllers
             try
             {
                 if (!fileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
-                {
                     fileName += ".xml";
-                }
 
-                if (string.IsNullOrWhiteSpace(fileName) || !fileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
-                    return BadRequest(new { success = false, message = "Nombre de archivo inválido o no es un archivo XML." });
+                var fileNameWithRnc = rnc + Path.GetFileNameWithoutExtension(fileName) + ".xml";
+                var xmlPath = Path.Combine(_env.ContentRootPath, "Storage", "Certificacion", "XMLGenerados", rnc, fileNameWithRnc);
 
-                var nombreConRnc = rnc + Path.GetFileNameWithoutExtension(fileName) + ".xml";
-
-                var xmlPath = Path.Combine(_env.ContentRootPath, "Storage", "Certificacion", "XMLGenerados", rnc, nombreConRnc);
                 if (!System.IO.File.Exists(xmlPath))
                     return NotFound(new { success = false, message = "Archivo XML no encontrado." });
 
-                var token = await _semillaService.ObtenerTokenAsync(rnc);
+                var dgiiToken = await _semillaService.ObtenerTokenAsync(rnc);
 
                 using var formContent = new MultipartFormDataContent();
-                var fileBytes = await System.IO.File.ReadAllBytesAsync(xmlPath);
-                var fileContent = new ByteArrayContent(fileBytes);
+                var fileContent = new ByteArrayContent(await System.IO.File.ReadAllBytesAsync(xmlPath));
                 fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("text/xml");
-                formContent.Add(fileContent, "xml", nombreConRnc);
+                formContent.Add(fileContent, "xml", fileNameWithRnc);
 
-                var client = _httpClientFactory.CreateClient("ApiClient");
-                using var request = new HttpRequestMessage(HttpMethod.Post, "https://ecf.dgii.gov.do/CerteCF/Recepcion/api/FacturasElectronicas");
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                request.Content = formContent;
+                // Use _httpClient (default, no internal auth handlers) for DGII requests
+                using var dgiiRequest = new HttpRequestMessage(HttpMethod.Post, "https://ecf.dgii.gov.do/CerteCF/Recepcion/api/FacturasElectronicas");
+                dgiiRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", dgiiToken);
+                dgiiRequest.Content = formContent;
 
-                var response = await client.SendAsync(request);
-                if (!response.IsSuccessStatusCode)
+                var dgiiResponse = await _httpClient.SendAsync(dgiiRequest);
+                if (!dgiiResponse.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogError("Error al enviar XML a DGII: {Status} - {Content}", response.StatusCode, errorContent);
-                    return StatusCode((int)response.StatusCode, new { success = false, message = errorContent });
+                    var errorBody = await dgiiResponse.Content.ReadAsStringAsync();
+                    _logger.LogError("Error al enviar XML a DGII: {Status} - {Content}", dgiiResponse.StatusCode, errorBody);
+                    return StatusCode((int)dgiiResponse.StatusCode, new { success = false, message = errorBody });
                 }
 
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var trackInfo = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                var dgiiResponseContent = await dgiiResponse.Content.ReadAsStringAsync();
+                var trackInfo = JsonSerializer.Deserialize<JsonElement>(dgiiResponseContent);
 
                 if (!trackInfo.TryGetProperty("trackId", out var trackIdElement))
                     return StatusCode(502, new { success = false, message = "La respuesta de la DGII no contiene trackId." });
@@ -411,20 +446,24 @@ namespace eCertify.Controllers
                 var trackId = trackIdElement.GetString();
                 await Task.Delay(5000);
 
-                var tokenApp = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                if (string.IsNullOrWhiteSpace(tokenApp))
-                    return Unauthorized(new { success = false, message = "El token de acceso de la aplicación no fue proporcionado." });
+                // Query DGII status endpoint directly using the same DGII token
+                var statusDgiiUrl = $"{Constants.ConsultarFacturasEndpoint}?trackId={trackId}";
+                using var statusRequest = new HttpRequestMessage(HttpMethod.Get, statusDgiiUrl);
+                statusRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", dgiiToken);
 
-                var consultaUrl = $"api/FacturasElectronicas/Consultas/Estatus?rnc={rnc}&trackId={trackId}";
+                var statusResponse = await _httpClient.SendAsync(statusRequest);
+                var statusBody = await statusResponse.Content.ReadAsStringAsync();
 
-                using var consultaRequest = new HttpRequestMessage(HttpMethod.Get, consultaUrl);
-                consultaRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenApp);
+                if (statusResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Estatus DGII para trackId {TrackId}: {Body}", trackId, statusBody);
+                    return Content(statusBody, "application/json");
+                }
 
-                var consultaResponse = await client.SendAsync(consultaRequest);
-                consultaResponse.EnsureSuccessStatusCode();
-                var estadoJson = await consultaResponse.Content.ReadAsStringAsync();
+                _logger.LogWarning("Consulta de estatus DGII retornó {Status} para trackId {TrackId}: {Body}",
+                    statusResponse.StatusCode, trackId, statusBody);
 
-                return Content(estadoJson, "application/json");
+                return StatusCode((int)statusResponse.StatusCode, new { success = false, message = statusBody, trackId });
             }
             catch (Exception ex)
             {
@@ -529,7 +568,7 @@ namespace eCertify.Controllers
 
             try
             {
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                ExcelPackage.License.SetNonCommercialPersonal("eCertify");
                 using var package = new ExcelPackage(new FileInfo(rutaExcel));
 
                 // Procesar hoja ECF (Facturas)

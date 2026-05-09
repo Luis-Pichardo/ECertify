@@ -52,7 +52,7 @@ namespace eCertify.Services
             if (!File.Exists(rutaExcel))
                 throw new FileNotFoundException("Archivo Excel no encontrado", rutaExcel);
 
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            ExcelPackage.License.SetNonCommercialPersonal("eCertify");
             using var package = new ExcelPackage(new FileInfo(rutaExcel));
             var worksheet = package.Workbook.Worksheets["ECF"];
             if (worksheet == null)

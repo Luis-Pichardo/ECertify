@@ -12,7 +12,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (completed) return;
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando…';
+            const isHero = btn.classList.contains('sh-btn');
+            btn.innerHTML = isHero
+                ? '<i class="fas fa-spinner fa-spin me-1"></i>Procesando…'
+                : '<i class="fas fa-spinner fa-spin me-2"></i>Procesando…';
 
             try {
                 const payload  = new FormData(form);
@@ -42,16 +45,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function setCompletedState(btn) {
         btn.disabled = true;
-        btn.classList.remove('btn-outline-success');
-        btn.classList.add('btn-success');
-        btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>¡Completado!';
+        if (btn.classList.contains('sh-btn')) {
+            btn.classList.add('is-done');
+            btn.innerHTML = '<i class="fas fa-check-circle me-1"></i>¡Completado!';
+        } else {
+            btn.classList.remove('btn-outline-success');
+            btn.classList.add('btn-success');
+            btn.innerHTML = '<i class="fas fa-check-circle me-2"></i>¡Completado!';
+        }
     }
 
     function resetState(btn) {
         btn.disabled = false;
-        btn.classList.remove('btn-success');
-        btn.classList.add('btn-outline-success');
-        btn.innerHTML = '<i class="far fa-check-circle me-2"></i>Marcar como completado';
+        if (btn.classList.contains('sh-btn')) {
+            btn.classList.remove('is-done');
+            btn.innerHTML = '<i class="far fa-check-circle me-1"></i>Marcar Completado';
+        } else {
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-success');
+            btn.innerHTML = '<i class="far fa-check-circle me-2"></i>Marcar como completado';
+        }
     }
 
     function showToast(title, message, type) {
