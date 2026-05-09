@@ -1,37 +1,37 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace eCertify.DTOs.Front
 {
-    public class AprobacionDTO
+    public class CommercialApprovalRowDto
     {
-        [JsonPropertyName("numeroFila")]
-        public int NumeroFila { get; set; }
+        [JsonPropertyName("rowNumber")]
+        public int RowNumber { get; set; }
 
         [JsonPropertyName("version")]
-        public string Version { get; set; }
+        public string? Version { get; set; }
 
-        [JsonPropertyName("rncEmisor")]
-        public string RncEmisor { get; set; }
+        [JsonPropertyName("issuerRnc")]
+        public string? IssuerRnc { get; set; }
 
-        [JsonPropertyName("enCf")]
-        public string ENCf { get; set; }
+        [JsonPropertyName("encf")]
+        public string? Encf { get; set; }
 
-        [JsonPropertyName("fechaEmision")]
-        public string FechaEmision { get; set; }
+        [JsonPropertyName("issueDate")]
+        public string? IssueDate { get; set; }
 
-        [JsonPropertyName("montoTotal")]
-        public decimal MontoTotal { get; set; }
+        [JsonPropertyName("totalAmount")]
+        public decimal TotalAmount { get; set; }
 
-        [JsonPropertyName("rncComprador")]
-        public string RncComprador { get; set; }
+        [JsonPropertyName("buyerRnc")]
+        public string? BuyerRnc { get; set; }
 
-        [JsonPropertyName("estado")]
-        public int Estado { get; set; }
+        [JsonPropertyName("status")]
+        public int Status { get; set; }
 
-        [JsonPropertyName("detalleMotivoRechazo")]
-        public string DetalleMotivoRechazo { get; set; }
+        [JsonPropertyName("rejectionDetail")]
+        public string? RejectionDetail { get; set; }
 
-        [JsonPropertyName("fechaHoraAprobacionComercial")]
-        public string FechaHoraAprobacionComercial { get; set; }
+        [JsonPropertyName("commercialApprovalDateTime")]
+        public string? CommercialApprovalDateTime { get; set; }
     }
 }

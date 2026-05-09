@@ -43,7 +43,7 @@ builder.Services.AddScoped<IFacturasElectronicasService, FacturasElectronicasSer
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IFacturasXmlService, FacturasXmlService>();
 builder.Services.AddScoped<ISemillaService, SemillaService>();
-builder.Services.AddScoped<IAprobacionComercialService, AprobacionComercialService>();
+builder.Services.AddScoped<ICommercialApprovalService, CommercialApprovalService>();
 builder.Services.AddScoped<IRecepcionEcfService, RecepcionEcfService>();
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("ApiSettings"));
 builder.Services.AddScoped<IEmpresaService, EmpresaService>();

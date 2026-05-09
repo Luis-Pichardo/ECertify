@@ -1,4 +1,4 @@
-﻿/*********************************************************************
+/*********************************************************************
  *                        DESARROLLADOR ENCARGADO:                    *
  *                             Luís Pichardo                         *
  *                                                                   *
@@ -11,139 +11,115 @@ using System.Xml;
 using eCertify.Interfaces;
 using eCertify.Models;
 using System.Text.Json;
-using Microsoft.AspNetCore.Authorization;
 
 namespace eCertify.Controllers
 {
-    
     [ApiController]
-    public class AprobacionComercialController : ControllerBase
+    public class CommercialApprovalController : ControllerBase
     {
-
-        private readonly IAprobacionComercialService _service;
-        private readonly ILogger<AprobacionComercialController> _logger;
+        private readonly ICommercialApprovalService _approvalService;
+        private readonly ILogger<CommercialApprovalController> _logger;
         private readonly IFileStorageManager _fileStorageManager;
 
-        public AprobacionComercialController(IAprobacionComercialService service, ILogger<AprobacionComercialController> logger, IFileStorageManager fileStorageManager)
+        public CommercialApprovalController(
+            ICommercialApprovalService approvalService,
+            ILogger<CommercialApprovalController> logger,
+            IFileStorageManager fileStorageManager)
         {
-            _service = service;
-            _logger = logger;
+            _approvalService    = approvalService;
+            _logger             = logger;
             _fileStorageManager = fileStorageManager;
         }
 
-        /// <summary>
-        /// Endpoint que genera y firma un XML de aprobación comercial y lo envía a la DGII.
-        /// </summary>
-        /// <param name="modelo">Modelo ACECF con los datos de la aprobación comercial.</param>
-        /// <returns>Respuesta JSON con el resultado del proceso o un error en caso de fallo.</returns>
-        [HttpPost("AprobacionComercial/GenerarXmlACECF")]
-        public async Task<IActionResult> GenerarXmlAprobacion([FromBody] ACECF modelo)
+        [HttpPost("CommercialApproval/GenerateApprovalXml")]
+        public async Task<IActionResult> GenerateApprovalXml([FromBody] ACECF model)
         {
             try
             {
-                _logger.LogInformation("Solicitud recibida para generar XML de aprobación comercial");
+                _logger.LogInformation("Request received to generate commercial approval XML");
 
-                var respuestaDgii = await _service.GenerarYFirmarXmlAsync(modelo);
-
-                // Parsear la respuesta de DGII para extraer los datos importantes
-                var respuestaJson = JsonSerializer.Deserialize<Dictionary<string, object>>(respuestaDgii);
+                var dgiiResponse = await _approvalService.GenerateAndSignXmlAsync(model);
+                var responseData = JsonSerializer.Deserialize<Dictionary<string, object>>(dgiiResponse);
 
                 return Ok(new
                 {
-                    success = true,
-                    estado = respuestaJson["codigo"].ToString() == "01" ? 1 : 2, // 1=Aceptada, 2=Rechazada
-                    mensaje = respuestaJson["estado"].ToString(),
-                    detalles = respuestaJson["mensaje"] as List<string> ?? new List<string>(),
+                    success  = true,
+                    estado   = responseData!["codigo"].ToString() == "01" ? 1 : 2,
+                    mensaje  = responseData["estado"].ToString(),
+                    detalles = responseData["mensaje"] as List<string> ?? new List<string>()
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al generar XML de aprobación comercial");
+                _logger.LogError(ex, "Error generating commercial approval XML");
                 return StatusCode(500, new
                 {
                     success = false,
-                    mensaje = "Error interno al generar XML",
-                    detalle = ex.Message
+                    mensaje = "Error interno al generar el XML de aprobación comercial."
                 });
             }
         }
 
-
-        /// <summary>
-        /// Recibe un archivo XML de aprobación comercial (ACECF), valida su contenido
-        /// y lo guarda en el sistema de archivos si la validación es exitosa.
-        /// </summary>
-        /// <param name="xml">Archivo XML que contiene la información de aprobación comercial.</param>
-        /// <returns>
-        /// Retorna un resultado HTTP 200 (OK) si el archivo es válido y se guarda correctamente.
-        /// Retorna un resultado HTTP 400 (Bad Request) si el archivo está vacío, tiene errores de lectura,
-        /// falla la validación o no se encuentra la información necesaria para guardarlo.
-        /// </returns>
-        //Cuidado con la modificacion de este EndPoint ya que se utiliza para recibir la aprobacion comercial de la DGII, No se le puede modificar la RUTA.
+        // WARNING: Do NOT change this route — DGII posts commercial approvals to this exact URL.
         [HttpPost("/fe/aprobacioncomercial/api/ecf")]
-        public async Task<IActionResult> RecepcionAC(IFormFile xml)
+        public async Task<IActionResult> ReceiveCommercialApproval(IFormFile xml)
         {
-            _logger.LogInformation("Inicio de recepción de aprobación comercial.");
+            _logger.LogInformation("Incoming commercial approval from DGII");
 
             if (xml == null || xml.Length == 0)
             {
-                _logger.LogWarning("Archivo XML no proporcionado o está vacío.");
+                _logger.LogWarning("XML file not provided or empty");
                 return BadRequest("Insatisfactorio: archivo XML no proporcionado o vacío.");
             }
 
-            string contenidoXml;
+            string xmlContent;
             try
             {
                 using var reader = new StreamReader(xml.OpenReadStream());
-                contenidoXml = await reader.ReadToEndAsync();
-                _logger.LogInformation("Archivo XML leído correctamente.");
+                xmlContent = await reader.ReadToEndAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al leer el archivo XML.");
+                _logger.LogError(ex, "Error reading incoming XML file");
                 return BadRequest("error al leer el archivo XML.");
             }
 
             try
             {
-                var resultado = _service.ValidarAprobacionComercial(contenidoXml);
+                var result = _approvalService.ValidateApproval(xmlContent);
 
-                if (!resultado.Exito)
+                if (!result.Success)
                 {
-                    _logger.LogWarning("Validación fallida: {Mensaje}", resultado.Mensaje);
-                    return BadRequest($"Insatisfactorio");
-                }
-
-                // Aquí guardamos el XML usando el FileStorageManager:
-                var xmlDoc = new XmlDocument();
-                xmlDoc.LoadXml(contenidoXml);
-
-                var rncNode = xmlDoc.SelectSingleNode("//ACECF/DetalleAprobacionComercial/RNCComprador");
-                var eNCFNode = xmlDoc.SelectSingleNode("//ACECF/DetalleAprobacionComercial/eNCF");
-
-                if (rncNode == null || eNCFNode == null)
-                {
-                    _logger.LogWarning("No se encontró RNCComprador o eNCF para nombrar el archivo.");
+                    _logger.LogWarning("Validation failed: {Message}", result.Message);
                     return BadRequest("Insatisfactorio");
                 }
 
-                string rnc = rncNode.InnerText;
-                string eNCF = eNCFNode.InnerText;
+                var xmlDoc   = new XmlDocument();
+                xmlDoc.LoadXml(xmlContent);
 
-                string fileName = $"ACECF_{rnc}_{eNCF}.xml";
+                var buyerRncNode = xmlDoc.SelectSingleNode("//ACECF/DetalleAprobacionComercial/RNCComprador");
+                var encfNode     = xmlDoc.SelectSingleNode("//ACECF/DetalleAprobacionComercial/eNCF");
 
-                await _fileStorageManager.SaveACECFAsync(contenidoXml, rnc, fileName);
+                if (buyerRncNode == null || encfNode == null)
+                {
+                    _logger.LogWarning("RNCComprador or eNCF node not found in XML");
+                    return BadRequest("Insatisfactorio");
+                }
 
-                _logger.LogInformation("Archivo XML guardado correctamente: {fileName}", fileName);
+                string buyerRnc  = buyerRncNode.InnerText;
+                string encf      = encfNode.InnerText;
+                string fileName  = $"ACECF_{buyerRnc}_{encf}.xml";
 
+                await _fileStorageManager.SaveACECFAsync(xmlContent, buyerRnc, fileName);
+
+                _logger.LogInformation("Commercial approval saved: {FileName}", fileName);
                 return Ok("Satisfactorio");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error durante la validación o guardado de aprobación comercial.");
+                _logger.LogError(ex, "Error during commercial approval validation or save");
                 return BadRequest("Insatisfactorio");
             }
         }
-
     }
 }

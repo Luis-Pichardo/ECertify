@@ -1,4 +1,4 @@
-﻿/*********************************************************************
+/*********************************************************************
  *                        DESARROLLADOR ENCARGADO:                    *
  *                             Luís Pichardo                         *
  *                                                                   *
@@ -6,33 +6,28 @@
  * responsable principal de esta implementación.                     *
  *********************************************************************/
 
-
 using System.Xml;
 using eCertify.Utils;
 using eCertify.Interfaces;
 using eCertify.Models;
 using System.Xml.Serialization;
-using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Headers;
-using System.Xml.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 
 namespace eCertify.Services
 {
-    public class AprobacionComercialService : IAprobacionComercialService
+    public class CommercialApprovalService : ICommercialApprovalService
     {
-
         private readonly IFileStorageManager _fileStorageManager;
         private readonly ISemillaService _semillaService;
-        private readonly ILogger<AprobacionComercialService> _logger;
+        private readonly ILogger<CommercialApprovalService> _logger;
         private readonly IEmpresaService _empresaService;
-        private readonly IWebHostEnvironment _env;
 
-        public AprobacionComercialService(
+        public CommercialApprovalService(
             IFileStorageManager fileStorageManager,
             ISemillaService semillaService,
-            ILogger<AprobacionComercialService> logger,
+            ILogger<CommercialApprovalService> logger,
             IEmpresaService empresaService)
         {
             _fileStorageManager = fileStorageManager;
@@ -41,176 +36,150 @@ namespace eCertify.Services
             _empresaService = empresaService;
         }
 
-        /// <summary>
-        /// Genera y firma un XML de aprobación comercial (ACECF) con el certificado de la empresa según el RNC del comprador,
-        /// lo guarda localmente y lo envía al endpoint de la DGII, retornando su respuesta JSON.
-        /// </summary>
-        /// <param name="modelo">Modelo ACECF con los datos de la aprobación comercial.</param>
-        /// <returns>Respuesta JSON de la DGII tras enviar el XML firmado.</returns>
-        /// <exception cref="Exception">Se lanza si ocurre un error en el proceso.</exception>
-        public async Task<string> GenerarYFirmarXmlAsync(ACECF modelo)
+        public async Task<string> GenerateAndSignXmlAsync(ACECF model)
         {
             try
             {
-                _logger.LogInformation("Iniciando generación de XML para aprobación comercial");
+                _logger.LogInformation("Starting XML generation for commercial approval");
 
-                string rnc = modelo.DetalleAprobacionComercial?.RNCComprador ?? throw new Exception("RNC del comprador no puede ser nulo");
-                string eNCF = modelo.DetalleAprobacionComercial?.eNCF ?? throw new Exception("eNCF no puede ser nulo");
-                string fileName = $"{"ACECF"}{rnc}{eNCF}.xml";
+                string rnc      = model.DetalleAprobacionComercial?.RNCComprador ?? throw new Exception("Buyer RNC cannot be null");
+                string encf     = model.DetalleAprobacionComercial?.eNCF         ?? throw new Exception("eNCF cannot be null");
+                string fileName = $"ACECF{rnc}{encf}.xml";
 
-                // Serializar el modelo a XML
                 var serializer = new XmlSerializer(typeof(ACECF));
-                var xmlDoc = new XmlDocument();
+                var xmlDoc     = new XmlDocument();
                 using (var ms = new MemoryStream())
                 {
-                    serializer.Serialize(ms, modelo);
+                    serializer.Serialize(ms, model);
                     ms.Position = 0;
                     xmlDoc.Load(ms);
                 }
 
-                _logger.LogInformation("XML generado correctamente, procediendo a firmar");
+                _logger.LogInformation("XML generated, proceeding to sign");
 
-                // Obtener empresa para firmar XML
-                var empresa = await _empresaService.GetEmpresaByRncAsync(rnc);
-                if (empresa == null)
+                var company = await _empresaService.GetEmpresaByRncAsync(rnc);
+                if (company == null)
                 {
-                    _logger.LogError("Empresa con RNC {rnc} no encontrada", rnc);
-                    throw new Exception($"Empresa con RNC {rnc} no encontrada");
+                    _logger.LogError("Company with RNC {Rnc} not found", rnc);
+                    throw new Exception($"Company with RNC {rnc} not found");
                 }
 
-                var empresaFirmada = _semillaService.FirmarXml(xmlDoc, empresa);
+                var signedDoc     = _semillaService.FirmarXml(xmlDoc, company);
+                var signedXmlStr  = signedDoc.OuterXml;
 
-                // Guardar XML firmado
-                var xmlFirmadoString = empresaFirmada.OuterXml;
-                await _fileStorageManager.SaveXmlAsync(rnc, xmlFirmadoString, fileName, FileStorageManager.StorageType.Aprobaciones);
+                await _fileStorageManager.SaveXmlAsync(rnc, signedXmlStr, fileName, FileStorageManager.StorageType.Aprobaciones);
 
-                string ruta = Path.Combine(
-                _fileStorageManager.GetDynamicFolderPath(rnc, FileStorageManager.StorageType.Aprobaciones),
-                fileName);
+                string filePath = Path.Combine(
+                    _fileStorageManager.GetDynamicFolderPath(rnc, FileStorageManager.StorageType.Aprobaciones),
+                    fileName);
 
-                _logger.LogInformation("XML firmado y guardado correctamente en {ruta}", ruta);
+                _logger.LogInformation("Signed XML saved to {FilePath}", filePath);
 
-                // === OBTENER TOKEN DE LA DGII ===
-                string token = await _semillaService.ObtenerTokenAsync(rnc);
-                _logger.LogInformation("Token obtenido exitosamente");
+                string dgiiToken = await _semillaService.ObtenerTokenAsync(rnc);
 
-                // === ENVIAR ARCHIVO A DGII ===
-                using var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                using var httpClient      = new HttpClient();
+                using var multipart       = new MultipartFormDataContent();
+                await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
 
-                using var multipartContent = new MultipartFormDataContent();
-                await using var fileStream = new FileStream(ruta, FileMode.Open, FileAccess.Read);
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", dgiiToken);
+
                 var fileContent = new StreamContent(fileStream);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue("text/xml");
+                multipart.Add(fileContent, "xml", fileName);
 
-                multipartContent.Add(fileContent, "xml", fileName);
+                var dgiiResponse = await httpClient.PostAsync(Constants.AprobacionComercialEndpoint, multipart);
+                var responseBody = await dgiiResponse.Content.ReadAsStringAsync();
 
-                var response = await httpClient.PostAsync(Constants.AprobacionComercialEndpoint, multipartContent);
-                string respuestaJson = await response.Content.ReadAsStringAsync();
-
-                _logger.LogInformation("Respuesta DGII: {respuesta}", respuestaJson);
-
-                // retorna el Json de respuesta de la DGII
-                return respuestaJson;
+                _logger.LogInformation("DGII response: {Response}", responseBody);
+                return responseBody;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en GenerarYFirmarXmlAsync");
+                _logger.LogError(ex, "Error in GenerateAndSignXmlAsync");
                 throw;
             }
         }
 
-        //Cuidado con modificar este metodo para validar la aprobacion comercial que envia la DGII, ya que tiene las validaciones especificas que requiere la DGII.
-        public (bool Exito, string Mensaje) ValidarAprobacionComercial(string xmlString)
+        // Do NOT modify this validation — it implements DGII-specific requirements for incoming approvals.
+        public (bool Success, string Message) ValidateApproval(string xmlContent)
         {
             try
             {
-                _logger.LogInformation("Iniciando validación de aprobación comercial.");
+                _logger.LogInformation("Starting commercial approval validation");
 
-                var xmlDoc = new XmlDocument
-                {
-                    PreserveWhitespace = true
-                };
-                xmlDoc.LoadXml(xmlString);
-                _logger.LogInformation("XML cargado correctamente.");
+                var xmlDoc = new XmlDocument { PreserveWhitespace = true };
+                xmlDoc.LoadXml(xmlContent);
 
                 var signedXml = new SignedXml(xmlDoc);
-
                 var signatureNode = xmlDoc.GetElementsByTagName("Signature", "http://www.w3.org/2000/09/xmldsig#")[0] as XmlElement;
+
                 if (signatureNode == null)
                 {
-                    _logger.LogWarning("El XML no contiene un nodo de firma digital.");
+                    _logger.LogWarning("XML does not contain a digital signature node");
                     return (false, "El XML no tiene nodo de firma digital.");
                 }
 
                 signedXml.LoadXml(signatureNode);
-                _logger.LogInformation("Nodo de firma cargado.");
 
                 var certNode = signatureNode.GetElementsByTagName("X509Certificate")[0];
                 if (certNode == null)
                 {
-                    _logger.LogWarning("No se encontró el nodo X509Certificate.");
+                    _logger.LogWarning("X509Certificate node not found");
                     return (false, "No se encontró el certificado dentro del XML.");
                 }
 
-                var certString = certNode.InnerText;
-                var cert = new X509Certificate2(Convert.FromBase64String(certString));
-                _logger.LogInformation("Certificado extraído correctamente.");
+                var cert        = new X509Certificate2(Convert.FromBase64String(certNode.InnerText));
+                bool signValid  = signedXml.CheckSignature(cert, true);
 
-                bool firmaValida = signedXml.CheckSignature(cert, true);
-                if (!firmaValida)
+                if (!signValid)
                 {
-                    _logger.LogWarning("La firma digital es inválida o el contenido fue alterado.");
+                    _logger.LogWarning("Digital signature is invalid or content was tampered");
                     return (false, "Firma digital inválida o el contenido fue alterado.");
                 }
 
-                _logger.LogInformation("Firma digital verificada correctamente.");
-
-                var detalleNode = xmlDoc.SelectSingleNode("//ACECF/DetalleAprobacionComercial");
-                if (detalleNode == null)
+                var detailNode = xmlDoc.SelectSingleNode("//ACECF/DetalleAprobacionComercial");
+                if (detailNode == null)
                 {
-                    _logger.LogWarning("Falta el nodo DetalleAprobacionComercial.");
+                    _logger.LogWarning("Missing DetalleAprobacionComercial node");
                     return (false, "Estructura XML inválida. Falta nodo DetalleAprobacionComercial.");
                 }
 
-                var camposRequeridos = new[]
+                var requiredFields = new[]
                 {
                     "Version", "RNCEmisor", "eNCF", "FechaEmision", "MontoTotal",
                     "RNCComprador", "Estado", "FechaHoraAprobacionComercial"
                 };
 
-                foreach (var campo in camposRequeridos)
+                foreach (var field in requiredFields)
                 {
-                    var nodo = detalleNode.SelectSingleNode(campo);
-                    if (nodo == null || string.IsNullOrWhiteSpace(nodo.InnerText))
+                    var node = detailNode.SelectSingleNode(field);
+                    if (node == null || string.IsNullOrWhiteSpace(node.InnerText))
                     {
-                        _logger.LogWarning("Campo requerido '{Campo}' no se encuentra o está vacío.", campo);
-                        return (false, $"El campo '{campo}' es requerido y no se encuentra o está vacío.");
+                        _logger.LogWarning("Required field '{Field}' is missing or empty", field);
+                        return (false, $"El campo '{field}' es requerido y no se encuentra o está vacío.");
                     }
                 }
 
-                var encf = detalleNode.SelectSingleNode("eNCF")?.InnerText ?? "";
-                if (!string.IsNullOrWhiteSpace(encf) && encf.Length >= 3)
+                var encfValue = detailNode.SelectSingleNode("eNCF")?.InnerText ?? "";
+                if (encfValue.Length >= 3)
                 {
-                    var tipo = encf.Substring(1, 2);
-                    var tiposInvalidos = new[] { "32", "41", "43", "46", "47" };
-                    if (tiposInvalidos.Contains(tipo))
+                    var ecfType = encfValue.Substring(1, 2);
+                    var invalidTypes = new[] { "32", "41", "43", "46", "47" };
+                    if (invalidTypes.Contains(ecfType))
                     {
-                        _logger.LogWarning("Tipo de eCF no válido para aprobación comercial: {Tipo}", tipo);
-                        return (false, $"El tipo de eCF '{tipo}' no aplica para aprobación comercial.");
+                        _logger.LogWarning("Invalid ECF type for commercial approval: {Type}", ecfType);
+                        return (false, $"El tipo de eCF '{ecfType}' no aplica para aprobación comercial.");
                     }
                 }
 
-                _logger.LogInformation("Validación completada exitosamente. Firma y estructura válidas.");
+                _logger.LogInformation("Validation completed successfully");
                 return (true, "Firma válida y estructura XML aceptada.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en validación de firma.");
+                _logger.LogError(ex, "Error during approval validation");
                 return (false, $"Error en validación de firma: {ex.Message}");
             }
         }
-
-
     }
 }

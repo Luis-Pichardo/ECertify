@@ -1,14 +1,10 @@
-﻿using eCertify.Models;
-using System.Xml;
+using eCertify.Models;
 
 namespace eCertify.Interfaces
 {
-    public interface IAprobacionComercialService
+    public interface ICommercialApprovalService
     {
-        //Task<string> EnviarAprobacion(XmlDocument xmlDocument, string fileName, string bearerToken);
-
-        Task<string> GenerarYFirmarXmlAsync(ACECF modelo);
-
-        (bool Exito, string Mensaje) ValidarAprobacionComercial(string xmlString);
+        Task<string> GenerateAndSignXmlAsync(ACECF model);
+        (bool Success, string Message) ValidateApproval(string xmlContent);
     }
 }
